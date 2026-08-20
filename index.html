@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuangPM - All in One App</title>
+    <meta name="description" content="Pomodoro Timer & To-do List - All in One Productivity App by QuangPM">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Background animated orbs -->
+    <div class="bg-orbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <!-- SVG Gradient Definitions (hidden) -->
+    <svg width="0" height="0" style="position:absolute">
+        <defs>
+            <linearGradient id="gradient-work" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#7c3aed" />
+                <stop offset="100%" stop-color="#a855f7" />
+            </linearGradient>
+            <linearGradient id="gradient-break" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#10b981" />
+                <stop offset="100%" stop-color="#34d399" />
+            </linearGradient>
+        </defs>
+    </svg>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-top">
+                <h1 class="app-title">⚡ ProductivityHub</h1>
+                <button class="lang-toggle" id="lang-toggle" title="Switch language">
+                    <span class="lang-flag" id="lang-flag">🇻🇳</span>
+                    <span class="lang-label" id="lang-label">VI</span>
+                </button>
+            </div>
+            <nav class="tab-nav" role="tablist">
+                <button class="tab-btn active" data-tab="pomodoro" role="tab" id="tab-pomodoro">
+                    🍅 Pomodoro
+                </button>
+                <button class="tab-btn" data-tab="todo" role="tab" id="tab-todo">
+                    ✅ To-do
+                </button>
+                <button class="tab-btn" data-tab="notes" role="tab" id="tab-notes">
+                    📝 Notes
+                </button>
+            </nav>
+        </header>
+
+        <!-- ===== POMODORO SECTION ===== -->
+        <section id="pomodoro-section" class="section active" role="tabpanel">
+            <!-- Mode Selector -->
+            <div class="card mode-selector">
+                <h3 class="card-title" data-i18n="mode">Chế độ</h3>
+                <div class="mode-options">
+                    <button class="mode-btn active" data-mode="30" id="mode-30">
+                        <span class="mode-time" data-i18n="mode30">30 phút</span>
+                        <span class="mode-detail" data-i18n="mode30Detail">25' làm + 5' nghỉ</span>
+                    </button>
+                    <button class="mode-btn" data-mode="50" id="mode-50">
+                        <span class="mode-time" data-i18n="mode50">50 phút</span>
+                        <span class="mode-detail" data-i18n="mode50Detail">40' làm + 10' nghỉ</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Rep Selector -->
+            <div class="card rep-selector">
+                <h3 class="card-title" data-i18n="reps">Số Rep</h3>
+                <div class="rep-controls">
+                    <button class="rep-btn" id="rep-decrease" aria-label="Giảm rep">−</button>
+                    <span class="rep-count" id="rep-count">3</span>
+                    <button class="rep-btn" id="rep-increase" aria-label="Tăng rep">+</button>
+                </div>
+            </div>
+
+            <!-- Timer -->
+            <div class="card timer-card" id="timer-card">
+                <div class="timer-status" id="timer-status" data-i18n="ready">Sẵn sàng</div>
+                <div class="timer-ring-container">
+                    <svg class="timer-ring" viewBox="0 0 260 260">
+                        <circle class="timer-ring-bg" cx="130" cy="130" r="120" />
+                        <circle class="timer-ring-progress" id="timer-ring-progress" cx="130" cy="130" r="120" />
+                    </svg>
+                    <div class="timer-display">
+                        <span class="timer-time" id="timer-time">25:00</span>
+                        <span class="timer-rep" id="timer-rep">Rep 1/3</span>
+                    </div>
+                </div>
+                <div class="timer-controls">
+                    <button class="control-btn" id="btn-start" data-i18n="start">▶ Bắt đầu</button>
+                    <button class="control-btn secondary" id="btn-reset" disabled>↺ Reset</button>
+                </div>
+            </div>
+
+            <!-- History -->
+            <div class="card history-card">
+                <div class="history-header" id="history-toggle">
+                    <h3 class="card-title" data-i18n="history">📊 Lịch sử</h3>
+                    <span class="history-arrow" id="history-arrow">▼</span>
+                </div>
+                <div class="history-content" id="history-content">
+                    <div id="history-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== TODO SECTION ===== -->
+        <section id="todo-section" class="section" role="tabpanel">
+            <!-- Input -->
+            <div class="card todo-input-card">
+                <div class="todo-input-group">
+                    <input type="text" id="todo-input" class="todo-input" data-i18n-placeholder="addTaskPlaceholder" placeholder="Thêm task mới..." autocomplete="off" />
+                    <button class="add-btn" id="btn-add-todo" data-i18n="addBtn">+ Thêm</button>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="card todo-filter-card">
+                <div class="filter-bar">
+                    <button class="filter-btn active" data-filter="all" id="filter-all" data-i18n="filterAll">Tất cả</button>
+                    <button class="filter-btn" data-filter="in-progress" id="filter-inprogress" data-i18n="filterInProgress">Đang làm</button>
+                    <button class="filter-btn" data-filter="completed" id="filter-completed" data-i18n="filterCompleted">Hoàn thành</button>
+                </div>
+            </div>
+
+            <!-- Task List -->
+            <div class="card todo-list-card">
+                <div class="todo-stats" id="todo-stats"></div>
+                <div class="todo-list" id="todo-list">
+                    <div class="todo-empty" id="todo-empty">
+                        <span class="empty-icon">📝</span>
+                        <p data-i18n="emptyTasks">Chưa có task nào</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== NOTES SECTION ===== -->
+        <section id="notes-section" class="section" role="tabpanel">
+            <!-- Notes Toolbar -->
+            <div class="notes-toolbar">
+                <button class="note-delete-selected" id="note-delete-selected" data-i18n="deleteSelected">🗑 Xóa đã chọn</button>
+                <button class="note-add-btn" id="note-add-btn" data-i18n="newNote">+ Ghi chú mới</button>
+            </div>
+
+            <!-- Notes Grid -->
+            <div class="notes-grid" id="notes-grid">
+                <div class="notes-empty" id="notes-empty">
+                    <span class="empty-icon">📌</span>
+                    <p data-i18n="emptyNotes">Chưa có ghi chú nào</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ===== NOTE MODAL OVERLAY ===== -->
+    <div class="modal-overlay" id="note-modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title" id="note-modal-title" data-i18n="newNote">Ghi chú mới</h3>
+                <button class="modal-close" id="note-modal-close">✕</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="note-title-input" id="note-title-input" data-i18n-placeholder="noteTitlePlaceholder" placeholder="Tiêu đề..." autocomplete="off" />
+                <textarea class="note-content-input" id="note-content-input" data-i18n-placeholder="noteContentPlaceholder" placeholder="Nội dung ghi chú..." rows="8"></textarea>
+                <div class="note-color-picker">
+                    <span class="color-label" data-i18n="noteColor">Màu:</span>
+                    <button class="color-dot active" data-color="default" style="background: rgba(255,255,255,0.06)"></button>
+                    <button class="color-dot" data-color="purple" style="background: rgba(124,58,237,0.25)"></button>
+                    <button class="color-dot" data-color="blue" style="background: rgba(59,130,246,0.25)"></button>
+                    <button class="color-dot" data-color="green" style="background: rgba(16,185,129,0.25)"></button>
+                    <button class="color-dot" data-color="orange" style="background: rgba(245,158,11,0.25)"></button>
+                    <button class="color-dot" data-color="red" style="background: rgba(239,68,68,0.25)"></button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn secondary" id="note-modal-cancel" data-i18n="cancel">Hủy</button>
+                <button class="modal-btn primary" id="note-modal-save" data-i18n="saveNote">Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
