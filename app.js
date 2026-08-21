@@ -32,7 +32,7 @@
             logout: 'Đăng xuất',
             goldPrices: 'Giá Vàng DOJI', goldSJC: 'Vàng miếng SJC', goldRing: 'Nhẫn tròn Hưng Thịnh Vượng',
             buyPrice: 'Mua vào', sellPrice: 'Bán ra', refresh: '🔄 Làm mới',
-            globalPrices: 'Hàng Hóa Toàn Cầu', worldGold: 'Vàng (World)', crudeOil: 'Dầu Thô (WTI)', rubber: 'Cao su (Tokyo)'
+            globalPrices: 'Hàng Hóa Toàn Cầu', worldGold: 'Vàng (World)', crudeOil: 'Dầu Thô (WTI)'
         },
         en: {
             mode: 'Mode', mode30: '30 min', mode30Detail: "25' work + 5' rest",
@@ -55,7 +55,7 @@
             logout: 'Sign out',
             goldPrices: 'DOJI Gold Prices', goldSJC: 'SJC Gold Bar', goldRing: 'Gold Ring',
             buyPrice: 'Buy', sellPrice: 'Sell', refresh: '🔄 Refresh',
-            globalPrices: 'Global Commodities', worldGold: 'Gold (World)', crudeOil: 'Crude Oil (WTI)', rubber: 'Rubber (Tokyo)'
+            globalPrices: 'Global Commodities', worldGold: 'Gold (World)', crudeOil: 'Crude Oil (WTI)'
         }
     };
 
@@ -712,8 +712,7 @@
         this.goldTrendEl = document.getElementById('trend-gold');
         this.oilPriceEl = document.getElementById('price-oil');
         this.oilTrendEl = document.getElementById('trend-oil');
-        this.rubberPriceEl = document.getElementById('price-rubber');
-        this.rubberTrendEl = document.getElementById('trend-rubber');
+
 
         this.lastUpdateEl = document.getElementById('prices-last-update');
         this.refreshBtn = document.getElementById('btn-refresh-prices');
@@ -784,12 +783,8 @@
                 if (globalData.data['Oil']) {
                     self.updateGlobalCard(self.oilPriceEl, self.oilTrendEl, globalData.data['Oil'], '$');
                 }
-                if (globalData.data['Rubber']) {
-                    self.updateGlobalCard(self.rubberPriceEl, self.rubberTrendEl, globalData.data['Rubber'], '$');
-                }
             } else {
                 self.oilPriceEl.textContent = "Chờ API...";
-                self.rubberPriceEl.textContent = "Chờ API...";
             }
         }).catch(function (err) {
             console.error("Lỗi lấy giá:", err);
