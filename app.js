@@ -532,21 +532,30 @@
         // Long press logic for mobile and desktop
         var longPressTimer = null;
         var isLongPress = false;
+        var startX = 0, startY = 0;
 
         var startPress = function (e) {
             if (e.target.classList.contains('note-select')) return;
             var card = e.target.closest('.note-card');
             if (!card) return;
+            
+            if (e.type === 'touchstart') {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+            }
+
             isLongPress = false;
             longPressTimer = setTimeout(function () {
                 isLongPress = true;
+                // Vibrate on mobile to indicate successful long press
+                if (navigator.vibrate) navigator.vibrate(50);
                 var checkbox = card.querySelector('.note-select');
                 if (checkbox) {
                     checkbox.checked = !checkbox.checked;
                     checkbox.dispatchEvent(new Event('change', { bubbles: true }));
                 }
                 longPressTimer = null;
-            }, 600);
+            }, 500); // 500ms for better mobile feel
         };
 
         var cancelPress = function () {
@@ -556,13 +565,28 @@
             }
         };
 
+        var touchMoveCancel = function (e) {
+            if (!longPressTimer) return;
+            var dx = e.touches[0].clientX - startX;
+            var dy = e.touches[0].clientY - startY;
+            if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+                cancelPress();
+            }
+        };
+
         this.gridEl.addEventListener('mousedown', startPress);
         this.gridEl.addEventListener('touchstart', startPress, { passive: true });
         this.gridEl.addEventListener('mouseup', cancelPress);
         this.gridEl.addEventListener('mouseleave', cancelPress);
         this.gridEl.addEventListener('touchend', cancelPress);
         this.gridEl.addEventListener('touchcancel', cancelPress);
-        this.gridEl.addEventListener('touchmove', cancelPress, { passive: true });
+        this.gridEl.addEventListener('touchmove', touchMoveCancel, { passive: true });
+
+        this.gridEl.addEventListener('contextmenu', function (e) {
+            // Prevent default context menu on long press on mobile
+            var card = e.target.closest('.note-card');
+            if (card) e.preventDefault();
+        });
 
         this.gridEl.addEventListener('click', function (e) {
             cancelPress();
