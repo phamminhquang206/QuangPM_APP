@@ -704,8 +704,11 @@
     function PriceApp() {
         this.sjcBuyEl = document.getElementById('price-sjc-buy');
         this.sjcSellEl = document.getElementById('price-sjc-sell');
+        this.sjcTrendEl = document.getElementById('trend-sjc');
+        
         this.ringBuyEl = document.getElementById('price-ring-buy');
         this.ringSellEl = document.getElementById('price-ring-sell');
+        this.ringTrendEl = document.getElementById('trend-ring');
 
         // Global
         this.goldPriceEl = document.getElementById('price-gold');
@@ -733,6 +736,30 @@
         return value.toLocaleString('vi-VN') + ' đ';
     };
 
+    PriceApp.prototype.updateDojiTrend = function(trendEl, changeVal, currentPrice) {
+        if (!trendEl) return;
+        if (!changeVal || changeVal === 0) {
+            trendEl.textContent = '--';
+            trendEl.className = 'trend-badge';
+            return;
+        }
+        var prev = currentPrice - changeVal;
+        var percent = ((changeVal / prev) * 100).toFixed(2) + '%';
+        
+        var changeStr = '';
+        if (Math.abs(changeVal) >= 1000) {
+            changeStr = (changeVal / 1000).toLocaleString('vi-VN') + 'K';
+        } else {
+            changeStr = changeVal.toLocaleString('vi-VN');
+        }
+        
+        var isUp = changeVal > 0;
+        if (isUp) changeStr = '+' + changeStr;
+        
+        trendEl.textContent = (isUp ? '▲ ' : '▼ ') + changeStr + ' (' + percent + ')';
+        trendEl.className = 'trend-badge ' + (isUp ? 'up' : 'down');
+    };
+
     PriceApp.prototype.fetchPrices = function () {
         var self = this;
         this.refreshBtn.classList.add('loading');
@@ -756,11 +783,13 @@
                 if (sjc) {
                     self.sjcBuyEl.textContent = self.formatPrice(sjc.buy);
                     self.sjcSellEl.textContent = self.formatPrice(sjc.sell);
+                    self.updateDojiTrend(self.sjcTrendEl, sjc.change_buy, sjc.buy);
                 }
                 var ring = dojiData.prices['DOJINHTV'];
                 if (ring) {
                     self.ringBuyEl.textContent = self.formatPrice(ring.buy);
                     self.ringSellEl.textContent = self.formatPrice(ring.sell);
+                    self.updateDojiTrend(self.ringTrendEl, ring.change_buy, ring.buy);
                 }
                 var dateObj = new Date(dojiData.timestamp * 1000);
                 self.lastUpdateEl.textContent = 'Cập nhật: ' + dateObj.toLocaleTimeString('vi-VN') + ' ' + dateObj.toLocaleDateString('vi-VN');
