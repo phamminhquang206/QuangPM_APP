@@ -538,7 +538,7 @@
             if (e.target.classList.contains('note-select')) return;
             var card = e.target.closest('.note-card');
             if (!card) return;
-            
+
             if (e.type === 'touchstart') {
                 startX = e.touches[0].clientX;
                 startY = e.touches[0].clientY;
@@ -700,62 +700,93 @@
         this.sjcSellEl = document.getElementById('price-sjc-sell');
         this.ringBuyEl = document.getElementById('price-ring-buy');
         this.ringSellEl = document.getElementById('price-ring-sell');
+
+        // Global
+        this.goldPriceEl = document.getElementById('price-gold');
+        this.goldTrendEl = document.getElementById('trend-gold');
+        this.oilPriceEl = document.getElementById('price-oil');
+        this.oilTrendEl = document.getElementById('trend-oil');
+        this.rubberPriceEl = document.getElementById('price-rubber');
+        this.rubberTrendEl = document.getElementById('trend-rubber');
+
         this.lastUpdateEl = document.getElementById('prices-last-update');
         this.refreshBtn = document.getElementById('btn-refresh-prices');
 
         if (!this.sjcBuyEl) return;
 
         this.refreshBtn.addEventListener('click', this.fetchPrices.bind(this));
-        
+
+        // PASTE YOUR APPS SCRIPT URL HERE
+        this.appsScriptUrl = "https://script.google.com/macros/s/AKfycbzgehE46dQ-oMGOTRLh71L02VykMBsImfOcu9ePvqZwnO0lV2vc6k5-RQh9FWOXE6C6/exec";
+
         // Initial fetch
         this.fetchPrices();
     }
 
-    PriceApp.prototype.formatPrice = function(value) {
+    PriceApp.prototype.formatPrice = function (value) {
         if (!value) return '--';
         return value.toLocaleString('vi-VN') + ' đ';
     };
 
-    PriceApp.prototype.fetchPrices = function() {
+    PriceApp.prototype.fetchPrices = function () {
         var self = this;
         this.refreshBtn.classList.add('loading');
-        
-        fetch('https://www.vang.today/api/prices')
-            .then(function(response) { return response.json(); })
-            .then(function(data) {
-                if (data && data.success && data.prices) {
-                    var sjc = data.prices['DOHNL'] || data.prices['DOHCML'];
-                    if (sjc) {
-                        self.sjcBuyEl.textContent = self.formatPrice(sjc.buy);
-                        self.sjcBuyEl.classList.remove('error');
-                        self.sjcSellEl.textContent = self.formatPrice(sjc.sell);
-                        self.sjcSellEl.classList.remove('error');
-                    }
-                    var ring = data.prices['DOJINHTV'];
-                    if (ring) {
-                        self.ringBuyEl.textContent = self.formatPrice(ring.buy);
-                        self.ringBuyEl.classList.remove('error');
-                        self.ringSellEl.textContent = self.formatPrice(ring.sell);
-                        self.ringSellEl.classList.remove('error');
-                    }
-                    var dateObj = new Date(data.timestamp * 1000);
-                    var dateStr = dateObj.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + ' ' + 
-                                  dateObj.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
-                    self.lastUpdateEl.textContent = 'Cập nhật lần cuối: ' + dateStr;
-                } else {
-                    throw new Error("Invalid data");
+
+        // 1. Fetch DOJI Gold (Vang.today)
+        var p1 = fetch('https://www.vang.today/api/prices').then(function (res) { return res.json(); });
+
+        // 2. Fetch Global Commodities (Google Apps Script)
+        var p2 = Promise.resolve({ success: false }); // Default if no script URL
+        if (this.appsScriptUrl !== "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
+            p2 = fetch(this.appsScriptUrl).then(function (res) { return res.json(); });
+        }
+
+        Promise.all([p1, p2]).then(function (results) {
+            var dojiData = results[0];
+            var globalData = results[1];
+
+            // --- DOJI DATA ---
+            if (dojiData && dojiData.success && dojiData.prices) {
+                var sjc = dojiData.prices['DOHNL'] || dojiData.prices['DOHCML'];
+                if (sjc) {
+                    self.sjcBuyEl.textContent = self.formatPrice(sjc.buy);
+                    self.sjcSellEl.textContent = self.formatPrice(sjc.sell);
                 }
-            })
-            .catch(function(err) {
-                console.error("Lỗi lấy giá vàng:", err);
-                self.sjcBuyEl.textContent = "Lỗi API";
-                self.sjcBuyEl.classList.add('error');
-                self.ringBuyEl.textContent = "Lỗi API";
-                self.ringBuyEl.classList.add('error');
-            })
-            .finally(function() {
-                self.refreshBtn.classList.remove('loading');
-            });
+                var ring = dojiData.prices['DOJINHTV'];
+                if (ring) {
+                    self.ringBuyEl.textContent = self.formatPrice(ring.buy);
+                    self.ringSellEl.textContent = self.formatPrice(ring.sell);
+                }
+                var dateObj = new Date(dojiData.timestamp * 1000);
+                self.lastUpdateEl.textContent = 'Cập nhật: ' + dateObj.toLocaleTimeString('vi-VN') + ' ' + dateObj.toLocaleDateString('vi-VN');
+            }
+
+            // --- GLOBAL COMMODITIES ---
+            if (globalData && globalData.success && globalData.data) {
+                self.updateGlobalCard(self.goldPriceEl, self.goldTrendEl, globalData.data['Gold'], '$');
+                self.updateGlobalCard(self.oilPriceEl, self.oilTrendEl, globalData.data['Oil'], '$');
+                self.updateGlobalCard(self.rubberPriceEl, self.rubberTrendEl, globalData.data['Rubber'], '¥');
+            } else {
+                self.goldPriceEl.textContent = "Chờ API...";
+                self.oilPriceEl.textContent = "Chờ API...";
+                self.rubberPriceEl.textContent = "Chờ API...";
+            }
+        }).catch(function (err) {
+            console.error("Lỗi lấy giá:", err);
+            self.lastUpdateEl.textContent = 'Lỗi cập nhật lúc ' + new Date().toLocaleTimeString('vi-VN');
+        }).finally(function () {
+            self.refreshBtn.classList.remove('loading');
+        });
+    };
+
+    PriceApp.prototype.updateGlobalCard = function (priceEl, trendEl, dataObj, prefix) {
+        if (!dataObj) return;
+        priceEl.textContent = prefix + dataObj.price;
+
+        var isUp = dataObj.change.indexOf('+') !== -1 || parseFloat(dataObj.change) > 0;
+        var changeStr = dataObj.change + ' (' + dataObj.percent + ')';
+        trendEl.textContent = (isUp ? '▲ ' : '▼ ') + changeStr;
+        trendEl.className = 'trend-badge ' + (isUp ? 'up' : 'down');
     };
 
     // =========================================================

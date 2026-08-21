@@ -1635,3 +1635,22 @@ body {
     color: var(--accent-red);
     font-size: 1rem;
 }
+
+.trend-badge {
+    margin-left: auto;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.trend-badge.up {
+    color: var(--accent-green);
+    background: rgba(16, 185, 129, 0.15);
+}
+
+.trend-badge.down {
+    color: var(--accent-red);
+    background: rgba(239, 68, 68, 0.15);
+}
