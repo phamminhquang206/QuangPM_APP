@@ -29,7 +29,10 @@
             noteColor: 'Màu:', cancel: 'Hủy', saveNote: 'Lưu',
             loginSubtitle: 'Đăng nhập để bắt đầu',
             loginGoogle: 'Đăng nhập bằng Google', loginGithub: 'Đăng nhập bằng GitHub',
-            logout: 'Đăng xuất'
+            logout: 'Đăng xuất',
+            goldPrices: 'Giá Vàng DOJI', goldSJC: 'Vàng miếng SJC', goldRing: 'Nhẫn tròn Hưng Thịnh Vượng',
+            buyPrice: 'Mua vào', sellPrice: 'Bán ra', refresh: '🔄 Làm mới',
+            globalPrices: 'Hàng Hóa Toàn Cầu', worldGold: 'Vàng (World)', crudeOil: 'Dầu Thô (WTI)', rubber: 'Cao su (Tokyo)'
         },
         en: {
             mode: 'Mode', mode30: '30 min', mode30Detail: "25' work + 5' rest",
@@ -49,7 +52,10 @@
             noteColor: 'Color:', cancel: 'Cancel', saveNote: 'Save',
             loginSubtitle: 'Sign in to get started',
             loginGoogle: 'Sign in with Google', loginGithub: 'Sign in with GitHub',
-            logout: 'Sign out'
+            logout: 'Sign out',
+            goldPrices: 'DOJI Gold Prices', goldSJC: 'SJC Gold Bar', goldRing: 'Gold Ring',
+            buyPrice: 'Buy', sellPrice: 'Sell', refresh: '🔄 Refresh',
+            globalPrices: 'Global Commodities', worldGold: 'Gold (World)', crudeOil: 'Crude Oil (WTI)', rubber: 'Rubber (Tokyo)'
         }
     };
 
@@ -762,12 +768,26 @@
             }
 
             // --- GLOBAL COMMODITIES ---
-            if (globalData && globalData.success && globalData.data) {
-                self.updateGlobalCard(self.goldPriceEl, self.goldTrendEl, globalData.data['Gold'], '$');
-                self.updateGlobalCard(self.oilPriceEl, self.oilTrendEl, globalData.data['Oil'], '$');
-                self.updateGlobalCard(self.rubberPriceEl, self.rubberTrendEl, globalData.data['Rubber'], '¥');
+            if (dojiData && dojiData.success && dojiData.prices && dojiData.prices['XAUUSD']) {
+                var goldData = dojiData.prices['XAUUSD'];
+                var changeStr = (goldData.change_buy > 0 ? '+' : '') + goldData.change_buy.toFixed(2);
+                self.updateGlobalCard(self.goldPriceEl, self.goldTrendEl, {
+                    price: goldData.buy.toFixed(2),
+                    change: changeStr,
+                    percent: (goldData.change_buy / (goldData.buy - goldData.change_buy) * 100).toFixed(2) + '%'
+                }, '$');
             } else {
-                self.goldPriceEl.textContent = "Chờ API...";
+                self.goldPriceEl.textContent = "Lỗi API";
+            }
+
+            if (globalData && globalData.success && globalData.data) {
+                if (globalData.data['Oil']) {
+                    self.updateGlobalCard(self.oilPriceEl, self.oilTrendEl, globalData.data['Oil'], '$');
+                }
+                if (globalData.data['Rubber']) {
+                    self.updateGlobalCard(self.rubberPriceEl, self.rubberTrendEl, globalData.data['Rubber'], '$');
+                }
+            } else {
                 self.oilPriceEl.textContent = "Chờ API...";
                 self.rubberPriceEl.textContent = "Chờ API...";
             }
