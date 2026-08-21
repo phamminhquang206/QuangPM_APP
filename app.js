@@ -29,7 +29,7 @@
             noteColor: 'Màu:', cancel: 'Hủy', saveNote: 'Lưu',
             loginSubtitle: 'Đăng nhập để bắt đầu',
             loginGoogle: 'Đăng nhập bằng Google', loginGithub: 'Đăng nhập bằng GitHub',
-            logout: 'Đăng xuất',
+            logout: 'Đăng xuất', logoutConfirm: 'Bạn có chắc chắn muốn đăng xuất?',
             goldPrices: 'Giá Vàng DOJI', goldSJC: 'Vàng miếng SJC', goldRing: 'Nhẫn tròn Hưng Thịnh Vượng',
             buyPrice: 'Mua vào', sellPrice: 'Bán ra', refresh: '🔄 Làm mới',
             globalPrices: 'Hàng Hóa Toàn Cầu', worldGold: 'Vàng (World)', crudeOil: 'Dầu Thô (WTI)'
@@ -52,7 +52,7 @@
             noteColor: 'Color:', cancel: 'Cancel', saveNote: 'Save',
             loginSubtitle: 'Sign in to get started',
             loginGoogle: 'Sign in with Google', loginGithub: 'Sign in with GitHub',
-            logout: 'Sign out',
+            logout: 'Sign out', logoutConfirm: 'Are you sure you want to sign out?',
             goldPrices: 'DOJI Gold Prices', goldSJC: 'SJC Gold Bar', goldRing: 'Gold Ring',
             buyPrice: 'Buy', sellPrice: 'Sell', refresh: '🔄 Refresh',
             globalPrices: 'Global Commodities', worldGold: 'Gold (World)', crudeOil: 'Crude Oil (WTI)'
@@ -170,7 +170,9 @@
 
         // Logout
         document.getElementById('btn-logout').addEventListener('click', function () {
-            auth.signOut();
+            if (window.confirm(t('logoutConfirm'))) {
+                auth.signOut();
+            }
         });
 
         // Auth state listener
