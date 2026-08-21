@@ -528,7 +528,49 @@
                 self._updateDeleteBtn(); self._updateCardSelection();
             }
         });
+
+        // Long press logic for mobile and desktop
+        var longPressTimer = null;
+        var isLongPress = false;
+
+        var startPress = function (e) {
+            if (e.target.classList.contains('note-select')) return;
+            var card = e.target.closest('.note-card');
+            if (!card) return;
+            isLongPress = false;
+            longPressTimer = setTimeout(function () {
+                isLongPress = true;
+                var checkbox = card.querySelector('.note-select');
+                if (checkbox) {
+                    checkbox.checked = !checkbox.checked;
+                    checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+                longPressTimer = null;
+            }, 600);
+        };
+
+        var cancelPress = function () {
+            if (longPressTimer) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
+            }
+        };
+
+        this.gridEl.addEventListener('mousedown', startPress);
+        this.gridEl.addEventListener('touchstart', startPress, { passive: true });
+        this.gridEl.addEventListener('mouseup', cancelPress);
+        this.gridEl.addEventListener('mouseleave', cancelPress);
+        this.gridEl.addEventListener('touchend', cancelPress);
+        this.gridEl.addEventListener('touchcancel', cancelPress);
+        this.gridEl.addEventListener('touchmove', cancelPress, { passive: true });
+
         this.gridEl.addEventListener('click', function (e) {
+            cancelPress();
+            if (isLongPress) {
+                isLongPress = false;
+                e.preventDefault();
+                return;
+            }
             if (e.target.classList.contains('note-select')) return;
             var card = e.target.closest('.note-card');
             if (card) self._openModal(card.getAttribute('data-id'));
