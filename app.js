@@ -2,226 +2,215 @@
     'use strict';
 
     // ===== CONSTANTS =====
-    const MODES = {
+    var MODES = {
         '30': { work: 25 * 60, break: 5 * 60, label: '30 phút' },
         '50': { work: 40 * 60, break: 10 * 60, label: '50 phút' }
     };
 
-    const STORAGE_KEYS = {
-        history: 'pomodoro_history',
-        tasks: 'todo_tasks',
-        notes: 'quick_notes',
-        lang: 'app_language'
-    };
+    var CIRCUMFERENCE = 2 * Math.PI * 120;
 
     // ===== I18N DICTIONARIES =====
     var LANG = {
         vi: {
-            // Pomodoro
-            mode: 'Chế độ',
-            mode30: '30 phút',
-            mode30Detail: "25' làm + 5' nghỉ",
-            mode50: '50 phút',
-            mode50Detail: "40' làm + 10' nghỉ",
-            reps: 'Số Rep',
-            ready: 'Sẵn sàng',
-            start: '▶ Bắt đầu',
-            pause: '⏸ Tạm dừng',
-            resume: '▶ Tiếp tục',
-            completed: '🎉 Hoàn thành!',
-            working: '🔥 Đang làm việc',
-            breaking: '☕ Nghỉ ngơi',
-            history: '📊 Lịch sử',
-            noHistory: 'Chưa có lịch sử',
-            // Todo
-            addTaskPlaceholder: 'Thêm task mới...',
-            addBtn: '+ Thêm',
-            filterAll: 'Tất cả',
-            filterInProgress: 'Đang làm',
-            filterCompleted: 'Hoàn thành',
-            emptyTasks: 'Chưa có task nào',
-            noMatch: 'Không có task phù hợp',
+            mode: 'Chế độ', mode30: '30 phút', mode30Detail: "25' làm + 5' nghỉ",
+            mode50: '50 phút', mode50Detail: "40' làm + 10' nghỉ", reps: 'Số Rep',
+            ready: 'Sẵn sàng', start: '▶ Bắt đầu', pause: '⏸ Tạm dừng',
+            resume: '▶ Tiếp tục', completed: '🎉 Hoàn thành!',
+            working: '🔥 Đang làm việc', breaking: '☕ Nghỉ ngơi',
+            history: '📊 Lịch sử', noHistory: 'Chưa có lịch sử',
+            addTaskPlaceholder: 'Thêm task mới...', addBtn: '+ Thêm',
+            filterAll: 'Tất cả', filterInProgress: 'Đang làm', filterCompleted: 'Hoàn thành',
+            emptyTasks: 'Chưa có task nào', noMatch: 'Không có task phù hợp',
             statsTemplate: '{ip} đang làm · {c} hoàn thành · {t} tổng',
-            // Mode labels for history
-            modeLabel30: '30 phút',
-            modeLabel50: '50 phút',
-            // Notes
-            newNote: '+ Ghi chú mới',
-            editNote: 'Sửa ghi chú',
-            deleteSelected: '🗑 Xóa đã chọn',
-            emptyNotes: 'Chưa có ghi chú nào',
-            noteTitlePlaceholder: 'Tiêu đề...',
-            noteContentPlaceholder: 'Nội dung ghi chú...',
-            noteColor: 'Màu:',
-            cancel: 'Hủy',
-            saveNote: 'Lưu'
+            modeLabel30: '30 phút', modeLabel50: '50 phút',
+            newNote: '+ Ghi chú mới', editNote: 'Sửa ghi chú',
+            deleteSelected: '🗑 Xóa đã chọn', emptyNotes: 'Chưa có ghi chú nào',
+            noteTitlePlaceholder: 'Tiêu đề...', noteContentPlaceholder: 'Nội dung ghi chú...',
+            noteColor: 'Màu:', cancel: 'Hủy', saveNote: 'Lưu',
+            loginSubtitle: 'Đăng nhập để bắt đầu',
+            loginGoogle: 'Đăng nhập bằng Google', loginGithub: 'Đăng nhập bằng GitHub',
+            logout: 'Đăng xuất'
         },
         en: {
-            // Pomodoro
-            mode: 'Mode',
-            mode30: '30 min',
-            mode30Detail: "25' work + 5' rest",
-            mode50: '50 min',
-            mode50Detail: "40' work + 10' rest",
-            reps: 'Reps',
-            ready: 'Ready',
-            start: '▶ Start',
-            pause: '⏸ Pause',
-            resume: '▶ Resume',
-            completed: '🎉 Completed!',
-            working: '🔥 Working',
-            breaking: '☕ Break',
-            history: '📊 History',
-            noHistory: 'No history yet',
-            // Todo
-            addTaskPlaceholder: 'Add new task...',
-            addBtn: '+ Add',
-            filterAll: 'All',
-            filterInProgress: 'In Progress',
-            filterCompleted: 'Completed',
-            emptyTasks: 'No tasks yet',
-            noMatch: 'No matching tasks',
+            mode: 'Mode', mode30: '30 min', mode30Detail: "25' work + 5' rest",
+            mode50: '50 min', mode50Detail: "40' work + 10' rest", reps: 'Reps',
+            ready: 'Ready', start: '▶ Start', pause: '⏸ Pause',
+            resume: '▶ Resume', completed: '🎉 Completed!',
+            working: '🔥 Working', breaking: '☕ Break',
+            history: '📊 History', noHistory: 'No history yet',
+            addTaskPlaceholder: 'Add new task...', addBtn: '+ Add',
+            filterAll: 'All', filterInProgress: 'In Progress', filterCompleted: 'Completed',
+            emptyTasks: 'No tasks yet', noMatch: 'No matching tasks',
             statsTemplate: '{ip} in progress · {c} completed · {t} total',
-            // Mode labels for history
-            modeLabel30: '30 min',
-            modeLabel50: '50 min',
-            // Notes
-            newNote: '+ New Note',
-            editNote: 'Edit Note',
-            deleteSelected: '🗑 Delete Selected',
-            emptyNotes: 'No notes yet',
-            noteTitlePlaceholder: 'Title...',
-            noteContentPlaceholder: 'Note content...',
-            noteColor: 'Color:',
-            cancel: 'Cancel',
-            saveNote: 'Save'
+            modeLabel30: '30 min', modeLabel50: '50 min',
+            newNote: '+ New Note', editNote: 'Edit Note',
+            deleteSelected: '🗑 Delete Selected', emptyNotes: 'No notes yet',
+            noteTitlePlaceholder: 'Title...', noteContentPlaceholder: 'Note content...',
+            noteColor: 'Color:', cancel: 'Cancel', saveNote: 'Save',
+            loginSubtitle: 'Sign in to get started',
+            loginGoogle: 'Sign in with Google', loginGithub: 'Sign in with GitHub',
+            logout: 'Sign out'
         }
     };
 
     // ===== I18N MANAGER =====
-    var currentLang = localStorage.getItem(STORAGE_KEYS.lang) || 'vi';
+    var currentLang = localStorage.getItem('app_language') || 'vi';
 
     function t(key) {
-        return LANG[currentLang][key] || LANG['vi'][key] || key;
+        return (LANG[currentLang] && LANG[currentLang][key]) || LANG['vi'][key] || key;
     }
 
     function applyI18nToDOM() {
-        // Translate textContent
         document.querySelectorAll('[data-i18n]').forEach(function (el) {
-            var key = el.getAttribute('data-i18n');
-            el.textContent = t(key);
+            el.textContent = t(el.getAttribute('data-i18n'));
         });
-        // Translate placeholders
         document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
-            var key = el.getAttribute('data-i18n-placeholder');
-            el.placeholder = t(key);
+            el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
         });
     }
 
     function setLanguage(lang) {
         currentLang = lang;
-        localStorage.setItem(STORAGE_KEYS.lang, lang);
-
-        // Update toggle button
+        localStorage.setItem('app_language', lang);
         var flagEl = document.getElementById('lang-flag');
         var labelEl = document.getElementById('lang-label');
         if (lang === 'vi') {
-            flagEl.textContent = '🇻🇳';
-            labelEl.textContent = 'VI';
+            flagEl.textContent = '🇻🇳'; labelEl.textContent = 'VI';
             document.documentElement.lang = 'vi';
         } else {
-            flagEl.textContent = '🇬🇧';
-            labelEl.textContent = 'EN';
+            flagEl.textContent = '🇬🇧'; labelEl.textContent = 'EN';
             document.documentElement.lang = 'en';
         }
-
         applyI18nToDOM();
     }
 
-    const CIRCUMFERENCE = 2 * Math.PI * 120; // r=120 from SVG
-
     // ===== UTILITY FUNCTIONS =====
-    function formatTime(totalSeconds) {
-        const mins = Math.floor(totalSeconds / 60);
-        const secs = totalSeconds % 60;
-        return String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+    function formatTime(s) {
+        return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
     }
-
     function getTodayStr() {
-        const d = new Date();
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        return year + '-' + month + '-' + day;
+        var d = new Date();
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     }
-
     function getTimeStr() {
-        const d = new Date();
+        var d = new Date();
         return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
     }
+    function generateId() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 6); }
+    function escapeHtml(text) { var d = document.createElement('div'); d.textContent = text; return d.innerHTML; }
 
-    function generateId() {
-        return Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
-    }
-
-    function escapeHtml(text) {
-        var div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    // ===== AUDIO NOTIFICATION =====
-    function playBeep(frequency, duration, times) {
-        frequency = frequency || 800;
-        duration = duration || 200;
-        times = times || 3;
-
+    function playBeep(freq, dur, times) {
+        freq = freq || 800; dur = dur || 200; times = times || 3;
         try {
-            var AudioCtx = window.AudioContext || window.webkitAudioContext;
-            if (!AudioCtx) return;
-            var ctx = new AudioCtx();
-            var startTime = ctx.currentTime;
-
+            var Ctx = window.AudioContext || window.webkitAudioContext;
+            if (!Ctx) return;
+            var ctx = new Ctx(), st = ctx.currentTime;
             for (var i = 0; i < times; i++) {
-                var osc = ctx.createOscillator();
-                var gain = ctx.createGain();
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.frequency.value = frequency;
-                osc.type = 'sine';
-                gain.gain.setValueAtTime(0.3, startTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration / 1000);
-                osc.start(startTime);
-                osc.stop(startTime + duration / 1000);
-                startTime += (duration + 150) / 1000;
+                var o = ctx.createOscillator(), g = ctx.createGain();
+                o.connect(g); g.connect(ctx.destination);
+                o.frequency.value = freq; o.type = 'sine';
+                g.gain.setValueAtTime(0.3, st);
+                g.gain.exponentialRampToValueAtTime(0.001, st + dur / 1000);
+                o.start(st); o.stop(st + dur / 1000);
+                st += (dur + 150) / 1000;
             }
-        } catch (e) {
-            // Audio API not available, silently ignore
-        }
+        } catch (e) { /* ignore */ }
     }
 
-    // ===== TAB MANAGER =====
+    // =========================================================
+    //  FIREBASE SETUP
+    // =========================================================
+    firebase.initializeApp(firebaseConfig);
+    var auth = firebase.auth();
+    var db = firebase.firestore();
+
+    // Enable offline persistence
+    db.enablePersistence({ synchronizeTabs: true }).catch(function () { /* ignore */ });
+
+    var currentUser = null;
+
+    function userDocRef(collection) {
+        return db.collection('users').doc(currentUser.uid).collection(collection);
+    }
+
+    // =========================================================
+    //  AUTH MODULE
+    // =========================================================
+    function initAuth() {
+        var loginPage = document.getElementById('login-page');
+        var appContainer = document.getElementById('app-container');
+        var loadingOverlay = document.getElementById('loading-overlay');
+        var loginError = document.getElementById('login-error');
+        var avatarEl = document.getElementById('user-avatar');
+        var nameEl = document.getElementById('user-name');
+
+        // Google login
+        document.getElementById('btn-login-google').addEventListener('click', function () {
+            loginError.textContent = '';
+            var provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider).catch(function (err) {
+                loginError.textContent = err.message;
+            });
+        });
+
+        // GitHub login
+        document.getElementById('btn-login-github').addEventListener('click', function () {
+            loginError.textContent = '';
+            var provider = new firebase.auth.GithubAuthProvider();
+            auth.signInWithPopup(provider).catch(function (err) {
+                loginError.textContent = err.message;
+            });
+        });
+
+        // Logout
+        document.getElementById('btn-logout').addEventListener('click', function () {
+            auth.signOut();
+        });
+
+        // Auth state listener
+        auth.onAuthStateChanged(function (user) {
+            loadingOverlay.classList.add('hidden');
+
+            if (user) {
+                currentUser = user;
+                // Update UI
+                avatarEl.src = user.photoURL || '';
+                nameEl.textContent = user.displayName || user.email || 'User';
+                loginPage.classList.add('hidden');
+                appContainer.style.display = '';
+
+                // Load data from Firestore
+                loadAllUserData();
+            } else {
+                currentUser = null;
+                loginPage.classList.remove('hidden');
+                appContainer.style.display = 'none';
+            }
+        });
+    }
+
+    function loadAllUserData() {
+        if (window.__pomodoroApp) window.__pomodoroApp._loadHistory();
+        if (window.__todoApp) window.__todoApp._loadTasks();
+        if (window.__noteApp) window.__noteApp._loadNotes();
+    }
+
+    // =========================================================
+    //  TAB MANAGER
+    // =========================================================
     function initTabs() {
         var tabBtns = document.querySelectorAll('.tab-btn');
         var sections = document.querySelectorAll('.section');
-
         tabBtns.forEach(function (btn) {
             btn.addEventListener('click', function () {
-                var targetTab = btn.getAttribute('data-tab');
-
-                // Update tab buttons
+                var tab = btn.getAttribute('data-tab');
                 tabBtns.forEach(function (b) { b.classList.remove('active'); });
                 btn.classList.add('active');
-
-                // Update sections with re-trigger animation
                 sections.forEach(function (s) {
                     s.classList.remove('active');
-                    s.style.animation = 'none';
-                    s.offsetHeight; // force reflow
-                    s.style.animation = '';
+                    s.style.animation = 'none'; s.offsetHeight; s.style.animation = '';
                 });
-
-                document.getElementById(targetTab + '-section').classList.add('active');
+                document.getElementById(tab + '-section').classList.add('active');
             });
         });
     }
@@ -230,20 +219,13 @@
     //  POMODORO TIMER
     // =========================================================
     function PomodoroTimer() {
-        this.mode = '30';
-        this.totalReps = 3;
-        this.currentRep = 1;
-        this.isWorking = true;
-        this.timeRemaining = MODES[this.mode].work;
-        this.totalTime = MODES[this.mode].work;
-        this.isRunning = false;
-        this.isPaused = false;
-        this.intervalId = null;
+        this.mode = '30'; this.totalReps = 3; this.currentRep = 1;
+        this.isWorking = true; this.timeRemaining = MODES['30'].work;
+        this.totalTime = MODES['30'].work; this.isRunning = false;
+        this.isPaused = false; this.intervalId = null;
 
-        this._cacheElements();
-        this._bindEvents();
-        this._loadHistory();
-        this._updateDisplay();
+        this._cacheElements(); this._bindEvents();
+        this._loadHistory(); this._updateDisplay();
     }
 
     PomodoroTimer.prototype._cacheElements = function () {
@@ -262,49 +244,29 @@
 
     PomodoroTimer.prototype._bindEvents = function () {
         var self = this;
-
-        // Mode selection
-        var modeBtns = document.querySelectorAll('.mode-btn');
-        modeBtns.forEach(function (btn) {
+        document.querySelectorAll('.mode-btn').forEach(function (btn) {
             btn.addEventListener('click', function () {
                 if (self.isRunning) return;
-                modeBtns.forEach(function (b) { b.classList.remove('active'); });
+                document.querySelectorAll('.mode-btn').forEach(function (b) { b.classList.remove('active'); });
                 btn.classList.add('active');
                 self.mode = btn.getAttribute('data-mode');
                 self._reset();
             });
         });
-
-        // Rep controls
         document.getElementById('rep-decrease').addEventListener('click', function () {
             if (self.isRunning || self.totalReps <= 1) return;
-            self.totalReps--;
-            self.repCountEl.textContent = self.totalReps;
-            self._reset();
+            self.totalReps--; self.repCountEl.textContent = self.totalReps; self._reset();
         });
-
         document.getElementById('rep-increase').addEventListener('click', function () {
             if (self.isRunning || self.totalReps >= 10) return;
-            self.totalReps++;
-            self.repCountEl.textContent = self.totalReps;
-            self._reset();
+            self.totalReps++; self.repCountEl.textContent = self.totalReps; self._reset();
         });
-
-        // Start / Pause / Resume
         this.startBtn.addEventListener('click', function () {
-            if (!self.isRunning) {
-                self._start();
-            } else if (self.isPaused) {
-                self._resume();
-            } else {
-                self._pause();
-            }
+            if (!self.isRunning) self._start();
+            else if (self.isPaused) self._resume();
+            else self._pause();
         });
-
-        // Reset
         this.resetBtn.addEventListener('click', function () { self._reset(); });
-
-        // History toggle
         document.getElementById('history-toggle').addEventListener('click', function () {
             self.historyContent.classList.toggle('open');
             self.historyArrow.classList.toggle('open');
@@ -313,65 +275,45 @@
 
     PomodoroTimer.prototype._start = function () {
         var self = this;
-        this.isRunning = true;
-        this.isPaused = false;
+        this.isRunning = true; this.isPaused = false;
         this.resetBtn.disabled = false;
         this.startBtn.textContent = t('pause');
         this.timerCard.classList.add('running');
-        this._updateStatus();
-        this._setLockedUI(true);
-
+        this._updateStatus(); this._setLockedUI(true);
         this.intervalId = setInterval(function () { self._tick(); }, 1000);
     };
-
     PomodoroTimer.prototype._pause = function () {
-        this.isPaused = true;
-        clearInterval(this.intervalId);
+        this.isPaused = true; clearInterval(this.intervalId);
         this.startBtn.textContent = t('resume');
         this.timerCard.classList.remove('running');
     };
-
     PomodoroTimer.prototype._resume = function () {
-        var self = this;
-        this.isPaused = false;
+        var self = this; this.isPaused = false;
         this.startBtn.textContent = t('pause');
         this.timerCard.classList.add('running');
         this.intervalId = setInterval(function () { self._tick(); }, 1000);
     };
-
     PomodoroTimer.prototype._reset = function () {
         clearInterval(this.intervalId);
-        this.isRunning = false;
-        this.isPaused = false;
-        this.currentRep = 1;
-        this.isWorking = true;
+        this.isRunning = false; this.isPaused = false;
+        this.currentRep = 1; this.isWorking = true;
         this.timeRemaining = MODES[this.mode].work;
         this.totalTime = MODES[this.mode].work;
-
         this.startBtn.textContent = t('start');
         this.resetBtn.disabled = true;
         this.statusEl.textContent = t('ready');
         this.statusEl.className = 'timer-status';
-        this.timerCard.classList.remove('running');
-        this.timerCard.classList.remove('break-active');
+        this.timerCard.classList.remove('running', 'break-active');
         this.ringEl.classList.remove('break-mode');
-        this._setLockedUI(false);
-        this._updateDisplay();
+        this._setLockedUI(false); this._updateDisplay();
     };
-
     PomodoroTimer.prototype._tick = function () {
         this.timeRemaining--;
-
-        if (this.timeRemaining <= 0) {
-            this._onPhaseComplete();
-        }
-
+        if (this.timeRemaining <= 0) this._onPhaseComplete();
         this._updateDisplay();
     };
-
     PomodoroTimer.prototype._onPhaseComplete = function () {
         if (this.isWorking) {
-            // Work → Break
             playBeep(600, 200, 2);
             this.isWorking = false;
             this.timeRemaining = MODES[this.mode].break;
@@ -379,51 +321,36 @@
             this.ringEl.classList.add('break-mode');
             this.timerCard.classList.add('break-active');
         } else {
-            // Break → next rep or complete
             this.ringEl.classList.remove('break-mode');
             this.timerCard.classList.remove('break-active');
-
             if (this.currentRep < this.totalReps) {
-                playBeep(800, 200, 2);
-                this.currentRep++;
+                playBeep(800, 200, 2); this.currentRep++;
                 this.isWorking = true;
                 this.timeRemaining = MODES[this.mode].work;
                 this.totalTime = MODES[this.mode].work;
             } else {
-                // All done!
-                playBeep(1000, 300, 4);
-                this._onAllComplete();
-                return;
+                playBeep(1000, 300, 4); this._onAllComplete(); return;
             }
         }
         this._updateStatus();
     };
-
     PomodoroTimer.prototype._onAllComplete = function () {
         clearInterval(this.intervalId);
-        this.isRunning = false;
-        this.isPaused = false;
-
+        this.isRunning = false; this.isPaused = false;
         this.statusEl.textContent = t('completed');
         this.statusEl.className = 'timer-status completed';
         this.startBtn.textContent = t('start');
         this.resetBtn.disabled = false;
         this.timerCard.classList.remove('running');
         this._setLockedUI(false);
-
         this._saveHistory();
     };
-
     PomodoroTimer.prototype._updateDisplay = function () {
         this.timeEl.textContent = formatTime(this.timeRemaining);
         this.repEl.textContent = 'Rep ' + this.currentRep + '/' + this.totalReps;
-
-        // Update SVG ring
         var progress = 1 - (this.timeRemaining / this.totalTime);
-        var offset = CIRCUMFERENCE * (1 - progress);
-        this.ringEl.style.strokeDashoffset = offset;
+        this.ringEl.style.strokeDashoffset = CIRCUMFERENCE * (1 - progress);
     };
-
     PomodoroTimer.prototype._updateStatus = function () {
         if (this.isWorking) {
             this.statusEl.textContent = t('working');
@@ -433,76 +360,50 @@
             this.statusEl.className = 'timer-status breaking';
         }
     };
-
-    // Lock mode & rep controls while timer is running
     PomodoroTimer.prototype._setLockedUI = function (locked) {
-        var modeBtns = document.querySelectorAll('.mode-btn');
-        var repBtns = document.querySelectorAll('.rep-btn');
-
-        modeBtns.forEach(function (b) {
-            if (locked) b.classList.add('disabled');
-            else b.classList.remove('disabled');
-        });
-        repBtns.forEach(function (b) {
-            if (locked) b.classList.add('disabled');
-            else b.classList.remove('disabled');
-        });
+        var cls = locked ? 'add' : 'remove';
+        document.querySelectorAll('.mode-btn, .rep-btn').forEach(function (b) { b.classList[cls]('disabled'); });
     };
 
-    // ----- History persistence -----
-
+    // History — Firestore
     PomodoroTimer.prototype._saveHistory = function () {
-        var raw = localStorage.getItem(STORAGE_KEYS.history);
-        var history = raw ? JSON.parse(raw) : {};
-        var today = getTodayStr();
-
-        if (!history[today]) history[today] = [];
-
-        history[today].push({
-            mode: this.mode,
-            reps: this.totalReps,
-            completedAt: getTimeStr()
+        if (!currentUser) return;
+        var entry = { mode: this.mode, reps: this.totalReps, completedAt: getTimeStr(), date: getTodayStr() };
+        userDocRef('pomodoro_history').add(entry).then(function () {
+            if (window.__pomodoroApp) window.__pomodoroApp._loadHistory();
         });
-
-        localStorage.setItem(STORAGE_KEYS.history, JSON.stringify(history));
-        this._renderHistory(history);
     };
-
     PomodoroTimer.prototype._loadHistory = function () {
-        var raw = localStorage.getItem(STORAGE_KEYS.history);
-        var history = raw ? JSON.parse(raw) : {};
-        this._renderHistory(history);
+        if (!currentUser) return;
+        var self = this;
+        userDocRef('pomodoro_history').orderBy('date', 'desc').get().then(function (snap) {
+            var history = {};
+            snap.forEach(function (doc) {
+                var d = doc.data();
+                if (!history[d.date]) history[d.date] = [];
+                history[d.date].push(d);
+            });
+            self._renderHistory(history);
+        });
     };
-
     PomodoroTimer.prototype._renderHistory = function (history) {
         var days = Object.keys(history).sort().reverse();
-
         if (days.length === 0) {
             this.historyListEl.innerHTML = '<div class="history-empty">' + t('noHistory') + '</div>';
             return;
         }
-
         var html = '';
         var locale = currentLang === 'vi' ? 'vi-VN' : 'en-US';
         days.forEach(function (day) {
             var items = history[day];
             var dateObj = new Date(day + 'T00:00:00');
-            var dateStr = dateObj.toLocaleDateString(locale, {
-                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-            });
-
-            html += '<div class="history-day">';
-            html += '<div class="history-date">' + dateStr + '</div>';
+            var dateStr = dateObj.toLocaleDateString(locale, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            html += '<div class="history-day"><div class="history-date">' + dateStr + '</div>';
             items.forEach(function (item) {
-                var modeLabel = t('modeLabel' + item.mode);
-                html += '<div class="history-item">';
-                html += '<span class="history-item-mode">🍅 ' + modeLabel + ' × ' + item.reps + ' rep</span>';
-                html += '<span class="history-item-detail">' + item.completedAt + '</span>';
-                html += '</div>';
+                html += '<div class="history-item"><span class="history-item-mode">🍅 ' + t('modeLabel' + item.mode) + ' × ' + item.reps + ' rep</span><span class="history-item-detail">' + item.completedAt + '</span></div>';
             });
             html += '</div>';
         });
-
         this.historyListEl.innerHTML = html;
     };
 
@@ -510,133 +411,219 @@
     //  TODO LIST
     // =========================================================
     function TodoList() {
-        this.tasks = [];
-        this.filter = 'all';
-
-        this._cacheElements();
-        this._bindEvents();
-        this._loadTasks();
+        this.tasks = []; this.filter = 'all';
+        this._cacheElements(); this._bindEvents(); this._loadTasks();
     }
-
     TodoList.prototype._cacheElements = function () {
         this.inputEl = document.getElementById('todo-input');
-        this.addBtn = document.getElementById('btn-add-todo');
         this.listEl = document.getElementById('todo-list');
         this.statsEl = document.getElementById('todo-stats');
     };
-
     TodoList.prototype._bindEvents = function () {
         var self = this;
-
-        this.addBtn.addEventListener('click', function () { self._addTask(); });
-
-        this.inputEl.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter') self._addTask();
-        });
-
-        // Filter buttons
-        var filterBtns = document.querySelectorAll('.filter-btn');
-        filterBtns.forEach(function (btn) {
+        document.getElementById('btn-add-todo').addEventListener('click', function () { self._addTask(); });
+        this.inputEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') self._addTask(); });
+        document.querySelectorAll('.filter-btn').forEach(function (btn) {
             btn.addEventListener('click', function () {
-                filterBtns.forEach(function (b) { b.classList.remove('active'); });
+                document.querySelectorAll('.filter-btn').forEach(function (b) { b.classList.remove('active'); });
                 btn.classList.add('active');
                 self.filter = btn.getAttribute('data-filter');
                 self._render();
             });
         });
     };
-
     TodoList.prototype._addTask = function () {
         var text = this.inputEl.value.trim();
-        if (!text) return;
-
-        this.tasks.unshift({
-            id: generateId(),
-            text: text,
-            completed: false,
-            createdAt: new Date().toISOString()
-        });
-
-        this.inputEl.value = '';
-        this.inputEl.focus();
-        this._saveTasks();
-        this._render();
+        if (!text || !currentUser) return;
+        var task = { id: generateId(), text: text, completed: false, createdAt: new Date().toISOString() };
+        this.tasks.unshift(task);
+        this.inputEl.value = ''; this.inputEl.focus();
+        this._saveTasks(); this._render();
     };
-
     TodoList.prototype.toggleTask = function (id) {
         var task = this.tasks.find(function (t) { return t.id === id; });
-        if (task) {
-            task.completed = !task.completed;
-            this._saveTasks();
-            this._render();
-        }
+        if (task) { task.completed = !task.completed; this._saveTasks(); this._render(); }
     };
-
     TodoList.prototype.deleteTask = function (id) {
         this.tasks = this.tasks.filter(function (t) { return t.id !== id; });
-        this._saveTasks();
-        this._render();
+        this._saveTasks(); this._render();
     };
-
     TodoList.prototype._getFilteredTasks = function () {
-        switch (this.filter) {
-            case 'completed':
-                return this.tasks.filter(function (t) { return t.completed; });
-            case 'in-progress':
-                return this.tasks.filter(function (t) { return !t.completed; });
-            default:
-                return this.tasks;
-        }
+        if (this.filter === 'completed') return this.tasks.filter(function (t) { return t.completed; });
+        if (this.filter === 'in-progress') return this.tasks.filter(function (t) { return !t.completed; });
+        return this.tasks;
     };
-
     TodoList.prototype._render = function () {
         var filtered = this._getFilteredTasks();
-        var totalTasks = this.tasks.length;
-        var completedTasks = this.tasks.filter(function (t) { return t.completed; }).length;
-        var inProgressTasks = totalTasks - completedTasks;
-
-        // Stats
-        this.statsEl.textContent = t('statsTemplate')
-            .replace('{ip}', inProgressTasks)
-            .replace('{c}', completedTasks)
-            .replace('{t}', totalTasks);
-
-        // Empty state
+        var total = this.tasks.length;
+        var done = this.tasks.filter(function (t) { return t.completed; }).length;
+        this.statsEl.textContent = t('statsTemplate').replace('{ip}', total - done).replace('{c}', done).replace('{t}', total);
         if (filtered.length === 0) {
-            var msg = totalTasks === 0 ? t('emptyTasks') : t('noMatch');
-            this.listEl.innerHTML =
-                '<div class="todo-empty">' +
-                '<span class="empty-icon">📝</span>' +
-                '<p>' + msg + '</p>' +
-                '</div>';
+            this.listEl.innerHTML = '<div class="todo-empty"><span class="empty-icon">📝</span><p>' + (total === 0 ? t('emptyTasks') : t('noMatch')) + '</p></div>';
             return;
         }
-
-        // Render items
         var html = '';
         filtered.forEach(function (task) {
-            var checkedAttr = task.completed ? ' checked' : '';
-            var completedClass = task.completed ? ' completed' : '';
-
-            html +=
-                '<div class="todo-item' + completedClass + '" data-id="' + task.id + '">' +
-                '<input type="checkbox" class="todo-checkbox"' + checkedAttr + ' data-action="toggle" data-task-id="' + task.id + '" />' +
+            html += '<div class="todo-item' + (task.completed ? ' completed' : '') + '" data-id="' + task.id + '">' +
+                '<input type="checkbox" class="todo-checkbox"' + (task.completed ? ' checked' : '') + ' data-action="toggle" data-task-id="' + task.id + '" />' +
                 '<span class="todo-text">' + escapeHtml(task.text) + '</span>' +
-                '<button class="todo-delete" data-action="delete" data-task-id="' + task.id + '" title="Xóa">✕</button>' +
-                '</div>';
+                '<button class="todo-delete" data-action="delete" data-task-id="' + task.id + '" title="Xóa">✕</button></div>';
         });
-
         this.listEl.innerHTML = html;
     };
 
+    // Firestore persistence
     TodoList.prototype._saveTasks = function () {
-        localStorage.setItem(STORAGE_KEYS.tasks, JSON.stringify(this.tasks));
+        if (!currentUser) return;
+        userDocRef('data').doc('todos').set({ items: this.tasks });
+    };
+    TodoList.prototype._loadTasks = function () {
+        if (!currentUser) { this.tasks = []; this._render(); return; }
+        var self = this;
+        userDocRef('data').doc('todos').get().then(function (doc) {
+            self.tasks = (doc.exists && doc.data().items) ? doc.data().items : [];
+            self._render();
+        });
     };
 
-    TodoList.prototype._loadTasks = function () {
-        var raw = localStorage.getItem(STORAGE_KEYS.tasks);
-        this.tasks = raw ? JSON.parse(raw) : [];
-        this._render();
+    // =========================================================
+    //  QUICK NOTES
+    // =========================================================
+    function NoteApp() {
+        this.notes = []; this.selectedIds = new Set();
+        this.editingNoteId = null; this.currentColor = 'default';
+        this._cacheElements(); this._bindEvents(); this._loadNotes();
+    }
+    NoteApp.prototype._cacheElements = function () {
+        this.gridEl = document.getElementById('notes-grid');
+        this.deleteBtn = document.getElementById('note-delete-selected');
+        this.overlay = document.getElementById('note-modal-overlay');
+        this.modalTitle = document.getElementById('note-modal-title');
+        this.titleInput = document.getElementById('note-title-input');
+        this.contentInput = document.getElementById('note-content-input');
+        this.colorDots = document.querySelectorAll('.color-dot');
+    };
+    NoteApp.prototype._bindEvents = function () {
+        var self = this;
+        document.getElementById('note-add-btn').addEventListener('click', function () { self._openModal(null); });
+        this.deleteBtn.addEventListener('click', function () { self._deleteSelected(); });
+        document.getElementById('note-modal-close').addEventListener('click', function () { self._closeModal(); });
+        document.getElementById('note-modal-cancel').addEventListener('click', function () { self._closeModal(); });
+        this.overlay.addEventListener('click', function (e) { if (e.target === self.overlay) self._closeModal(); });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && self.overlay.classList.contains('active')) self._closeModal();
+        });
+        document.getElementById('note-modal-save').addEventListener('click', function () { self._saveFromModal(); });
+        this.colorDots.forEach(function (dot) {
+            dot.addEventListener('click', function () {
+                self.colorDots.forEach(function (d) { d.classList.remove('active'); });
+                dot.classList.add('active');
+                self.currentColor = dot.getAttribute('data-color');
+            });
+        });
+        this.gridEl.addEventListener('change', function (e) {
+            if (e.target.classList.contains('note-select')) {
+                var nid = e.target.getAttribute('data-note-id');
+                if (e.target.checked) self.selectedIds.add(nid); else self.selectedIds.delete(nid);
+                self._updateDeleteBtn(); self._updateCardSelection();
+            }
+        });
+        this.gridEl.addEventListener('click', function (e) {
+            if (e.target.classList.contains('note-select')) return;
+            var card = e.target.closest('.note-card');
+            if (card) self._openModal(card.getAttribute('data-id'));
+        });
+    };
+    NoteApp.prototype._openModal = function (noteId) {
+        this.editingNoteId = noteId;
+        this.colorDots.forEach(function (d) { d.classList.remove('active'); });
+        if (noteId) {
+            var note = this.notes.find(function (n) { return n.id === noteId; });
+            if (!note) return;
+            this.modalTitle.textContent = t('editNote');
+            this.titleInput.value = note.title; this.contentInput.value = note.content;
+            this.currentColor = note.color || 'default';
+        } else {
+            this.modalTitle.textContent = t('newNote');
+            this.titleInput.value = ''; this.contentInput.value = '';
+            this.currentColor = 'default';
+        }
+        var self = this;
+        this.colorDots.forEach(function (d) {
+            if (d.getAttribute('data-color') === self.currentColor) d.classList.add('active');
+        });
+        this.overlay.classList.add('active');
+        setTimeout(function () { self.titleInput.focus(); }, 300);
+    };
+    NoteApp.prototype._closeModal = function () {
+        this.overlay.classList.remove('active'); this.editingNoteId = null;
+    };
+    NoteApp.prototype._saveFromModal = function () {
+        var title = this.titleInput.value.trim();
+        var content = this.contentInput.value.trim();
+        if (!title && !content) return;
+        if (this.editingNoteId) {
+            var note = this.notes.find(function (n) { return n.id === this.editingNoteId; }.bind(this));
+            if (note) {
+                note.title = title; note.content = content;
+                note.color = this.currentColor; note.updatedAt = new Date().toISOString();
+            }
+        } else {
+            this.notes.unshift({
+                id: generateId(), title: title, content: content,
+                color: this.currentColor,
+                createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
+            });
+        }
+        this._saveNotes(); this._render(); this._closeModal();
+    };
+    NoteApp.prototype._deleteSelected = function () {
+        var sel = this.selectedIds;
+        this.notes = this.notes.filter(function (n) { return !sel.has(n.id); });
+        this.selectedIds.clear(); this._updateDeleteBtn();
+        this._saveNotes(); this._render();
+    };
+    NoteApp.prototype._updateDeleteBtn = function () {
+        this.deleteBtn.classList[this.selectedIds.size > 0 ? 'add' : 'remove']('visible');
+    };
+    NoteApp.prototype._updateCardSelection = function () {
+        var sel = this.selectedIds;
+        this.gridEl.querySelectorAll('.note-card').forEach(function (c) {
+            c.classList[sel.has(c.getAttribute('data-id')) ? 'add' : 'remove']('selected');
+        });
+    };
+    NoteApp.prototype._render = function () {
+        if (this.notes.length === 0) {
+            this.gridEl.innerHTML = '<div class="notes-empty"><span class="empty-icon">📌</span><p>' + t('emptyNotes') + '</p></div>';
+            return;
+        }
+        var html = '', locale = currentLang === 'vi' ? 'vi-VN' : 'en-US', sel = this.selectedIds;
+        this.notes.forEach(function (note) {
+            var checked = sel.has(note.id), colorAttr = note.color && note.color !== 'default' ? ' data-color="' + note.color + '"' : '';
+            var dateObj = new Date(note.updatedAt || note.createdAt);
+            var dateStr = dateObj.toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' +
+                dateObj.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+            html += '<div class="note-card' + (checked ? ' selected' : '') + '" data-id="' + note.id + '"' + colorAttr + '>' +
+                '<input type="checkbox" class="note-select" data-note-id="' + note.id + '"' + (checked ? ' checked' : '') + ' />' +
+                (note.title ? '<div class="note-title">' + escapeHtml(note.title) + '</div>' : '') +
+                (note.content ? '<div class="note-body">' + escapeHtml(note.content) + '</div>' : '') +
+                '<div class="note-date">' + dateStr + '</div></div>';
+        });
+        this.gridEl.innerHTML = html;
+    };
+
+    // Firestore persistence
+    NoteApp.prototype._saveNotes = function () {
+        if (!currentUser) return;
+        userDocRef('data').doc('notes').set({ items: this.notes });
+    };
+    NoteApp.prototype._loadNotes = function () {
+        if (!currentUser) { this.notes = []; this._render(); return; }
+        var self = this;
+        userDocRef('data').doc('notes').get().then(function (doc) {
+            self.notes = (doc.exists && doc.data().items) ? doc.data().items : [];
+            self._render();
+        });
     };
 
     // =========================================================
@@ -644,18 +631,14 @@
     // =========================================================
     document.addEventListener('DOMContentLoaded', function () {
         initTabs();
-
-        // Apply saved language
         setLanguage(currentLang);
+        initAuth();
 
         // Language toggle
         document.getElementById('lang-toggle').addEventListener('click', function () {
-            var newLang = currentLang === 'vi' ? 'en' : 'vi';
-            setLanguage(newLang);
-            // Re-render dynamic content with new language
+            setLanguage(currentLang === 'vi' ? 'en' : 'vi');
             if (window.__pomodoroApp) {
                 window.__pomodoroApp._loadHistory();
-                // Update timer status if not running
                 if (!window.__pomodoroApp.isRunning) {
                     window.__pomodoroApp.statusEl.textContent = t('ready');
                     window.__pomodoroApp.startBtn.textContent = t('start');
@@ -667,296 +650,23 @@
                     window.__pomodoroApp._updateStatus();
                 }
             }
-            if (window.__todoApp) {
-                window.__todoApp._render();
-            }
-            if (window.__noteApp) {
-                window.__noteApp._render();
-            }
+            if (window.__todoApp) window.__todoApp._render();
+            if (window.__noteApp) window.__noteApp._render();
         });
 
-        // Pomodoro
+        // Create app instances
         window.__pomodoroApp = new PomodoroTimer();
-
-        // Todo — use event delegation for performance
         window.__todoApp = new TodoList();
-
-        document.getElementById('todo-list').addEventListener('click', function (e) {
-            var target = e.target;
-            var action = target.getAttribute('data-action');
-            var taskId = target.getAttribute('data-task-id');
-
-            if (!action || !taskId) return;
-
-            if (action === 'delete') {
-                window.__todoApp.deleteTask(taskId);
-            }
-        });
-
-        document.getElementById('todo-list').addEventListener('change', function (e) {
-            var target = e.target;
-            var action = target.getAttribute('data-action');
-            var taskId = target.getAttribute('data-task-id');
-
-            if (action === 'toggle' && taskId) {
-                window.__todoApp.toggleTask(taskId);
-            }
-        });
-
-        // Notes
         window.__noteApp = new NoteApp();
+
+        // Todo event delegation
+        document.getElementById('todo-list').addEventListener('click', function (e) {
+            var action = e.target.getAttribute('data-action'), id = e.target.getAttribute('data-task-id');
+            if (action === 'delete' && id) window.__todoApp.deleteTask(id);
+        });
+        document.getElementById('todo-list').addEventListener('change', function (e) {
+            var action = e.target.getAttribute('data-action'), id = e.target.getAttribute('data-task-id');
+            if (action === 'toggle' && id) window.__todoApp.toggleTask(id);
+        });
     });
-
-    // =========================================================
-    //  QUICK NOTES
-    // =========================================================
-    function NoteApp() {
-        this.notes = [];
-        this.selectedIds = new Set();
-        this.editingNoteId = null;
-        this.currentColor = 'default';
-
-        this._cacheElements();
-        this._bindEvents();
-        this._loadNotes();
-    }
-
-    NoteApp.prototype._cacheElements = function () {
-        this.gridEl = document.getElementById('notes-grid');
-        this.deleteBtn = document.getElementById('note-delete-selected');
-        this.addBtn = document.getElementById('note-add-btn');
-        this.overlay = document.getElementById('note-modal-overlay');
-        this.modalTitle = document.getElementById('note-modal-title');
-        this.titleInput = document.getElementById('note-title-input');
-        this.contentInput = document.getElementById('note-content-input');
-        this.saveBtn = document.getElementById('note-modal-save');
-        this.cancelBtn = document.getElementById('note-modal-cancel');
-        this.closeBtn = document.getElementById('note-modal-close');
-        this.colorDots = document.querySelectorAll('.color-dot');
-    };
-
-    NoteApp.prototype._bindEvents = function () {
-        var self = this;
-
-        // Add button → open modal for new note
-        this.addBtn.addEventListener('click', function () {
-            self._openModal(null);
-        });
-
-        // Delete selected
-        this.deleteBtn.addEventListener('click', function () {
-            self._deleteSelected();
-        });
-
-        // Modal close / cancel
-        this.closeBtn.addEventListener('click', function () { self._closeModal(); });
-        this.cancelBtn.addEventListener('click', function () { self._closeModal(); });
-
-        // Click overlay backdrop to close
-        this.overlay.addEventListener('click', function (e) {
-            if (e.target === self.overlay) self._closeModal();
-        });
-
-        // Escape key to close modal
-        document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape' && self.overlay.classList.contains('active')) {
-                self._closeModal();
-            }
-        });
-
-        // Save
-        this.saveBtn.addEventListener('click', function () {
-            self._saveFromModal();
-        });
-
-        // Color picker
-        this.colorDots.forEach(function (dot) {
-            dot.addEventListener('click', function () {
-                self.colorDots.forEach(function (d) { d.classList.remove('active'); });
-                dot.classList.add('active');
-                self.currentColor = dot.getAttribute('data-color');
-            });
-        });
-
-        // Event delegation on the grid: select checkboxes + click to edit
-        this.gridEl.addEventListener('change', function (e) {
-            if (e.target.classList.contains('note-select')) {
-                var noteId = e.target.getAttribute('data-note-id');
-                if (e.target.checked) {
-                    self.selectedIds.add(noteId);
-                } else {
-                    self.selectedIds.delete(noteId);
-                }
-                self._updateDeleteBtn();
-                self._updateCardSelection();
-            }
-        });
-
-        this.gridEl.addEventListener('click', function (e) {
-            // Don't open modal if clicking checkbox
-            if (e.target.classList.contains('note-select')) return;
-
-            var card = e.target.closest('.note-card');
-            if (card) {
-                var noteId = card.getAttribute('data-id');
-                self._openModal(noteId);
-            }
-        });
-    };
-
-    NoteApp.prototype._openModal = function (noteId) {
-        this.editingNoteId = noteId;
-
-        // Reset color picker
-        this.colorDots.forEach(function (d) { d.classList.remove('active'); });
-
-        if (noteId) {
-            // Edit existing note
-            var note = this.notes.find(function (n) { return n.id === noteId; });
-            if (!note) return;
-            this.modalTitle.textContent = t('editNote');
-            this.titleInput.value = note.title;
-            this.contentInput.value = note.content;
-            this.currentColor = note.color || 'default';
-        } else {
-            // New note
-            this.modalTitle.textContent = t('newNote');
-            this.titleInput.value = '';
-            this.contentInput.value = '';
-            this.currentColor = 'default';
-        }
-
-        // Activate current color dot
-        var self = this;
-        this.colorDots.forEach(function (d) {
-            if (d.getAttribute('data-color') === self.currentColor) {
-                d.classList.add('active');
-            }
-        });
-
-        this.overlay.classList.add('active');
-        // Focus title input after animation
-        setTimeout(function () { self.titleInput.focus(); }, 300);
-    };
-
-    NoteApp.prototype._closeModal = function () {
-        this.overlay.classList.remove('active');
-        this.editingNoteId = null;
-    };
-
-    NoteApp.prototype._saveFromModal = function () {
-        var title = this.titleInput.value.trim();
-        var content = this.contentInput.value.trim();
-
-        // Need at least title or content
-        if (!title && !content) return;
-
-        if (this.editingNoteId) {
-            // Update existing
-            var note = this.notes.find(function (n) { return n.id === this.editingNoteId; }.bind(this));
-            if (note) {
-                note.title = title;
-                note.content = content;
-                note.color = this.currentColor;
-                note.updatedAt = new Date().toISOString();
-            }
-        } else {
-            // Create new
-            this.notes.unshift({
-                id: generateId(),
-                title: title,
-                content: content,
-                color: this.currentColor,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-            });
-        }
-
-        this._saveNotes();
-        this._render();
-        this._closeModal();
-    };
-
-    NoteApp.prototype._deleteSelected = function () {
-        var selected = this.selectedIds;
-        this.notes = this.notes.filter(function (n) { return !selected.has(n.id); });
-        this.selectedIds.clear();
-        this._updateDeleteBtn();
-        this._saveNotes();
-        this._render();
-    };
-
-    NoteApp.prototype._updateDeleteBtn = function () {
-        if (this.selectedIds.size > 0) {
-            this.deleteBtn.classList.add('visible');
-        } else {
-            this.deleteBtn.classList.remove('visible');
-        }
-    };
-
-    NoteApp.prototype._updateCardSelection = function () {
-        var cards = this.gridEl.querySelectorAll('.note-card');
-        var selected = this.selectedIds;
-        cards.forEach(function (card) {
-            var id = card.getAttribute('data-id');
-            if (selected.has(id)) {
-                card.classList.add('selected');
-            } else {
-                card.classList.remove('selected');
-            }
-        });
-    };
-
-    NoteApp.prototype._render = function () {
-        if (this.notes.length === 0) {
-            this.gridEl.innerHTML =
-                '<div class="notes-empty">' +
-                '<span class="empty-icon">📌</span>' +
-                '<p data-i18n="emptyNotes">' + t('emptyNotes') + '</p>' +
-                '</div>';
-            return;
-        }
-
-        var html = '';
-        var locale = currentLang === 'vi' ? 'vi-VN' : 'en-US';
-        var selectedIds = this.selectedIds;
-
-        this.notes.forEach(function (note) {
-            var isSelected = selectedIds.has(note.id);
-            var checkedAttr = isSelected ? ' checked' : '';
-            var selectedClass = isSelected ? ' selected' : '';
-            var colorAttr = note.color && note.color !== 'default' ? ' data-color="' + note.color + '"' : '';
-
-            var dateObj = new Date(note.updatedAt || note.createdAt);
-            var dateStr = dateObj.toLocaleDateString(locale, {
-                day: '2-digit', month: '2-digit', year: 'numeric'
-            }) + ' ' + dateObj.toLocaleTimeString(locale, {
-                hour: '2-digit', minute: '2-digit'
-            });
-
-            html += '<div class="note-card' + selectedClass + '" data-id="' + note.id + '"' + colorAttr + '>';
-            html += '<input type="checkbox" class="note-select" data-note-id="' + note.id + '"' + checkedAttr + ' />';
-            if (note.title) {
-                html += '<div class="note-title">' + escapeHtml(note.title) + '</div>';
-            }
-            if (note.content) {
-                html += '<div class="note-body">' + escapeHtml(note.content) + '</div>';
-            }
-            html += '<div class="note-date">' + dateStr + '</div>';
-            html += '</div>';
-        });
-
-        this.gridEl.innerHTML = html;
-    };
-
-    NoteApp.prototype._saveNotes = function () {
-        localStorage.setItem(STORAGE_KEYS.notes, JSON.stringify(this.notes));
-    };
-
-    NoteApp.prototype._loadNotes = function () {
-        var raw = localStorage.getItem(STORAGE_KEYS.notes);
-        this.notes = raw ? JSON.parse(raw) : [];
-        this._render();
-    };
-
 })();

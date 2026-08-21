@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QuangPM - All in One App</title>
-    <meta name="description" content="Pomodoro Timer & To-do List - All in One Productivity App by QuangPM">
+    <meta name="description" content="Pomodoro Timer, To-do List & Quick Notes - All in One Productivity App by QuangPM">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -32,15 +32,53 @@
         </defs>
     </svg>
 
-    <div class="app-container">
+    <!-- ===== LOGIN PAGE ===== -->
+    <div class="login-page" id="login-page">
+        <div class="login-card">
+            <div class="login-logo">⚡</div>
+            <h1 class="login-title">ProductivityHub</h1>
+            <p class="login-subtitle" data-i18n="loginSubtitle">Đăng nhập để bắt đầu</p>
+            <div class="login-buttons">
+                <button class="login-btn google" id="btn-login-google">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                    <span data-i18n="loginGoogle">Đăng nhập bằng Google</span>
+                </button>
+                <button class="login-btn github" id="btn-login-github">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                    </svg>
+                    <span data-i18n="loginGithub">Đăng nhập bằng GitHub</span>
+                </button>
+            </div>
+            <div class="login-error" id="login-error"></div>
+        </div>
+    </div>
+
+    <!-- ===== MAIN APP (hidden until login) ===== -->
+    <div class="app-container" id="app-container" style="display:none">
         <!-- Header -->
         <header class="app-header">
             <div class="header-top">
                 <h1 class="app-title">⚡ ProductivityHub</h1>
-                <button class="lang-toggle" id="lang-toggle" title="Switch language">
-                    <span class="lang-flag" id="lang-flag">🇻🇳</span>
-                    <span class="lang-label" id="lang-label">VI</span>
-                </button>
+                <div class="header-actions">
+                    <button class="lang-toggle" id="lang-toggle" title="Switch language">
+                        <span class="lang-flag" id="lang-flag">🇻🇳</span>
+                        <span class="lang-label" id="lang-label">VI</span>
+                    </button>
+                </div>
+            </div>
+            <!-- User info bar -->
+            <div class="user-bar" id="user-bar">
+                <div class="user-info">
+                    <img class="user-avatar" id="user-avatar" src="" alt="" />
+                    <span class="user-name" id="user-name"></span>
+                </div>
+                <button class="logout-btn" id="btn-logout" data-i18n="logout">Đăng xuất</button>
             </div>
             <nav class="tab-nav" role="tablist">
                 <button class="tab-btn active" data-tab="pomodoro" role="tab" id="tab-pomodoro">
@@ -115,15 +153,12 @@
 
         <!-- ===== TODO SECTION ===== -->
         <section id="todo-section" class="section" role="tabpanel">
-            <!-- Input -->
             <div class="card todo-input-card">
                 <div class="todo-input-group">
                     <input type="text" id="todo-input" class="todo-input" data-i18n-placeholder="addTaskPlaceholder" placeholder="Thêm task mới..." autocomplete="off" />
                     <button class="add-btn" id="btn-add-todo" data-i18n="addBtn">+ Thêm</button>
                 </div>
             </div>
-
-            <!-- Filters -->
             <div class="card todo-filter-card">
                 <div class="filter-bar">
                     <button class="filter-btn active" data-filter="all" id="filter-all" data-i18n="filterAll">Tất cả</button>
@@ -131,8 +166,6 @@
                     <button class="filter-btn" data-filter="completed" id="filter-completed" data-i18n="filterCompleted">Hoàn thành</button>
                 </div>
             </div>
-
-            <!-- Task List -->
             <div class="card todo-list-card">
                 <div class="todo-stats" id="todo-stats"></div>
                 <div class="todo-list" id="todo-list">
@@ -146,13 +179,10 @@
 
         <!-- ===== NOTES SECTION ===== -->
         <section id="notes-section" class="section" role="tabpanel">
-            <!-- Notes Toolbar -->
             <div class="notes-toolbar">
                 <button class="note-delete-selected" id="note-delete-selected" data-i18n="deleteSelected">🗑 Xóa đã chọn</button>
                 <button class="note-add-btn" id="note-add-btn" data-i18n="newNote">+ Ghi chú mới</button>
             </div>
-
-            <!-- Notes Grid -->
             <div class="notes-grid" id="notes-grid">
                 <div class="notes-empty" id="notes-empty">
                     <span class="empty-icon">📌</span>
@@ -189,6 +219,16 @@
         </div>
     </div>
 
+    <!-- ===== LOADING OVERLAY ===== -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Firebase SDK (compat for vanilla JS) -->
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
