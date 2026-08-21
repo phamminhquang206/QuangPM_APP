@@ -19,3 +19,7 @@ All in one APP
    * REQ 4.2: Khi ấn vào tab Quick note thì giao diện sẽ có 2 phần: 1 là danh sách note, 2 là nút tạo thêm note
    * REQ 4.3: Có nút tạo ghi chú mới, khi ấn vào thì hiện ra 1 cửa sổ nằm đè trên màn hình trước đó.
    * REQ 4.4: Ở màn hình danh sách note, có 1 select button bên trái để lựa chọn note, khi chọn thì hiện nút DELETE màu đỏ, chữ trắng.
+5. Prices
+
+   * REQ 5.1 Tab price cập nhật giá vàng tại DOJI, hiển thị giá vàng nhẫn tròn và vàng miếng SJC.
+   * REQ 5.2. Có 1 nút refresh để cập nhập lại giá khi user muốn

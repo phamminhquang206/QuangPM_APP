@@ -95,6 +95,9 @@
                 <button class="tab-btn" data-tab="notes" role="tab" id="tab-notes">
                     📝 Notes
                 </button>
+                <button class="tab-btn" data-tab="prices" role="tab" id="tab-prices">
+                    💰 Prices
+                </button>
             </nav>
         </header>
 
@@ -192,6 +195,53 @@
                 <div class="notes-empty" id="notes-empty">
                     <span class="empty-icon">📌</span>
                     <p data-i18n="emptyNotes">Chưa có ghi chú nào</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== PRICES SECTION ===== -->
+        <section id="prices-section" class="section" role="tabpanel">
+            <div class="prices-toolbar">
+                <h3 class="prices-title" data-i18n="goldPrices">Giá Vàng DOJI</h3>
+                <button class="prices-refresh-btn" id="btn-refresh-prices" data-i18n="refresh">🔄 Làm mới</button>
+            </div>
+            <div class="prices-last-update" id="prices-last-update"></div>
+            
+            <div class="prices-grid" id="prices-grid">
+                <!-- SJC -->
+                <div class="price-card">
+                    <div class="price-card-header">
+                        <span class="price-icon">🥇</span>
+                        <h4 data-i18n="goldSJC">Vàng miếng SJC</h4>
+                    </div>
+                    <div class="price-row">
+                        <div class="price-col">
+                            <span class="price-label" data-i18n="buyPrice">Mua vào</span>
+                            <span class="price-value" id="price-sjc-buy">--</span>
+                        </div>
+                        <div class="price-col">
+                            <span class="price-label" data-i18n="sellPrice">Bán ra</span>
+                            <span class="price-value" id="price-sjc-sell">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nhẫn Tròn -->
+                <div class="price-card">
+                    <div class="price-card-header">
+                        <span class="price-icon">💍</span>
+                        <h4 data-i18n="goldRing">Nhẫn tròn Hưng Thịnh Vượng</h4>
+                    </div>
+                    <div class="price-row">
+                        <div class="price-col">
+                            <span class="price-label" data-i18n="buyPrice">Mua vào</span>
+                            <span class="price-value" id="price-ring-buy">--</span>
+                        </div>
+                        <div class="price-col">
+                            <span class="price-label" data-i18n="sellPrice">Bán ra</span>
+                            <span class="price-value" id="price-ring-sell">--</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>

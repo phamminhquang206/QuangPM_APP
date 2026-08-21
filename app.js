@@ -693,6 +693,72 @@
     };
 
     // =========================================================
+    //  PRICE APP (DOJI)
+    // =========================================================
+    function PriceApp() {
+        this.sjcBuyEl = document.getElementById('price-sjc-buy');
+        this.sjcSellEl = document.getElementById('price-sjc-sell');
+        this.ringBuyEl = document.getElementById('price-ring-buy');
+        this.ringSellEl = document.getElementById('price-ring-sell');
+        this.lastUpdateEl = document.getElementById('prices-last-update');
+        this.refreshBtn = document.getElementById('btn-refresh-prices');
+
+        if (!this.sjcBuyEl) return;
+
+        this.refreshBtn.addEventListener('click', this.fetchPrices.bind(this));
+        
+        // Initial fetch
+        this.fetchPrices();
+    }
+
+    PriceApp.prototype.formatPrice = function(value) {
+        if (!value) return '--';
+        return value.toLocaleString('vi-VN') + ' đ';
+    };
+
+    PriceApp.prototype.fetchPrices = function() {
+        var self = this;
+        this.refreshBtn.classList.add('loading');
+        
+        fetch('https://www.vang.today/api/prices')
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                if (data && data.success && data.prices) {
+                    var sjc = data.prices['DOHNL'] || data.prices['DOHCML'];
+                    if (sjc) {
+                        self.sjcBuyEl.textContent = self.formatPrice(sjc.buy);
+                        self.sjcBuyEl.classList.remove('error');
+                        self.sjcSellEl.textContent = self.formatPrice(sjc.sell);
+                        self.sjcSellEl.classList.remove('error');
+                    }
+                    var ring = data.prices['DOJINHTV'];
+                    if (ring) {
+                        self.ringBuyEl.textContent = self.formatPrice(ring.buy);
+                        self.ringBuyEl.classList.remove('error');
+                        self.ringSellEl.textContent = self.formatPrice(ring.sell);
+                        self.ringSellEl.classList.remove('error');
+                    }
+                    var dateObj = new Date(data.timestamp * 1000);
+                    var dateStr = dateObj.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + ' ' + 
+                                  dateObj.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                    self.lastUpdateEl.textContent = 'Cập nhật lần cuối: ' + dateStr;
+                } else {
+                    throw new Error("Invalid data");
+                }
+            })
+            .catch(function(err) {
+                console.error("Lỗi lấy giá vàng:", err);
+                self.sjcBuyEl.textContent = "Lỗi API";
+                self.sjcBuyEl.classList.add('error');
+                self.ringBuyEl.textContent = "Lỗi API";
+                self.ringBuyEl.classList.add('error');
+            })
+            .finally(function() {
+                self.refreshBtn.classList.remove('loading');
+            });
+    };
+
+    // =========================================================
     //  INITIALIZATION
     // =========================================================
     document.addEventListener('DOMContentLoaded', function () {
@@ -724,6 +790,7 @@
         window.__pomodoroApp = new PomodoroTimer();
         window.__todoApp = new TodoList();
         window.__noteApp = new NoteApp();
+        window.__priceApp = new PriceApp();
 
         // Todo event delegation
         document.getElementById('todo-list').addEventListener('click', function (e) {
