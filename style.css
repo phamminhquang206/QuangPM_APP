@@ -860,8 +860,97 @@ body {
     box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
 }
 
+.todo-date-toggle-btn {
+    width: 46px;
+    height: 46px;
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-primary);
+    font-size: 1.15rem;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.todo-date-toggle-btn:hover,
+.todo-date-toggle-btn.active {
+    background: rgba(124, 58, 237, 0.15);
+    border-color: var(--accent-purple);
+    box-shadow: 0 0 12px rgba(124, 58, 237, 0.25);
+}
+
+.todo-dates-picker-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--glass-border);
+    animation: fadeIn 0.2s ease;
+}
+
+.todo-date-field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.todo-date-field label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.todo-date-input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-primary);
+    font-family: var(--font);
+    font-size: 0.85rem;
+    outline: none;
+    transition: var(--transition);
+    color-scheme: dark;
+}
+
+.todo-date-input:focus {
+    border-color: var(--accent-purple);
+    background: rgba(124, 58, 237, 0.05);
+}
+
+.todo-date-clear-btn {
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    flex-shrink: 0;
+}
+
+.todo-date-clear-btn:hover {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: var(--accent-red);
+}
+
 .add-btn {
-    padding: 13px 22px;
+    padding: 13px 20px;
     border: none;
     border-radius: var(--radius-md);
     background: var(--gradient-primary);
@@ -936,22 +1025,244 @@ body {
 
 .todo-item {
     display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 12px;
+    flex-direction: column;
+    padding: 12px 14px;
     border-radius: var(--radius-md);
     background: rgba(255, 255, 255, 0.02);
-    margin-bottom: 8px;
+    border: 1px solid var(--glass-border);
+    margin-bottom: 10px;
     transition: var(--transition);
     animation: slideIn 0.3s ease;
 }
 
 .todo-item:hover {
     background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.12);
 }
 
 .todo-item:last-child {
     margin-bottom: 0;
+}
+
+.todo-main-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
+
+.todo-content-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.todo-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.todo-date-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    padding: 2px 7px;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-secondary);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.todo-date-badge.overdue {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.todo-date-badge.today {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+.todo-subtasks-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    background: rgba(124, 58, 237, 0.1);
+    color: #c084fc;
+    border: 1px solid rgba(124, 58, 237, 0.25);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.todo-subtasks-toggle:hover {
+    background: rgba(124, 58, 237, 0.2);
+    border-color: var(--accent-purple);
+}
+
+.todo-subtasks-toggle.empty {
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-muted);
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+/* ===== SUBTASKS LIST & CONTAINER ===== */
+.todo-subtasks-container {
+    margin-top: 10px;
+    padding-top: 10px;
+    padding-left: 28px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+    animation: fadeIn 0.2s ease;
+}
+
+.todo-subtasks-container.open {
+    display: flex;
+}
+
+.subtask-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.subtask-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.02);
+    transition: var(--transition);
+}
+
+.subtask-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.subtask-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 17px;
+    height: 17px;
+    min-width: 17px;
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    background: rgba(0, 0, 0, 0.15);
+    flex-shrink: 0;
+}
+
+.subtask-checkbox:checked {
+    background: var(--accent-purple);
+    border-color: var(--accent-purple);
+}
+
+.subtask-checkbox:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-size: 0.55rem;
+    font-weight: 800;
+}
+
+.subtask-text {
+    flex: 1;
+    font-size: 0.84rem;
+    color: var(--text-primary);
+    word-break: break-word;
+    line-height: 1.3;
+}
+
+.subtask-item.completed .subtask-text {
+    text-decoration: line-through;
+    color: var(--text-muted);
+}
+
+.subtask-delete {
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: var(--transition);
+    flex-shrink: 0;
+}
+
+.subtask-item:hover .subtask-delete {
+    opacity: 1;
+}
+
+.subtask-delete:hover {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--accent-red);
+}
+
+.subtask-add-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.subtask-add-input {
+    flex: 1;
+    padding: 6px 10px;
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-primary);
+    font-family: var(--font);
+    font-size: 0.8rem;
+    outline: none;
+}
+
+.subtask-add-input:focus {
+    border-color: var(--accent-purple);
+    background: rgba(124, 58, 237, 0.05);
+}
+
+.subtask-add-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: rgba(124, 58, 237, 0.2);
+    border: 1px solid rgba(124, 58, 237, 0.3);
+    color: #c084fc;
+    font-family: var(--font);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.subtask-add-btn:hover {
+    background: var(--accent-purple);
+    color: #fff;
 }
 
 @keyframes slideIn {
@@ -1496,6 +1807,50 @@ body {
 .modal-btn.secondary:hover {
     background: var(--glass-hover);
     color: var(--text-primary);
+}
+
+.modal-btn.danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.modal-btn.danger:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+}
+
+/* ===== CONFIRM MODAL ===== */
+.confirm-modal-container {
+    max-width: 360px !important;
+    text-align: center;
+    padding: 28px 24px 24px !important;
+}
+
+.confirm-modal-icon {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+    line-height: 1;
+}
+
+.confirm-modal-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.confirm-modal-message {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 24px;
+}
+
+.confirm-modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
 }
 
 /* =========================================================

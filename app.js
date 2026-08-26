@@ -19,6 +19,15 @@
             working: '🔥 Đang làm việc', breaking: '☕ Nghỉ ngơi',
             history: '📊 Lịch sử', noHistory: 'Chưa có lịch sử',
             addTaskPlaceholder: 'Thêm task mới...', addBtn: '+ Thêm',
+            startDate: 'Bắt đầu:', endDate: 'Kết thúc:',
+            from: 'Từ', to: 'Đến',
+            todayBadge: 'Hôm nay', overdueBadge: 'Quá hạn',
+            subtasksCount: 'mục', addSubtaskPlaceholder: 'Thêm việc con...',
+            addSubtaskBtn: '+',
+            confirmModalTitle: 'Xác nhận xóa', confirmDelete: 'Xóa',
+            confirmDeleteTaskMsg: 'Bạn có chắc chắn muốn xóa công việc này?',
+            confirmDeleteSubtaskMsg: 'Bạn có chắc chắn muốn xóa việc con này?',
+            confirmDeleteNotesMsg: 'Bạn có chắc chắn muốn xóa các ghi chú đã chọn?',
             filterAll: 'Tất cả', filterInProgress: 'Đang làm', filterCompleted: 'Hoàn thành',
             emptyTasks: 'Chưa có task nào', noMatch: 'Không có task phù hợp',
             statsTemplate: '{ip} đang làm · {c} hoàn thành · {t} tổng',
@@ -42,6 +51,15 @@
             working: '🔥 Working', breaking: '☕ Break',
             history: '📊 History', noHistory: 'No history yet',
             addTaskPlaceholder: 'Add new task...', addBtn: '+ Add',
+            startDate: 'Start:', endDate: 'End:',
+            from: 'From', to: 'To',
+            todayBadge: 'Today', overdueBadge: 'Overdue',
+            subtasksCount: 'subtasks', addSubtaskPlaceholder: 'Add subtask...',
+            addSubtaskBtn: '+',
+            confirmModalTitle: 'Confirm Delete', confirmDelete: 'Delete',
+            confirmDeleteTaskMsg: 'Are you sure you want to delete this task?',
+            confirmDeleteSubtaskMsg: 'Are you sure you want to delete this subtask?',
+            confirmDeleteNotesMsg: 'Are you sure you want to delete selected notes?',
             filterAll: 'All', filterInProgress: 'In Progress', filterCompleted: 'Completed',
             emptyTasks: 'No tasks yet', noMatch: 'No matching tasks',
             statsTemplate: '{ip} in progress · {c} completed · {t} total',
@@ -121,6 +139,60 @@
                 st += (dur + 150) / 1000;
             }
         } catch (e) { /* ignore */ }
+    }
+
+    function formatDisplayDate(dateStr) {
+        if (!dateStr) return '';
+        var parts = dateStr.split('-');
+        if (parts.length === 3) {
+            return currentLang === 'vi' ? (parts[2] + '/' + parts[1]) : (parts[1] + '/' + parts[2]);
+        }
+        return dateStr;
+    }
+
+    // ===== CONFIRM MODAL MANAGER =====
+    var confirmCallback = null;
+    var confirmOverlay = null;
+
+    function initConfirmModal() {
+        confirmOverlay = document.getElementById('confirm-modal-overlay');
+        if (!confirmOverlay) return;
+        var cancelBtn = document.getElementById('confirm-modal-cancel');
+        var okBtn = document.getElementById('confirm-modal-ok');
+
+        cancelBtn.addEventListener('click', function () {
+            closeConfirmModal();
+        });
+
+        confirmOverlay.addEventListener('click', function (e) {
+            if (e.target === confirmOverlay) closeConfirmModal();
+        });
+
+        okBtn.addEventListener('click', function () {
+            var cb = confirmCallback;
+            closeConfirmModal();
+            if (typeof cb === 'function') cb();
+        });
+    }
+
+    function showConfirmModal(opts) {
+        if (!confirmOverlay) initConfirmModal();
+        if (!confirmOverlay) return;
+        var titleEl = document.getElementById('confirm-modal-title');
+        var messageEl = document.getElementById('confirm-modal-message');
+        var okBtn = document.getElementById('confirm-modal-ok');
+
+        if (titleEl) titleEl.textContent = opts.title || t('confirmModalTitle');
+        if (messageEl) messageEl.textContent = opts.message || t('confirmDeleteTaskMsg');
+        if (okBtn) okBtn.textContent = opts.confirmText || t('confirmDelete');
+
+        confirmCallback = opts.onConfirm;
+        confirmOverlay.classList.add('active');
+    }
+
+    function closeConfirmModal() {
+        if (confirmOverlay) confirmOverlay.classList.remove('active');
+        confirmCallback = null;
     }
 
     // =========================================================
@@ -419,18 +491,45 @@
     //  TODO LIST
     // =========================================================
     function TodoList() {
-        this.tasks = []; this.filter = 'all';
-        this._cacheElements(); this._bindEvents(); this._loadTasks();
+        this.tasks = [];
+        this.filter = 'all';
+        this.expandedTaskIds = new Set();
+        this._cacheElements();
+        this._bindEvents();
+        this._loadTasks();
     }
+
     TodoList.prototype._cacheElements = function () {
         this.inputEl = document.getElementById('todo-input');
+        this.dateToggleBtn = document.getElementById('todo-date-toggle-btn');
+        this.datesPickerRow = document.getElementById('todo-dates-picker-row');
+        this.startDateEl = document.getElementById('todo-start-date');
+        this.endDateEl = document.getElementById('todo-end-date');
+        this.dateClearBtn = document.getElementById('todo-date-clear-btn');
         this.listEl = document.getElementById('todo-list');
         this.statsEl = document.getElementById('todo-stats');
     };
+
     TodoList.prototype._bindEvents = function () {
         var self = this;
         document.getElementById('btn-add-todo').addEventListener('click', function () { self._addTask(); });
         this.inputEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') self._addTask(); });
+
+        if (this.dateToggleBtn) {
+            this.dateToggleBtn.addEventListener('click', function () {
+                var isHidden = self.datesPickerRow.style.display === 'none';
+                self.datesPickerRow.style.display = isHidden ? 'flex' : 'none';
+                self.dateToggleBtn.classList.toggle('active', isHidden);
+            });
+        }
+
+        if (this.dateClearBtn) {
+            this.dateClearBtn.addEventListener('click', function () {
+                if (self.startDateEl) self.startDateEl.value = '';
+                if (self.endDateEl) self.endDateEl.value = '';
+            });
+        }
+
         document.querySelectorAll('.filter-btn').forEach(function (btn) {
             btn.addEventListener('click', function () {
                 document.querySelectorAll('.filter-btn').forEach(function (b) { b.classList.remove('active'); });
@@ -439,44 +538,263 @@
                 self._render();
             });
         });
+
+        // Delegate clicks on listEl
+        this.listEl.addEventListener('click', function (e) {
+            var target = e.target.closest('[data-action]');
+            if (!target) return;
+            var action = target.getAttribute('data-action');
+            var taskId = target.getAttribute('data-task-id');
+            var subtaskId = target.getAttribute('data-subtask-id');
+
+            if (action === 'delete-task' && taskId) {
+                self.deleteTask(taskId);
+            } else if (action === 'toggle-subtasks' && taskId) {
+                self.toggleSubtasksView(taskId);
+            } else if (action === 'add-subtask' && taskId) {
+                var input = document.getElementById('subtask-input-' + taskId);
+                if (input && input.value.trim()) {
+                    self.addSubtask(taskId, input.value.trim());
+                    input.value = '';
+                }
+            } else if (action === 'delete-subtask' && taskId && subtaskId) {
+                self.deleteSubtask(taskId, subtaskId);
+            }
+        });
+
+        // Delegate checkbox changes on listEl
+        this.listEl.addEventListener('change', function (e) {
+            var target = e.target;
+            var action = target.getAttribute('data-action');
+            var taskId = target.getAttribute('data-task-id');
+            var subtaskId = target.getAttribute('data-subtask-id');
+
+            if (action === 'toggle-task' && taskId) {
+                self.toggleTask(taskId);
+            } else if (action === 'toggle-subtask' && taskId && subtaskId) {
+                self.toggleSubtask(taskId, subtaskId);
+            }
+        });
+
+        // Delegate enter key on subtask inputs
+        this.listEl.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && e.target.classList.contains('subtask-add-input')) {
+                var taskId = e.target.getAttribute('data-task-id');
+                if (taskId && e.target.value.trim()) {
+                    self.addSubtask(taskId, e.target.value.trim());
+                    e.target.value = '';
+                }
+            }
+        });
     };
+
     TodoList.prototype._addTask = function () {
         var text = this.inputEl.value.trim();
         if (!text || !currentUser) return;
-        var task = { id: generateId(), text: text, completed: false, createdAt: new Date().toISOString() };
+
+        var startDate = this.startDateEl ? this.startDateEl.value : '';
+        var endDate = this.endDateEl ? this.endDateEl.value : '';
+
+        var task = {
+            id: generateId(),
+            text: text,
+            completed: false,
+            startDate: startDate,
+            endDate: endDate,
+            subtasks: [],
+            createdAt: new Date().toISOString()
+        };
+
         this.tasks.unshift(task);
-        this.inputEl.value = ''; this.inputEl.focus();
-        this._saveTasks(); this._render();
+        this.inputEl.value = '';
+        this.inputEl.focus();
+
+        if (this.startDateEl) this.startDateEl.value = '';
+        if (this.endDateEl) this.endDateEl.value = '';
+        if (this.datesPickerRow) this.datesPickerRow.style.display = 'none';
+        if (this.dateToggleBtn) this.dateToggleBtn.classList.remove('active');
+
+        this._saveTasks();
+        this._render();
     };
+
     TodoList.prototype.toggleTask = function (id) {
         var task = this.tasks.find(function (t) { return t.id === id; });
-        if (task) { task.completed = !task.completed; this._saveTasks(); this._render(); }
+        if (task) {
+            task.completed = !task.completed;
+            this._saveTasks();
+            this._render();
+        }
     };
+
     TodoList.prototype.deleteTask = function (id) {
-        this.tasks = this.tasks.filter(function (t) { return t.id !== id; });
-        this._saveTasks(); this._render();
+        var self = this;
+        showConfirmModal({
+            title: t('confirmModalTitle'),
+            message: t('confirmDeleteTaskMsg'),
+            confirmText: t('confirmDelete'),
+            onConfirm: function () {
+                self.tasks = self.tasks.filter(function (t) { return t.id !== id; });
+                self.expandedTaskIds.delete(id);
+                self._saveTasks();
+                self._render();
+            }
+        });
     };
+
+    TodoList.prototype.toggleSubtasksView = function (taskId) {
+        if (this.expandedTaskIds.has(taskId)) {
+            this.expandedTaskIds.delete(taskId);
+        } else {
+            this.expandedTaskIds.add(taskId);
+        }
+        this._render();
+    };
+
+    TodoList.prototype.addSubtask = function (taskId, text) {
+        if (!text) return;
+        var task = this.tasks.find(function (t) { return t.id === taskId; });
+        if (!task) return;
+        if (!Array.isArray(task.subtasks)) task.subtasks = [];
+        task.subtasks.push({
+            id: generateId(),
+            text: text,
+            completed: false
+        });
+        this.expandedTaskIds.add(taskId);
+        this._saveTasks();
+        this._render();
+    };
+
+    TodoList.prototype.toggleSubtask = function (taskId, subtaskId) {
+        var task = this.tasks.find(function (t) { return t.id === taskId; });
+        if (!task || !Array.isArray(task.subtasks)) return;
+        var sub = task.subtasks.find(function (s) { return s.id === subtaskId; });
+        if (sub) {
+            sub.completed = !sub.completed;
+            this._saveTasks();
+            this._render();
+        }
+    };
+
+    TodoList.prototype.deleteSubtask = function (taskId, subtaskId) {
+        var self = this;
+        showConfirmModal({
+            title: t('confirmModalTitle'),
+            message: t('confirmDeleteSubtaskMsg'),
+            confirmText: t('confirmDelete'),
+            onConfirm: function () {
+                var task = self.tasks.find(function (t) { return t.id === taskId; });
+                if (!task || !Array.isArray(task.subtasks)) return;
+                task.subtasks = task.subtasks.filter(function (s) { return s.id !== subtaskId; });
+                self._saveTasks();
+                self._render();
+            }
+        });
+    };
+
     TodoList.prototype._getFilteredTasks = function () {
         if (this.filter === 'completed') return this.tasks.filter(function (t) { return t.completed; });
         if (this.filter === 'in-progress') return this.tasks.filter(function (t) { return !t.completed; });
         return this.tasks;
     };
+
     TodoList.prototype._render = function () {
+        var self = this;
         var filtered = this._getFilteredTasks();
         var total = this.tasks.length;
         var done = this.tasks.filter(function (t) { return t.completed; }).length;
+        var today = getTodayStr();
+
         this.statsEl.textContent = t('statsTemplate').replace('{ip}', total - done).replace('{c}', done).replace('{t}', total);
         if (filtered.length === 0) {
             this.listEl.innerHTML = '<div class="todo-empty"><span class="empty-icon">📝</span><p>' + (total === 0 ? t('emptyTasks') : t('noMatch')) + '</p></div>';
             return;
         }
+
         var html = '';
         filtered.forEach(function (task) {
+            var subtasks = Array.isArray(task.subtasks) ? task.subtasks : [];
+            var totalSubs = subtasks.length;
+            var doneSubs = subtasks.filter(function (s) { return s.completed; }).length;
+            var isExpanded = self.expandedTaskIds.has(task.id);
+
+            // Date badge
+            var dateBadgeHtml = '';
+            if (task.startDate || task.endDate) {
+                var dateStatusCls = '';
+                var dateLabel = '';
+
+                if (task.endDate && !task.completed) {
+                    if (task.endDate < today) {
+                        dateStatusCls = ' overdue';
+                    } else if (task.endDate === today) {
+                        dateStatusCls = ' today';
+                    }
+                }
+
+                if (task.startDate && task.endDate) {
+                    if (task.startDate === task.endDate) {
+                        dateLabel = formatDisplayDate(task.startDate);
+                    } else {
+                        dateLabel = formatDisplayDate(task.startDate) + ' - ' + formatDisplayDate(task.endDate);
+                    }
+                } else if (task.startDate) {
+                    dateLabel = t('from') + ' ' + formatDisplayDate(task.startDate);
+                } else if (task.endDate) {
+                    dateLabel = t('to') + ' ' + formatDisplayDate(task.endDate);
+                }
+
+                var statusPrefix = '';
+                if (dateStatusCls === ' overdue') statusPrefix = '⚠️ ' + t('overdueBadge') + ': ';
+                else if (dateStatusCls === ' today') statusPrefix = '⏰ ' + t('todayBadge') + ': ';
+                else statusPrefix = '📅 ';
+
+                dateBadgeHtml = '<span class="todo-date-badge' + dateStatusCls + '">' + statusPrefix + dateLabel + '</span>';
+            }
+
+            // Subtask toggle button & count
+            var subtasksToggleHtml = '';
+            if (totalSubs > 0) {
+                subtasksToggleHtml = '<button class="todo-subtasks-toggle" data-action="toggle-subtasks" data-task-id="' + task.id + '">' +
+                    '📋 ' + doneSubs + '/' + totalSubs + ' ' + (isExpanded ? '▲' : '▼') + '</button>';
+            } else {
+                subtasksToggleHtml = '<button class="todo-subtasks-toggle empty" data-action="toggle-subtasks" data-task-id="' + task.id + '">' +
+                    '📋 + ' + t('subtasksCount') + '</button>';
+            }
+
+            // Subtasks container
+            var subtasksListHtml = '';
+            subtasks.forEach(function (sub) {
+                subtasksListHtml += '<div class="subtask-item' + (sub.completed ? ' completed' : '') + '">' +
+                    '<input type="checkbox" class="subtask-checkbox"' + (sub.completed ? ' checked' : '') +
+                    ' data-action="toggle-subtask" data-task-id="' + task.id + '" data-subtask-id="' + sub.id + '" />' +
+                    '<span class="subtask-text">' + escapeHtml(sub.text) + '</span>' +
+                    '<button class="subtask-delete" data-action="delete-subtask" data-task-id="' + task.id + '" data-subtask-id="' + sub.id + '" title="' + t('confirmDelete') + '">✕</button>' +
+                    '</div>';
+            });
+
+            var subtasksContainerHtml = '<div class="todo-subtasks-container' + (isExpanded ? ' open' : '') + '">' +
+                '<div class="subtask-list">' + subtasksListHtml + '</div>' +
+                '<div class="subtask-add-row">' +
+                '<input type="text" class="subtask-add-input" id="subtask-input-' + task.id + '" data-task-id="' + task.id + '" placeholder="' + t('addSubtaskPlaceholder') + '" autocomplete="off" />' +
+                '<button class="subtask-add-btn" data-action="add-subtask" data-task-id="' + task.id + '">' + t('addSubtaskBtn') + '</button>' +
+                '</div>' +
+                '</div>';
+
             html += '<div class="todo-item' + (task.completed ? ' completed' : '') + '" data-id="' + task.id + '">' +
-                '<input type="checkbox" class="todo-checkbox"' + (task.completed ? ' checked' : '') + ' data-action="toggle" data-task-id="' + task.id + '" />' +
+                '<div class="todo-main-row">' +
+                '<input type="checkbox" class="todo-checkbox"' + (task.completed ? ' checked' : '') + ' data-action="toggle-task" data-task-id="' + task.id + '" />' +
+                '<div class="todo-content-col">' +
                 '<span class="todo-text">' + escapeHtml(task.text) + '</span>' +
-                '<button class="todo-delete" data-action="delete" data-task-id="' + task.id + '" title="Xóa">✕</button></div>';
+                '<div class="todo-meta-row">' + dateBadgeHtml + subtasksToggleHtml + '</div>' +
+                '</div>' +
+                '<button class="todo-delete" data-action="delete-task" data-task-id="' + task.id + '" title="' + t('confirmDelete') + '">✕</button>' +
+                '</div>' +
+                subtasksContainerHtml +
+                '</div>';
         });
+
         this.listEl.innerHTML = html;
     };
 
@@ -652,10 +970,21 @@
         this._saveNotes(); this._render(); this._closeModal();
     };
     NoteApp.prototype._deleteSelected = function () {
-        var sel = this.selectedIds;
-        this.notes = this.notes.filter(function (n) { return !sel.has(n.id); });
-        this.selectedIds.clear(); this._updateDeleteBtn();
-        this._saveNotes(); this._render();
+        if (this.selectedIds.size === 0) return;
+        var self = this;
+        showConfirmModal({
+            title: t('confirmModalTitle'),
+            message: t('confirmDeleteNotesMsg'),
+            confirmText: t('confirmDelete'),
+            onConfirm: function () {
+                var sel = self.selectedIds;
+                self.notes = self.notes.filter(function (n) { return !sel.has(n.id); });
+                self.selectedIds.clear();
+                self._updateDeleteBtn();
+                self._saveNotes();
+                self._render();
+            }
+        });
     };
     NoteApp.prototype._updateDeleteBtn = function () {
         this.deleteBtn.classList[this.selectedIds.size > 0 ? 'add' : 'remove']('visible');
@@ -842,6 +1171,7 @@
         initTabs();
         setLanguage(currentLang);
         initAuth();
+        initConfirmModal();
 
         // Language toggle
         document.getElementById('lang-toggle').addEventListener('click', function () {
@@ -868,15 +1198,5 @@
         window.__todoApp = new TodoList();
         window.__noteApp = new NoteApp();
         window.__priceApp = new PriceApp();
-
-        // Todo event delegation
-        document.getElementById('todo-list').addEventListener('click', function (e) {
-            var action = e.target.getAttribute('data-action'), id = e.target.getAttribute('data-task-id');
-            if (action === 'delete' && id) window.__todoApp.deleteTask(id);
-        });
-        document.getElementById('todo-list').addEventListener('change', function (e) {
-            var action = e.target.getAttribute('data-action'), id = e.target.getAttribute('data-task-id');
-            if (action === 'toggle' && id) window.__todoApp.toggleTask(id);
-        });
     });
 })();

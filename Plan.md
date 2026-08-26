@@ -1,5 +1,5 @@
-All in one APP
 
+All in one APP
 
 1. Countdown / pomodoro
 
@@ -10,6 +10,9 @@ All in one APP
 
    * REQ 2.1: có tính năng cơ bản như add, delete task
    * REQ 2.2: có tính năng filter : All - Completed - In-progress
+   * REQ 2.3: có tính năng tạo sub-list
+   * REQ 2.4: Có tính năng set ngày bắt đầu - kết thúc của task
+   * REQ 2.5: Khi xóa task (hoặc subtask) đều hiện cửa sổ xác nhận
 3. General rule
 
    * GEN 1: Có nút chuyển đổi ngôn ngữ: English-Tiếng Việt
@@ -19,6 +22,7 @@ All in one APP
    * REQ 4.2: Khi ấn vào tab Quick note thì giao diện sẽ có 2 phần: 1 là danh sách note, 2 là nút tạo thêm note
    * REQ 4.3: Có nút tạo ghi chú mới, khi ấn vào thì hiện ra 1 cửa sổ nằm đè trên màn hình trước đó.
    * REQ 4.4: Ở màn hình danh sách note, có 1 select button bên trái để lựa chọn note, khi chọn thì hiện nút DELETE màu đỏ, chữ trắng.
+   * REQ 4.5: Khi xóa note (hoặc các note đã chọn) đều hiện cửa sổ xác nhận
 5. Prices
 
    * REQ 5.1 Tab price cập nhật giá vàng tại DOJI, hiển thị giá vàng nhẫn tròn và vàng miếng SJC.

@@ -41,7 +41,7 @@
     <div class="login-page" id="login-page">
         <div class="login-card">
             <div class="login-logo">⚡</div>
-            <h1 class="login-title">ProductivityHub <span style="font-size: 14px; opacity: 0.5; font-weight: normal; vertical-align: middle;">v1.1</span></h1>
+            <h1 class="login-title">ProductivityHub <span style="font-size: 14px; opacity: 0.5; font-weight: normal; vertical-align: middle;">v1.2</span></h1>
             <p class="login-subtitle" data-i18n="loginSubtitle">Đăng nhập để bắt đầu</p>
             <div class="login-buttons">
                 <button class="login-btn google" id="btn-login-google">
@@ -69,7 +69,7 @@
         <!-- Header -->
         <header class="app-header">
             <div class="header-top">
-                <h1 class="app-title">⚡ ProductivityHub <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 4px;">v1.1</span></h1>
+                <h1 class="app-title">⚡ ProductivityHub <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 4px;">v1.2</span></h1>
                 <div class="header-actions">
                     <button class="lang-toggle" id="lang-toggle" title="Switch language">
                         <span class="lang-flag" id="lang-flag">🇻🇳</span>
@@ -164,7 +164,19 @@
             <div class="card todo-input-card">
                 <div class="todo-input-group">
                     <input type="text" id="todo-input" class="todo-input" data-i18n-placeholder="addTaskPlaceholder" placeholder="Thêm task mới..." autocomplete="off" />
+                    <button class="todo-date-toggle-btn" id="todo-date-toggle-btn" title="Chọn ngày" aria-label="Chọn ngày">📅</button>
                     <button class="add-btn" id="btn-add-todo" data-i18n="addBtn">+ Thêm</button>
+                </div>
+                <div class="todo-dates-picker-row" id="todo-dates-picker-row" style="display: none;">
+                    <div class="todo-date-field">
+                        <label for="todo-start-date" data-i18n="startDate">Bắt đầu:</label>
+                        <input type="date" id="todo-start-date" class="todo-date-input" />
+                    </div>
+                    <div class="todo-date-field">
+                        <label for="todo-end-date" data-i18n="endDate">Kết thúc:</label>
+                        <input type="date" id="todo-end-date" class="todo-date-input" />
+                    </div>
+                    <button class="todo-date-clear-btn" id="todo-date-clear-btn" title="Xóa ngày">✕</button>
                 </div>
             </div>
             <div class="card todo-filter-card">
@@ -311,6 +323,19 @@
             <div class="modal-footer">
                 <button class="modal-btn secondary" id="note-modal-cancel" data-i18n="cancel">Hủy</button>
                 <button class="modal-btn primary" id="note-modal-save" data-i18n="saveNote">Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== CONFIRM MODAL OVERLAY ===== -->
+    <div class="modal-overlay" id="confirm-modal-overlay">
+        <div class="modal-container confirm-modal-container">
+            <div class="confirm-modal-icon">⚠️</div>
+            <h3 class="confirm-modal-title" id="confirm-modal-title" data-i18n="confirmModalTitle">Xác nhận</h3>
+            <p class="confirm-modal-message" id="confirm-modal-message">Bạn có chắc chắn muốn xóa?</p>
+            <div class="confirm-modal-actions">
+                <button class="modal-btn secondary" id="confirm-modal-cancel" data-i18n="cancel">Hủy</button>
+                <button class="modal-btn danger" id="confirm-modal-ok" data-i18n="confirmDelete">Xóa</button>
             </div>
         </div>
     </div>
