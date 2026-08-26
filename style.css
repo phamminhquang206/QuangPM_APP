@@ -350,6 +350,37 @@ body {
     letter-spacing: -0.03em;
 }
 
+/* Header Actions & Reload Button */
+.reload-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.reload-btn:hover {
+    border-color: rgba(124, 58, 237, 0.3);
+    background: rgba(124, 58, 237, 0.08);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.15);
+}
+
+.reload-btn:active .reload-icon,
+.reload-btn.spinning .reload-icon {
+    display: inline-block;
+    animation: spin 0.6s ease-in-out;
+}
+
 /* Language Toggle */
 .lang-toggle {
     display: flex;
@@ -831,15 +862,20 @@ body {
     padding: 20px 0;
 }
 
-/* ===== TODO INPUT ===== */
+.todo-input-card {
+    padding: 16px;
+}
+
 .todo-input-group {
     display: flex;
-    gap: 10px;
+    gap: 8px;
+    align-items: center;
 }
 
 .todo-input {
     flex: 1;
-    padding: 13px 16px;
+    min-width: 0;
+    padding: 12px 14px;
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-md);
     background: rgba(255, 255, 255, 0.03);
@@ -861,13 +897,13 @@ body {
 }
 
 .todo-date-toggle-btn {
-    width: 46px;
-    height: 46px;
+    width: 42px;
+    height: 42px;
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-md);
     background: rgba(255, 255, 255, 0.03);
     color: var(--text-primary);
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     cursor: pointer;
     transition: var(--transition);
     display: flex;
@@ -950,18 +986,19 @@ body {
 }
 
 .add-btn {
-    padding: 13px 20px;
+    padding: 12px 18px;
     border: none;
     border-radius: var(--radius-md);
     background: var(--gradient-primary);
     color: #fff;
     font-family: var(--font);
-    font-size: 0.95rem;
+    font-size: 0.92rem;
     font-weight: 600;
     cursor: pointer;
     transition: var(--transition);
     white-space: nowrap;
     box-shadow: 0 4px 16px rgba(124, 58, 237, 0.3);
+    flex-shrink: 0;
 }
 
 .add-btn:hover {
@@ -1077,6 +1114,15 @@ body {
     background: rgba(255, 255, 255, 0.05);
     color: var(--text-secondary);
     border: 1px solid rgba(255, 255, 255, 0.08);
+    cursor: pointer;
+    transition: var(--transition);
+    user-select: none;
+}
+
+.todo-date-badge:hover {
+    filter: brightness(1.25);
+    transform: translateY(-1px);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 .todo-date-badge.overdue {
@@ -1089,6 +1135,18 @@ body {
     background: rgba(245, 158, 11, 0.15);
     color: #fbbf24;
     border-color: rgba(245, 158, 11, 0.3);
+}
+
+.todo-date-badge.empty {
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-muted);
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+.todo-date-badge.empty:hover {
+    background: rgba(124, 58, 237, 0.15);
+    color: #c084fc;
+    border-color: rgba(124, 58, 237, 0.3);
 }
 
 .todo-subtasks-toggle {
@@ -1384,11 +1442,15 @@ body {
 /* ===== RESPONSIVE ===== */
 @media (max-width: 480px) {
     .app-container {
-        padding: 16px 12px 36px;
+        padding: 16px 10px 36px;
     }
 
     .app-title {
         font-size: 1.5rem;
+    }
+
+    .card {
+        padding: 14px 12px;
     }
 
     .timer-ring-container {
@@ -1402,6 +1464,63 @@ body {
 
     .mode-options {
         flex-direction: column;
+    }
+
+    /* Todo Mobile Sizing */
+    .todo-input-card {
+        padding: 12px 10px;
+    }
+
+    .todo-input-group {
+        gap: 6px;
+    }
+
+    .todo-input {
+        min-width: 0;
+        padding: 10px 10px;
+        font-size: 0.88rem;
+    }
+
+    .todo-date-toggle-btn {
+        width: 38px;
+        height: 38px;
+        font-size: 1rem;
+    }
+
+    .add-btn {
+        padding: 10px 14px;
+        font-size: 0.85rem;
+    }
+
+    .todo-dates-picker-row {
+        gap: 6px;
+    }
+
+    .todo-date-input {
+        padding: 6px 6px;
+        font-size: 0.78rem;
+    }
+
+    .todo-date-clear-btn {
+        width: 30px;
+        height: 30px;
+    }
+
+    .filter-bar {
+        gap: 4px;
+    }
+
+    .filter-btn {
+        padding: 8px 6px;
+        font-size: 0.8rem;
+    }
+
+    .todo-item {
+        padding: 10px 10px;
+    }
+
+    .todo-subtasks-container {
+        padding-left: 16px;
     }
 
     .todo-delete {
@@ -1818,6 +1937,28 @@ body {
 .modal-btn.danger:hover {
     transform: translateY(-1px);
     box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+}
+
+/* ===== TODO DATE MODAL ===== */
+.todo-date-modal-container {
+    max-width: 400px !important;
+}
+
+.todo-date-modal-task-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--accent-purple);
+    word-break: break-word;
+}
+
+.todo-date-modal-fields {
+    display: flex;
+    gap: 12px;
 }
 
 /* ===== CONFIRM MODAL ===== */

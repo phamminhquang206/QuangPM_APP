@@ -41,7 +41,7 @@
     <div class="login-page" id="login-page">
         <div class="login-card">
             <div class="login-logo">⚡</div>
-            <h1 class="login-title">ProductivityHub <span style="font-size: 14px; opacity: 0.5; font-weight: normal; vertical-align: middle;">v1.2</span></h1>
+            <h1 class="login-title">FlowHub <span style="font-size: 14px; opacity: 0.5; font-weight: normal; vertical-align: middle;">v1.3</span></h1>
             <p class="login-subtitle" data-i18n="loginSubtitle">Đăng nhập để bắt đầu</p>
             <div class="login-buttons">
                 <button class="login-btn google" id="btn-login-google">
@@ -69,8 +69,11 @@
         <!-- Header -->
         <header class="app-header">
             <div class="header-top">
-                <h1 class="app-title">⚡ ProductivityHub <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 4px;">v1.2</span></h1>
+                <h1 class="app-title">⚡ FlowHub <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 4px;">v1.3</span></h1>
                 <div class="header-actions">
+                    <button class="reload-btn" id="btn-app-reload" title="Tải lại trang (F5)" aria-label="Tải lại trang">
+                        <span class="reload-icon">🔄</span>
+                    </button>
                     <button class="lang-toggle" id="lang-toggle" title="Switch language">
                         <span class="lang-flag" id="lang-flag">🇻🇳</span>
                         <span class="lang-label" id="lang-label">VI</span>
@@ -323,6 +326,36 @@
             <div class="modal-footer">
                 <button class="modal-btn secondary" id="note-modal-cancel" data-i18n="cancel">Hủy</button>
                 <button class="modal-btn primary" id="note-modal-save" data-i18n="saveNote">Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== TODO DATE MODAL OVERLAY ===== -->
+    <div class="modal-overlay" id="todo-date-modal-overlay">
+        <div class="modal-container todo-date-modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title" id="todo-date-modal-title" data-i18n="setTaskDates">Thời hạn công việc</h3>
+                <button class="modal-close" id="todo-date-modal-close">✕</button>
+            </div>
+            <div class="modal-body">
+                <p class="todo-date-modal-task-title" id="todo-date-modal-task-title"></p>
+                <div class="todo-date-modal-fields">
+                    <div class="todo-date-field">
+                        <label for="modal-task-start-date" data-i18n="startDate">Bắt đầu:</label>
+                        <input type="date" id="modal-task-start-date" class="todo-date-input" />
+                    </div>
+                    <div class="todo-date-field">
+                        <label for="modal-task-end-date" data-i18n="endDate">Kết thúc:</label>
+                        <input type="date" id="modal-task-end-date" class="todo-date-input" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="justify-content: space-between;">
+                <button class="modal-btn secondary" id="modal-task-date-clear" data-i18n="clearDates" style="color: var(--accent-red);">Xóa ngày</button>
+                <div style="display: flex; gap: 8px;">
+                    <button class="modal-btn secondary" id="modal-task-date-cancel" data-i18n="cancel">Hủy</button>
+                    <button class="modal-btn primary" id="modal-task-date-save" data-i18n="save">Lưu</button>
+                </div>
             </div>
         </div>
     </div>

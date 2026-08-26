@@ -1,7 +1,7 @@
 {
-  "name": "QuangPM - All in One App",
-  "short_name": "QuangPM",
-  "description": "Pomodoro Timer, To-do List & Quick Notes - All in One Productivity App",
+  "name": "FlowHub - All in One App",
+  "short_name": "FlowHub",
+  "description": "Pomodoro Timer, To-do List & Quick Notes - FlowHub by QuangPM",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",

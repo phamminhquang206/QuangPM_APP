@@ -24,6 +24,8 @@
             todayBadge: 'Hôm nay', overdueBadge: 'Quá hạn',
             subtasksCount: 'mục', addSubtaskPlaceholder: 'Thêm việc con...',
             addSubtaskBtn: '+',
+            setTaskDates: 'Thời hạn công việc', clearDates: 'Xóa hạn',
+            save: 'Lưu', addDate: '+ Ngày',
             confirmModalTitle: 'Xác nhận xóa', confirmDelete: 'Xóa',
             confirmDeleteTaskMsg: 'Bạn có chắc chắn muốn xóa công việc này?',
             confirmDeleteSubtaskMsg: 'Bạn có chắc chắn muốn xóa việc con này?',
@@ -56,6 +58,8 @@
             todayBadge: 'Today', overdueBadge: 'Overdue',
             subtasksCount: 'subtasks', addSubtaskPlaceholder: 'Add subtask...',
             addSubtaskBtn: '+',
+            setTaskDates: 'Task Dates', clearDates: 'Clear Dates',
+            save: 'Save', addDate: '+ Date',
             confirmModalTitle: 'Confirm Delete', confirmDelete: 'Delete',
             confirmDeleteTaskMsg: 'Are you sure you want to delete this task?',
             confirmDeleteSubtaskMsg: 'Are you sure you want to delete this subtask?',
@@ -494,6 +498,7 @@
         this.tasks = [];
         this.filter = 'all';
         this.expandedTaskIds = new Set();
+        this.editingDateTaskId = null;
         this._cacheElements();
         this._bindEvents();
         this._loadTasks();
@@ -508,6 +513,16 @@
         this.dateClearBtn = document.getElementById('todo-date-clear-btn');
         this.listEl = document.getElementById('todo-list');
         this.statsEl = document.getElementById('todo-stats');
+
+        // Date edit modal elements
+        this.dateModalOverlay = document.getElementById('todo-date-modal-overlay');
+        this.dateModalTaskTitle = document.getElementById('todo-date-modal-task-title');
+        this.modalStartDate = document.getElementById('modal-task-start-date');
+        this.modalEndDate = document.getElementById('modal-task-end-date');
+        this.modalDateSaveBtn = document.getElementById('modal-task-date-save');
+        this.modalDateCancelBtn = document.getElementById('modal-task-date-cancel');
+        this.modalDateClearBtn = document.getElementById('modal-task-date-clear');
+        this.modalDateCloseBtn = document.getElementById('todo-date-modal-close');
     };
 
     TodoList.prototype._bindEvents = function () {
@@ -530,6 +545,17 @@
             });
         }
 
+        // Date modal events
+        if (this.modalDateCloseBtn) this.modalDateCloseBtn.addEventListener('click', function () { self.closeDateModal(); });
+        if (this.modalDateCancelBtn) this.modalDateCancelBtn.addEventListener('click', function () { self.closeDateModal(); });
+        if (this.dateModalOverlay) {
+            this.dateModalOverlay.addEventListener('click', function (e) {
+                if (e.target === self.dateModalOverlay) self.closeDateModal();
+            });
+        }
+        if (this.modalDateSaveBtn) this.modalDateSaveBtn.addEventListener('click', function () { self.saveDateFromModal(); });
+        if (this.modalDateClearBtn) this.modalDateClearBtn.addEventListener('click', function () { self.clearDateFromModal(); });
+
         document.querySelectorAll('.filter-btn').forEach(function (btn) {
             btn.addEventListener('click', function () {
                 document.querySelectorAll('.filter-btn').forEach(function (b) { b.classList.remove('active'); });
@@ -551,6 +577,8 @@
                 self.deleteTask(taskId);
             } else if (action === 'toggle-subtasks' && taskId) {
                 self.toggleSubtasksView(taskId);
+            } else if (action === 'edit-dates' && taskId) {
+                self.openDateModal(taskId);
             } else if (action === 'add-subtask' && taskId) {
                 var input = document.getElementById('subtask-input-' + taskId);
                 if (input && input.value.trim()) {
@@ -586,6 +614,47 @@
                 }
             }
         });
+    };
+
+    TodoList.prototype.openDateModal = function (taskId) {
+        var task = this.tasks.find(function (t) { return t.id === taskId; });
+        if (!task) return;
+        this.editingDateTaskId = taskId;
+        if (this.dateModalTaskTitle) this.dateModalTaskTitle.textContent = task.text;
+        if (this.modalStartDate) this.modalStartDate.value = task.startDate || '';
+        if (this.modalEndDate) this.modalEndDate.value = task.endDate || '';
+        if (this.dateModalOverlay) this.dateModalOverlay.classList.add('active');
+    };
+
+    TodoList.prototype.closeDateModal = function () {
+        if (this.dateModalOverlay) this.dateModalOverlay.classList.remove('active');
+        this.editingDateTaskId = null;
+    };
+
+    TodoList.prototype.saveDateFromModal = function () {
+        if (!this.editingDateTaskId) return;
+        var self = this;
+        var task = this.tasks.find(function (t) { return t.id === self.editingDateTaskId; });
+        if (task) {
+            task.startDate = this.modalStartDate ? this.modalStartDate.value : '';
+            task.endDate = this.modalEndDate ? this.modalEndDate.value : '';
+            this._saveTasks();
+            this._render();
+        }
+        this.closeDateModal();
+    };
+
+    TodoList.prototype.clearDateFromModal = function () {
+        if (!this.editingDateTaskId) return;
+        var self = this;
+        var task = this.tasks.find(function (t) { return t.id === self.editingDateTaskId; });
+        if (task) {
+            task.startDate = '';
+            task.endDate = '';
+            this._saveTasks();
+            this._render();
+        }
+        this.closeDateModal();
     };
 
     TodoList.prototype._addTask = function () {
@@ -750,7 +819,9 @@
                 else if (dateStatusCls === ' today') statusPrefix = '⏰ ' + t('todayBadge') + ': ';
                 else statusPrefix = '📅 ';
 
-                dateBadgeHtml = '<span class="todo-date-badge' + dateStatusCls + '">' + statusPrefix + dateLabel + '</span>';
+                dateBadgeHtml = '<span class="todo-date-badge' + dateStatusCls + '" data-action="edit-dates" data-task-id="' + task.id + '" title="' + t('setTaskDates') + '">' + statusPrefix + dateLabel + ' ✎</span>';
+            } else {
+                dateBadgeHtml = '<span class="todo-date-badge empty" data-action="edit-dates" data-task-id="' + task.id + '" title="' + t('setTaskDates') + '">📅 ' + t('addDate') + '</span>';
             }
 
             // Subtask toggle button & count
@@ -1192,6 +1263,17 @@
             if (window.__todoApp) window.__todoApp._render();
             if (window.__noteApp) window.__noteApp._render();
         });
+
+        // App Reload (F5) button
+        var reloadBtn = document.getElementById('btn-app-reload');
+        if (reloadBtn) {
+            reloadBtn.addEventListener('click', function () {
+                reloadBtn.classList.add('spinning');
+                setTimeout(function () {
+                    window.location.reload();
+                }, 200);
+            });
+        }
 
         // Create app instances
         window.__pomodoroApp = new PomodoroTimer();
