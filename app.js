@@ -43,7 +43,25 @@
             logout: 'Đăng xuất', logoutConfirm: 'Bạn có chắc chắn muốn đăng xuất?',
             goldPrices: 'Giá Vàng DOJI', goldSJC: 'Vàng miếng SJC', goldRing: 'Nhẫn tròn Hưng Thịnh Vượng',
             buyPrice: 'Mua vào', sellPrice: 'Bán ra', refresh: '🔄 Làm mới',
-            globalPrices: 'Hàng Hóa Toàn Cầu', worldGold: 'Vàng (World)', crudeOil: 'Dầu Thô (WTI)'
+            globalPrices: 'Hàng Hóa Toàn Cầu', worldGold: 'Vàng (World)', crudeOil: 'Dầu Thô (WTI)',
+            or: 'hoặc',
+            installApp: 'Cài app',
+            installAppLogin: 'Cài đặt ứng dụng vào điện thoại',
+            installBannerTitle: 'Cài đặt FlowHub',
+            installBannerDesc: 'Thêm vào màn hình chính để dùng mượt mà như app di động',
+            installBtn: 'Cài đặt',
+            pwaGuideTitle: 'Cài đặt FlowHub',
+            pwaGuideIntro: 'Để cài đặt FlowHub vào màn hình chính thiết bị của bạn:',
+            iosStep1: 'Nhấn vào biểu tượng <strong>Chia sẻ (Share)</strong> <span class="pwa-inline-icon">📤</span> ở thanh công cụ trình duyệt.',
+            iosStep2: 'Cuộn xuống và chọn <strong>"Thêm vào MH chính"</strong> (Add to Home Screen) <span class="pwa-inline-icon">➕</span>.',
+            iosStep3: 'Nhấn <strong>"Thêm" (Add)</strong> ở góc trên bên phải để hoàn tất.',
+            desktopStep1: 'Nhấn biểu tượng Cài đặt <span class="pwa-inline-icon">⊕</span> hoặc <span class="pwa-inline-icon">💻</span> trên thanh địa chỉ trình duyệt.',
+            desktopStep2: 'Hoặc vào Menu <span class="pwa-inline-icon">⋮</span> của trình duyệt -> chọn <strong>"Cài đặt FlowHub..."</strong>',
+            desktopStep3: 'Xác nhận <strong>"Cài đặt"</strong> để mở FlowHub trong cửa sổ độc lập mượt mà.',
+            pwaTip: 'FlowHub sẽ hoạt động toàn màn hình mượt mà, độc lập và lưu dữ liệu offline!',
+            gotIt: 'Đã hiểu',
+            installedToast: 'Đã cài đặt FlowHub thành công! 🎉',
+            alreadyInstalledToast: 'FlowHub đã được cài đặt trên thiết bị của bạn! ✨'
         },
         en: {
             mode: 'Mode', mode30: '30 min', mode30Detail: "25' work + 5' rest",
@@ -77,7 +95,25 @@
             logout: 'Sign out', logoutConfirm: 'Are you sure you want to sign out?',
             goldPrices: 'DOJI Gold Prices', goldSJC: 'SJC Gold Bar', goldRing: 'Gold Ring',
             buyPrice: 'Buy', sellPrice: 'Sell', refresh: '🔄 Refresh',
-            globalPrices: 'Global Commodities', worldGold: 'Gold (World)', crudeOil: 'Crude Oil (WTI)'
+            globalPrices: 'Global Commodities', worldGold: 'Gold (World)', crudeOil: 'Crude Oil (WTI)',
+            or: 'or',
+            installApp: 'Install App',
+            installAppLogin: 'Install App to Mobile',
+            installBannerTitle: 'Install FlowHub',
+            installBannerDesc: 'Add to home screen for smooth, native mobile experience',
+            installBtn: 'Install',
+            pwaGuideTitle: 'Install FlowHub',
+            pwaGuideIntro: 'To install FlowHub to your device home screen:',
+            iosStep1: 'Tap the <strong>Share</strong> button <span class="pwa-inline-icon">📤</span> in the browser toolbar.',
+            iosStep2: 'Scroll down and select <strong>"Add to Home Screen"</strong> <span class="pwa-inline-icon">➕</span>.',
+            iosStep3: 'Tap <strong>"Add"</strong> at the top right to complete.',
+            desktopStep1: 'Click the Install icon <span class="pwa-inline-icon">⊕</span> or <span class="pwa-inline-icon">💻</span> in the browser address bar.',
+            desktopStep2: 'Or open browser Menu <span class="pwa-inline-icon">⋮</span> -> select <strong>"Install FlowHub..."</strong>',
+            desktopStep3: 'Confirm <strong>"Install"</strong> to launch FlowHub in a smooth standalone window.',
+            pwaTip: 'FlowHub will run smoothly in full-screen, standalone mode with offline data!',
+            gotIt: 'Got it',
+            installedToast: 'FlowHub installed successfully! 🎉',
+            alreadyInstalledToast: 'FlowHub is already installed on your device! ✨'
         }
     };
 
@@ -90,7 +126,12 @@
 
     function applyI18nToDOM() {
         document.querySelectorAll('[data-i18n]').forEach(function (el) {
-            el.textContent = t(el.getAttribute('data-i18n'));
+            var val = t(el.getAttribute('data-i18n'));
+            if (val.indexOf('<') !== -1) {
+                el.innerHTML = val;
+            } else {
+                el.textContent = val;
+            }
         });
         document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
             el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
@@ -1236,6 +1277,188 @@
     };
 
     // =========================================================
+    //  PWA INSTALLATION MANAGER
+    // =========================================================
+    var PwaManager = (function () {
+        var deferredPrompt = null;
+        var headerBtn = null;
+        var loginBtn = null;
+        var banner = null;
+        var bannerInstallBtn = null;
+        var bannerCloseBtn = null;
+        var guideModal = null;
+        var guideCloseBtn = null;
+        var guideOkBtn = null;
+        var toastEl = null;
+        var toastTimer = null;
+
+        var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+        function init() {
+            headerBtn = document.getElementById('btn-header-install');
+            loginBtn = document.getElementById('btn-login-install');
+            banner = document.getElementById('pwa-install-banner');
+            bannerInstallBtn = document.getElementById('pwa-banner-install-btn');
+            bannerCloseBtn = document.getElementById('pwa-banner-close');
+            guideModal = document.getElementById('pwa-guide-modal');
+            guideCloseBtn = document.getElementById('pwa-guide-close');
+            guideOkBtn = document.getElementById('pwa-guide-ok');
+            toastEl = document.getElementById('pwa-toast');
+
+            // If already installed (running in standalone app mode)
+            if (isStandalone) {
+                if (headerBtn) {
+                    headerBtn.classList.add('installed');
+                    headerBtn.title = t('alreadyInstalledToast');
+                }
+                var loginWrapper = document.getElementById('login-install-wrapper');
+                if (loginWrapper) loginWrapper.style.display = 'none';
+                return;
+            }
+
+            // Capture beforeinstallprompt event (Chromium on Android / Windows / Mac)
+            window.addEventListener('beforeinstallprompt', function (e) {
+                e.preventDefault();
+                deferredPrompt = e;
+                showInstallPrompts();
+            });
+
+            // App installed event
+            window.addEventListener('appinstalled', function () {
+                deferredPrompt = null;
+                hideInstallPrompts();
+                if (headerBtn) {
+                    headerBtn.classList.add('installed');
+                }
+                showToast(t('installedToast'), '🎉');
+            });
+
+            // If on iOS Safari, install is supported via Add to Home Screen
+            if (isIOS && !isStandalone) {
+                showInstallPrompts();
+            }
+
+            // Bind click handlers
+            if (headerBtn) {
+                headerBtn.addEventListener('click', handleInstallClick);
+            }
+            if (loginBtn) {
+                loginBtn.addEventListener('click', handleInstallClick);
+            }
+            if (bannerInstallBtn) {
+                bannerInstallBtn.addEventListener('click', handleInstallClick);
+            }
+            if (bannerCloseBtn) {
+                bannerCloseBtn.addEventListener('click', function () {
+                    if (banner) banner.style.display = 'none';
+                    sessionStorage.setItem('pwa_banner_dismissed', 'true');
+                });
+            }
+
+            // Guide modal handlers
+            if (guideCloseBtn) {
+                guideCloseBtn.addEventListener('click', closeGuideModal);
+            }
+            if (guideOkBtn) {
+                guideOkBtn.addEventListener('click', closeGuideModal);
+            }
+            if (guideModal) {
+                guideModal.addEventListener('click', function (e) {
+                    if (e.target === guideModal) closeGuideModal();
+                });
+            }
+        }
+
+        function showInstallPrompts() {
+            if (isStandalone) return;
+            var dismissed = sessionStorage.getItem('pwa_banner_dismissed');
+            if (!dismissed && banner) {
+                setTimeout(function () {
+                    if (banner && !sessionStorage.getItem('pwa_banner_dismissed') && !isStandalone) {
+                        banner.style.display = 'flex';
+                    }
+                }, 1200);
+            }
+        }
+
+        function hideInstallPrompts() {
+            if (banner) banner.style.display = 'none';
+            var loginWrapper = document.getElementById('login-install-wrapper');
+            if (loginWrapper) loginWrapper.style.display = 'none';
+        }
+
+        function handleInstallClick() {
+            if (isStandalone) {
+                showToast(t('alreadyInstalledToast'), '✨');
+                return;
+            }
+
+            // 1. If deferredPrompt exists (Chrome/Android/Edge)
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(function (choiceResult) {
+                    if (choiceResult && choiceResult.outcome === 'accepted') {
+                        hideInstallPrompts();
+                    }
+                    deferredPrompt = null;
+                });
+                return;
+            }
+
+            // 2. If iOS Safari or unsupported automated prompt: show Guide Modal
+            openGuideModal();
+        }
+
+        function openGuideModal() {
+            if (!guideModal) return;
+
+            var titleEl = document.getElementById('pwa-guide-title');
+            var step1El = document.getElementById('pwa-step-1');
+            var step2El = document.getElementById('pwa-step-2');
+            var step3El = document.getElementById('pwa-step-3');
+
+            if (isIOS) {
+                if (titleEl) titleEl.textContent = t('pwaGuideTitle') + ' (iOS)';
+                if (step1El) step1El.innerHTML = t('iosStep1');
+                if (step2El) step2El.innerHTML = t('iosStep2');
+                if (step3El) step3El.innerHTML = t('iosStep3');
+            } else {
+                if (titleEl) titleEl.textContent = t('pwaGuideTitle');
+                if (step1El) step1El.innerHTML = t('desktopStep1');
+                if (step2El) step2El.innerHTML = t('desktopStep2');
+                if (step3El) step3El.innerHTML = t('desktopStep3');
+            }
+
+            guideModal.classList.add('active');
+        }
+
+        function closeGuideModal() {
+            if (guideModal) guideModal.classList.remove('active');
+        }
+
+        function showToast(msg, icon) {
+            if (!toastEl) return;
+            var iconEl = document.getElementById('pwa-toast-icon');
+            var msgEl = document.getElementById('pwa-toast-msg');
+            if (iconEl && icon) iconEl.textContent = icon;
+            if (msgEl) msgEl.textContent = msg;
+
+            toastEl.style.display = 'flex';
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(function () {
+                toastEl.style.display = 'none';
+            }, 3500);
+        }
+
+        return {
+            init: init,
+            handleInstallClick: handleInstallClick,
+            showToast: showToast
+        };
+    })();
+
+    // =========================================================
     //  INITIALIZATION
     // =========================================================
     document.addEventListener('DOMContentLoaded', function () {
@@ -1243,6 +1466,7 @@
         setLanguage(currentLang);
         initAuth();
         initConfirmModal();
+        PwaManager.init();
 
         // Language toggle
         document.getElementById('lang-toggle').addEventListener('click', function () {

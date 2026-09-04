@@ -13,6 +13,9 @@
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#7c3aed">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="FlowHub">
     <link rel="apple-touch-icon" href="icon.svg">
 </head>
 <body>
@@ -60,6 +63,16 @@
                     <span data-i18n="loginGithub">Đăng nhập bằng GitHub</span>
                 </button>
             </div>
+            <!-- PWA Install option on login card -->
+            <div class="login-install-wrapper" id="login-install-wrapper">
+                <div class="login-divider">
+                    <span data-i18n="or">hoặc</span>
+                </div>
+                <button class="login-install-btn" id="btn-login-install">
+                    <span class="install-btn-icon">📲</span>
+                    <span data-i18n="installAppLogin">Cài đặt ứng dụng vào điện thoại</span>
+                </button>
+            </div>
             <div class="login-error" id="login-error"></div>
         </div>
     </div>
@@ -74,6 +87,10 @@
                     <span class="app-version">v1.3</span>
                 </div>
                 <div class="header-actions">
+                    <button class="install-header-btn" id="btn-header-install" title="Cài đặt FlowHub" aria-label="Cài đặt FlowHub">
+                        <span class="install-header-icon">📲</span>
+                        <span class="install-header-text" data-i18n="installApp">Cài app</span>
+                    </button>
                     <button class="reload-btn" id="btn-app-reload" title="Tải lại trang (F5)" aria-label="Tải lại trang">
                         <span class="reload-icon">🔄</span>
                     </button>
@@ -374,6 +391,71 @@
                 <button class="modal-btn danger" id="confirm-modal-ok" data-i18n="confirmDelete">Xóa</button>
             </div>
         </div>
+    </div>
+
+    <!-- ===== PWA INSTALL FLOATING BANNER ===== -->
+    <div class="pwa-install-banner" id="pwa-install-banner" style="display: none;">
+        <div class="pwa-banner-content">
+            <div class="pwa-banner-icon">
+                <img src="icon.svg" alt="FlowHub" width="40" height="40" />
+            </div>
+            <div class="pwa-banner-text">
+                <div class="pwa-banner-title" data-i18n="installBannerTitle">Cài đặt FlowHub</div>
+                <div class="pwa-banner-desc" data-i18n="installBannerDesc">Thêm vào màn hình chính để dùng mượt mà như app di động</div>
+            </div>
+        </div>
+        <div class="pwa-banner-actions">
+            <button class="pwa-banner-close" id="pwa-banner-close" title="Đóng" aria-label="Đóng">✕</button>
+            <button class="pwa-banner-btn" id="pwa-banner-install-btn" data-i18n="installBtn">Cài đặt</button>
+        </div>
+    </div>
+
+    <!-- ===== PWA INSTALL GUIDE MODAL ===== -->
+    <div class="modal-overlay" id="pwa-guide-modal">
+        <div class="modal-container pwa-guide-container">
+            <div class="modal-header">
+                <h3 class="modal-title" id="pwa-guide-title" data-i18n="pwaGuideTitle">Cài đặt FlowHub</h3>
+                <button class="modal-close" id="pwa-guide-close">✕</button>
+            </div>
+            <div class="modal-body" id="pwa-guide-body">
+                <div class="pwa-guide-intro" id="pwa-guide-intro" data-i18n="pwaGuideIntro">
+                    Để cài đặt FlowHub vào màn hình chính thiết bị của bạn:
+                </div>
+                <div class="pwa-steps-list" id="pwa-steps-list">
+                    <div class="pwa-step-item">
+                        <div class="pwa-step-num">1</div>
+                        <div class="pwa-step-content">
+                            <p class="pwa-step-text" id="pwa-step-1" data-i18n="iosStep1">Nhấn vào biểu tượng <strong>Chia sẻ (Share)</strong> <span class="pwa-inline-icon">📤</span> ở thanh công cụ trình duyệt.</p>
+                        </div>
+                    </div>
+                    <div class="pwa-step-item">
+                        <div class="pwa-step-num">2</div>
+                        <div class="pwa-step-content">
+                            <p class="pwa-step-text" id="pwa-step-2" data-i18n="iosStep2">Cuộn xuống và chọn <strong>"Thêm vào MH chính"</strong> (Add to Home Screen) <span class="pwa-inline-icon">➕</span>.</p>
+                        </div>
+                    </div>
+                    <div class="pwa-step-item">
+                        <div class="pwa-step-num">3</div>
+                        <div class="pwa-step-content">
+                            <p class="pwa-step-text" id="pwa-step-3" data-i18n="iosStep3">Nhấn <strong>"Thêm" (Add)</strong> ở góc trên bên phải để hoàn tất.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="pwa-guide-tip">
+                    <span class="pwa-tip-icon">⚡</span>
+                    <span data-i18n="pwaTip">FlowHub sẽ hoạt động toàn màn hình mượt mà, độc lập và lưu dữ liệu offline!</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn primary" id="pwa-guide-ok" data-i18n="gotIt">Đã hiểu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== PWA TOAST NOTIFICATION ===== -->
+    <div class="pwa-toast" id="pwa-toast" style="display: none;">
+        <span class="pwa-toast-icon" id="pwa-toast-icon">🎉</span>
+        <span class="pwa-toast-msg" id="pwa-toast-msg">Cài đặt ứng dụng thành công!</span>
     </div>
 
     <!-- ===== LOADING OVERLAY ===== -->
