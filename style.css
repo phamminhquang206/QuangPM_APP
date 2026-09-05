@@ -2835,3 +2835,357 @@ body {
     }
 }
 
+/* =========================================================
+ *  RESPONSIVE TABLET & DESKTOP OVERHAUL (>= 768px, >= 992px, >= 1024px, >= 1360px)
+ * ========================================================= */
+
+/* --- TABLET & UP (min-width: 768px) --- */
+@media (min-width: 768px) {
+    /* Container Expansion */
+    .app-container {
+        max-width: 880px;
+        padding: 32px 24px 64px;
+        transition: max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Ambient Lighting Orbs */
+    .orb-1 {
+        width: 460px;
+        height: 460px;
+        top: -80px;
+        right: -80px;
+    }
+    .orb-2 {
+        width: 400px;
+        height: 400px;
+        bottom: -80px;
+        left: -80px;
+    }
+    .orb-3 {
+        width: 320px;
+        height: 320px;
+    }
+
+    /* User Bar & Header */
+    .user-bar {
+        padding: 10px 18px;
+        margin-bottom: 20px;
+    }
+    .user-name {
+        max-width: 280px;
+        font-size: 0.9rem;
+    }
+    .app-title {
+        font-size: 2rem;
+    }
+    .app-header {
+        margin-bottom: 28px;
+    }
+    .tab-nav {
+        max-width: 680px;
+        margin: 0 auto;
+        padding: 6px;
+    }
+    .tab-btn {
+        padding: 12px 18px;
+        font-size: 0.95rem;
+    }
+
+    /* Cards general padding */
+    .card {
+        padding: 24px;
+        margin-bottom: 20px;
+    }
+
+    /* --- POMODORO SECTION (2-Column Split Dashboard) --- */
+    #pomodoro-section.active {
+        display: grid;
+        grid-template-columns: 1.15fr 1fr;
+        grid-template-areas:
+            "timer mode"
+            "timer reps"
+            "timer history";
+        grid-template-rows: auto auto 1fr;
+        gap: 20px;
+        align-items: start;
+    }
+
+    #pomodoro-section .timer-card {
+        grid-area: timer;
+        margin-bottom: 0;
+        min-height: 460px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 36px 24px;
+    }
+
+    #pomodoro-section .timer-ring-container {
+        margin: 18px auto 26px;
+    }
+
+    #pomodoro-section .timer-ring {
+        width: 250px;
+        height: 250px;
+    }
+
+    #pomodoro-section .timer-time {
+        font-size: 3.4rem;
+    }
+
+    #pomodoro-section .mode-selector {
+        grid-area: mode;
+        margin-bottom: 0;
+    }
+
+    #pomodoro-section .rep-selector {
+        grid-area: reps;
+        margin-bottom: 0;
+    }
+
+    #pomodoro-section .history-card {
+        grid-area: history;
+        margin-bottom: 0;
+    }
+
+    /* --- TO-DO SECTION (Tablet Centered) --- */
+    #todo-section {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .todo-input-card {
+        padding: 20px 24px;
+    }
+
+    .todo-dates-picker-row {
+        gap: 12px;
+    }
+
+    .todo-item {
+        padding: 14px 18px;
+    }
+
+    .todo-text {
+        font-size: 0.96rem;
+    }
+
+    /* --- QUICK NOTES SECTION (Tablet 3-Columns) --- */
+    .notes-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+    }
+
+    .notes-toolbar {
+        margin-bottom: 20px;
+    }
+
+    .note-add-btn {
+        padding: 11px 24px;
+        font-size: 0.92rem;
+    }
+
+    .note-card {
+        padding: 18px 18px 18px 46px;
+        min-height: 120px;
+    }
+
+    /* --- PRICES SECTION (Tablet 2x2 Grid) --- */
+    .prices-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    .price-card {
+        padding: 24px;
+    }
+
+    .price-value {
+        font-size: 1.35rem;
+    }
+
+    /* --- MODALS (Tablet & Desktop Expansions) --- */
+    .modal-container {
+        max-width: 580px;
+    }
+
+    #note-modal-overlay .modal-container {
+        max-width: 660px;
+    }
+
+    #note-title-input {
+        font-size: 1.25rem;
+        font-weight: 700;
+        padding: 12px 16px;
+    }
+
+    #note-content-input {
+        min-height: 220px;
+        font-size: 0.98rem;
+        line-height: 1.6;
+        padding: 14px 16px;
+    }
+
+    .todo-date-modal-container {
+        max-width: 520px !important;
+    }
+}
+
+/* --- DESKTOP & LAPTOP (min-width: 992px) --- */
+@media (min-width: 992px) {
+    /* --- TO-DO SECTION (2-Column Productivity Workspace) --- */
+    #todo-section {
+        max-width: 100%;
+        margin: 0;
+    }
+
+    #todo-section.active {
+        display: grid;
+        grid-template-columns: 350px 1fr;
+        grid-template-areas:
+            "input list"
+            "filter list";
+        grid-template-rows: auto 1fr;
+        gap: 22px;
+        align-items: start;
+    }
+
+    #todo-section .todo-input-card {
+        grid-area: input;
+        margin-bottom: 0;
+    }
+
+    #todo-section .todo-filter-card {
+        grid-area: filter;
+        margin-bottom: 0;
+        position: sticky;
+        top: 24px;
+        z-index: 10;
+    }
+
+    #todo-section .filter-bar {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    #todo-section .filter-btn {
+        text-align: left;
+        padding: 12px 16px;
+        font-size: 0.9rem;
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 10px;
+    }
+
+    #todo-section .todo-list-card {
+        grid-area: list;
+        margin-bottom: 0;
+        min-height: 520px;
+        padding: 24px 26px;
+    }
+}
+
+/* --- LARGE SCREENS & DESKTOP (min-width: 1024px) --- */
+@media (min-width: 1024px) {
+    /* Container Expansion */
+    .app-container {
+        max-width: 1180px;
+        padding: 36px 32px 80px;
+    }
+
+    /* Ambient Lighting Orbs */
+    .orb-1 {
+        width: 520px;
+        height: 520px;
+        top: -100px;
+        right: -100px;
+    }
+    .orb-2 {
+        width: 480px;
+        height: 480px;
+        bottom: -100px;
+        left: -100px;
+    }
+    .orb-3 {
+        width: 380px;
+        height: 380px;
+    }
+
+    /* Header Nav */
+    .tab-nav {
+        max-width: 760px;
+    }
+
+    /* Pomodoro Desktop Polish */
+    #pomodoro-section.active {
+        grid-template-columns: 1.25fr 1fr;
+        gap: 24px;
+    }
+
+    #pomodoro-section .timer-card {
+        padding: 44px 32px;
+        min-height: 500px;
+    }
+
+    #pomodoro-section .timer-ring {
+        width: 270px;
+        height: 270px;
+    }
+
+    #pomodoro-section .timer-time {
+        font-size: 3.6rem;
+    }
+
+    /* Quick Notes Desktop (4 Columns Masonry Board) */
+    .notes-grid {
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 20px;
+    }
+
+    .note-card {
+        padding: 20px 20px 20px 48px;
+        min-height: 130px;
+    }
+
+    .note-title {
+        font-size: 1.05rem;
+    }
+
+    .note-body {
+        font-size: 0.92rem;
+    }
+}
+
+/* --- ULTRA WIDE DESKTOP (min-width: 1360px) --- */
+@media (min-width: 1360px) {
+    .app-container {
+        max-width: 1280px;
+    }
+
+    /* Prices Section 4-Columns Financial Ticker */
+    .prices-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+    }
+
+    .price-card {
+        padding: 22px 18px;
+    }
+
+    .price-value {
+        font-size: 1.25rem;
+    }
+
+    /* Note Modal Ultra Wide */
+    #note-modal-overlay .modal-container {
+        max-width: 720px;
+    }
+
+    #note-content-input {
+        min-height: 280px;
+    }
+}
+
