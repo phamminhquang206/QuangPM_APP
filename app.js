@@ -24,6 +24,11 @@
             todayBadge: 'Hôm nay', overdueBadge: 'Quá hạn',
             subtasksCount: 'mục', addSubtaskPlaceholder: 'Thêm việc con...',
             addSubtaskBtn: '+',
+            editTask: 'Sửa tên',
+            doubleClickToEdit: 'Nhấp đúp hoặc bấm ✎ để sửa tên',
+            taskTitleLabel: 'Tên công việc:',
+            taskTitlePlaceholder: 'Nhập tên công việc...',
+            taskUpdatedToast: 'Đã cập nhật tên công việc! ✏️',
             setTaskDates: 'Thời hạn công việc', clearDates: 'Xóa hạn',
             save: 'Lưu', addDate: '+ Ngày',
             confirmModalTitle: 'Xác nhận xóa', confirmDelete: 'Xóa',
@@ -164,6 +169,11 @@
             todayBadge: 'Today', overdueBadge: 'Overdue',
             subtasksCount: 'subtasks', addSubtaskPlaceholder: 'Add subtask...',
             addSubtaskBtn: '+',
+            editTask: 'Edit task',
+            doubleClickToEdit: 'Double-click or click ✎ to edit',
+            taskTitleLabel: 'Task Title:',
+            taskTitlePlaceholder: 'Enter task title...',
+            taskUpdatedToast: 'Task title updated! ✏️',
             setTaskDates: 'Task Dates',
             setTaskDatesAndReminder: 'Task Dates & Reminder',
             enableTaskReminder: 'Enable task reminder',
@@ -1019,6 +1029,7 @@
         this.filter = 'all';
         this.expandedTaskIds = new Set();
         this.editingDateTaskId = null;
+        this.editingTaskId = null;
         this.activeAlertTaskId = null;
         this._exactTimer = null;
         this._cacheElements();
@@ -1040,6 +1051,7 @@
         // Date & Reminder edit modal elements
         this.dateModalOverlay = document.getElementById('todo-date-modal-overlay');
         this.dateModalTaskTitle = document.getElementById('todo-date-modal-task-title');
+        this.modalTaskTitleInput = document.getElementById('modal-task-title-input');
         this.modalStartDate = document.getElementById('modal-task-start-date');
         this.modalEndDate = document.getElementById('modal-task-end-date');
         this.modalReminderEnable = document.getElementById('modal-task-reminder-enable');
@@ -1162,6 +1174,12 @@
 
             if (action === 'delete-task' && taskId) {
                 self.deleteTask(taskId);
+            } else if (action === 'edit-task' && taskId) {
+                self.startEditTask(taskId);
+            } else if (action === 'save-edit-task' && taskId) {
+                self.saveEditTask(taskId);
+            } else if (action === 'cancel-edit-task') {
+                self.cancelEditTask();
             } else if (action === 'toggle-subtasks' && taskId) {
                 self.toggleSubtasksView(taskId);
             } else if (action === 'edit-dates' && taskId) {
@@ -1174,6 +1192,15 @@
                 }
             } else if (action === 'delete-subtask' && taskId && subtaskId) {
                 self.deleteSubtask(taskId, subtaskId);
+            }
+        });
+
+        // Delegate double click on task text to edit
+        this.listEl.addEventListener('dblclick', function (e) {
+            var textEl = e.target.closest('.todo-text');
+            if (textEl) {
+                var taskId = textEl.getAttribute('data-task-id');
+                if (taskId) self.startEditTask(taskId);
             }
         });
 
@@ -1191,14 +1218,39 @@
             }
         });
 
-        // Delegate enter key on subtask inputs
+        // Delegate keydown on edit input and subtask inputs
         this.listEl.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter' && e.target.classList.contains('subtask-add-input')) {
+            if (e.target.classList.contains('todo-edit-input')) {
                 var taskId = e.target.getAttribute('data-task-id');
-                if (taskId && e.target.value.trim()) {
-                    self.addSubtask(taskId, e.target.value.trim());
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    self.saveEditTask(taskId);
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    self.cancelEditTask();
+                }
+            } else if (e.key === 'Enter' && e.target.classList.contains('subtask-add-input')) {
+                var sTaskId = e.target.getAttribute('data-task-id');
+                if (sTaskId && e.target.value.trim()) {
+                    self.addSubtask(sTaskId, e.target.value.trim());
                     e.target.value = '';
                 }
+            }
+        });
+
+        // Delegate focusout on edit input to auto-save
+        this.listEl.addEventListener('focusout', function (e) {
+            if (e.target.classList.contains('todo-edit-input')) {
+                var taskId = e.target.getAttribute('data-task-id');
+                var related = e.relatedTarget;
+                if (related && (related.getAttribute('data-action') === 'cancel-edit-task' || related.getAttribute('data-action') === 'save-edit-task')) {
+                    return;
+                }
+                setTimeout(function () {
+                    if (self.editingTaskId === taskId) {
+                        self.saveEditTask(taskId);
+                    }
+                }, 200);
             }
         });
     };
@@ -1220,6 +1272,7 @@
         var task = this.tasks.find(function (t) { return t.id === taskId; });
         if (!task) return;
         this.editingDateTaskId = taskId;
+        if (this.modalTaskTitleInput) this.modalTaskTitleInput.value = task.text || '';
         if (this.dateModalTaskTitle) this.dateModalTaskTitle.textContent = task.text;
         if (this.modalStartDate) this.modalStartDate.value = task.startDate || '';
         if (this.modalEndDate) this.modalEndDate.value = task.endDate || '';
@@ -1242,6 +1295,10 @@
         var self = this;
         var task = this.tasks.find(function (t) { return t.id === self.editingDateTaskId; });
         if (task) {
+            var updatedTitle = this.modalTaskTitleInput ? this.modalTaskTitleInput.value.trim() : '';
+            if (updatedTitle) {
+                task.text = updatedTitle;
+            }
             task.startDate = this.modalStartDate ? this.modalStartDate.value : '';
             task.endDate = this.modalEndDate ? this.modalEndDate.value : '';
 
@@ -1438,6 +1495,39 @@
         });
     };
 
+    TodoList.prototype.startEditTask = function (id) {
+        if (!id) return;
+        this.editingTaskId = id;
+        this._render();
+    };
+
+    TodoList.prototype.saveEditTask = function (id) {
+        if (!id) return;
+        var input = document.getElementById('todo-edit-input-' + id);
+        var newTitle = input ? input.value.trim() : '';
+        if (!newTitle) {
+            this.cancelEditTask();
+            return;
+        }
+        var task = this.tasks.find(function (t) { return t.id === id; });
+        if (task) {
+            if (task.text !== newTitle) {
+                task.text = newTitle;
+                this._saveTasks();
+                if (typeof PwaManager !== 'undefined' && PwaManager.showToast) {
+                    PwaManager.showToast(t('taskUpdatedToast'), '✏️');
+                }
+            }
+        }
+        this.editingTaskId = null;
+        this._render();
+    };
+
+    TodoList.prototype.cancelEditTask = function () {
+        this.editingTaskId = null;
+        this._render();
+    };
+
     TodoList.prototype.toggleSubtasksView = function (taskId) {
         if (this.expandedTaskIds.has(taskId)) {
             this.expandedTaskIds.delete(taskId);
@@ -1580,20 +1670,45 @@
                 '</div>' +
                 '</div>';
 
-            html += '<div class="todo-item' + (task.completed ? ' completed' : '') + '" data-id="' + task.id + '">' +
+            var isEditing = self.editingTaskId === task.id;
+            var textOrInputHtml = '';
+            if (isEditing) {
+                textOrInputHtml = '<div class="todo-edit-row">' +
+                    '<input type="text" class="todo-edit-input" id="todo-edit-input-' + task.id + '" data-task-id="' + task.id + '" value="' + escapeHtml(task.text) + '" placeholder="' + t('taskTitlePlaceholder') + '" autocomplete="off" />' +
+                    '<div class="todo-edit-actions">' +
+                    '<button type="button" class="todo-edit-save-btn" data-action="save-edit-task" data-task-id="' + task.id + '" title="' + t('save') + '">✓</button>' +
+                    '<button type="button" class="todo-edit-cancel-btn" data-action="cancel-edit-task" data-task-id="' + task.id + '" title="' + t('cancel') + '">✕</button>' +
+                    '</div>' +
+                    '</div>';
+            } else {
+                textOrInputHtml = '<span class="todo-text" data-task-id="' + task.id + '" title="' + t('doubleClickToEdit') + '">' + escapeHtml(task.text) + '</span>';
+            }
+
+            html += '<div class="todo-item' + (task.completed ? ' completed' : '') + (isEditing ? ' editing' : '') + '" data-id="' + task.id + '">' +
                 '<div class="todo-main-row">' +
                 '<input type="checkbox" class="todo-checkbox"' + (task.completed ? ' checked' : '') + ' data-action="toggle-task" data-task-id="' + task.id + '" />' +
                 '<div class="todo-content-col">' +
-                '<span class="todo-text">' + escapeHtml(task.text) + '</span>' +
+                textOrInputHtml +
                 '<div class="todo-meta-row">' + dateBadgeHtml + subtasksToggleHtml + '</div>' +
                 '</div>' +
-                '<button class="todo-delete" data-action="delete-task" data-task-id="' + task.id + '" title="' + t('confirmDelete') + '">✕</button>' +
+                '<div class="todo-actions-wrap">' +
+                '<button type="button" class="todo-edit-btn" data-action="edit-task" data-task-id="' + task.id + '" title="' + t('editTask') + '">✎</button>' +
+                '<button type="button" class="todo-delete" data-action="delete-task" data-task-id="' + task.id + '" title="' + t('confirmDelete') + '">✕</button>' +
+                '</div>' +
                 '</div>' +
                 subtasksContainerHtml +
                 '</div>';
         });
 
         this.listEl.innerHTML = html;
+
+        if (this.editingTaskId) {
+            var activeInput = document.getElementById('todo-edit-input-' + this.editingTaskId);
+            if (activeInput) {
+                activeInput.focus();
+                activeInput.select();
+            }
+        }
     };
 
     // Scheduler and high-precision reminder check for tasks

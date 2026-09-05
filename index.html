@@ -474,7 +474,11 @@
                 <button class="modal-close" id="todo-date-modal-close">✕</button>
             </div>
             <div class="modal-body">
-                <p class="todo-date-modal-task-title" id="todo-date-modal-task-title"></p>
+                <div class="todo-date-field" style="margin-bottom: 12px;">
+                    <label for="modal-task-title-input" data-i18n="taskTitleLabel">Tên công việc:</label>
+                    <input type="text" id="modal-task-title-input" class="todo-date-input" style="font-weight: 600; font-size: 0.95rem;" placeholder="Nhập tên công việc..." autocomplete="off" />
+                </div>
+                <p class="todo-date-modal-task-title" id="todo-date-modal-task-title" style="display: none;"></p>
                 <div class="todo-date-modal-fields">
                     <div class="todo-date-field">
                         <label for="modal-task-start-date" data-i18n="startDate">Bắt đầu:</label>

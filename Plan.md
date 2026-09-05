@@ -28,8 +28,14 @@ Tài liệu đặc tả yêu cầu và các tính năng hiện có của dự á
 
 ## 2. To-do List (Quản lý công việc)
 
-* **REQ 2.1 - Thao tác cơ bản**:
+* **REQ 2.1 - Thao tác cơ bản & Chỉnh sửa tên công việc**:
   * Thêm công việc mới nhanh chóng bằng phím Enter hoặc nút "+ Thêm".
+  * Sửa tên công việc linh hoạt (Inline Edit & Modal Edit):
+    * Nhấp vào nút sửa (✎) ở mỗi task hoặc nhấp đúp vào dòng tên task để kích hoạt ô nhập inline.
+    * Hỗ trợ lưu nhanh bằng phím Enter, bấm nút "✓", hoặc tự động lưu khi click ra ngoài (blur).
+    * Hỗ trợ hủy bằng phím Escape hoặc nút "✕".
+    * Cho phép chỉnh sửa trực tiếp tên công việc bên trong Modal Thời hạn & Nhắc nhở.
+    * Tự động đồng bộ lên Firebase Firestore và Service Worker thông báo ngay khi sửa.
   * Đánh dấu hoàn thành / chưa hoàn thành (custom checkbox, hiệu ứng gạch ngang text).
   * Xóa công việc với nút xóa tiện lợi.
 * **REQ 2.2 - Bộ lọc công việc (Filter)**:
