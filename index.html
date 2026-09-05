@@ -44,7 +44,7 @@
     <div class="login-page" id="login-page">
         <div class="login-card">
             <div class="login-logo">⚡</div>
-            <h1 class="login-title">FlowHub <span style="font-size: 14px; opacity: 0.5; font-weight: normal; vertical-align: middle;">v1.3</span></h1>
+            <h1 class="login-title">FlowHub <span style="font-size: 14px; opacity: 0.5; font-weight: normal; vertical-align: middle;">v1.5</span></h1>
             <p class="login-subtitle" data-i18n="loginSubtitle">Đăng nhập để bắt đầu</p>
             <div class="login-buttons">
                 <button class="login-btn google" id="btn-login-google">
@@ -84,7 +84,7 @@
             <div class="header-top">
                 <div class="brand-group">
                     <h1 class="app-title">⚡ FlowHub</h1>
-                    <span class="app-version">v1.3</span>
+                    <span class="app-version">v1.5</span>
                 </div>
                 <div class="header-actions">
                     <button class="install-header-btn" id="btn-header-install" title="Cài đặt FlowHub" aria-label="Cài đặt FlowHub">
@@ -417,6 +417,12 @@
                             <span class="permission-notice-text" data-i18n="notificationNotice">Cần cấp quyền để nhận thông báo trên điện thoại / máy tính</span>
                             <button type="button" class="permission-request-btn" id="todo-permission-request-btn" data-i18n="enableNotification">Bật thông báo</button>
                         </div>
+                        <div class="battery-guide-trigger-wrap">
+                            <button type="button" class="battery-guide-trigger-btn" id="todo-battery-tip-btn">
+                                <span class="battery-trigger-icon">⚡</span>
+                                <span data-i18n="batteryTipLink">Mẹo: Nhận thông báo chuẩn khi tắt màn hình</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -498,6 +504,51 @@
             </div>
             <div class="modal-footer">
                 <button class="modal-btn primary" id="pwa-guide-ok" data-i18n="gotIt">Đã hiểu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== BATTERY GUIDE MODAL ===== -->
+    <div class="modal-overlay" id="battery-guide-modal">
+        <div class="modal-container battery-guide-container">
+            <div class="modal-header">
+                <h3 class="modal-title" data-i18n="batteryGuideTitle">⚡ Mẹo nhận thông báo khi tắt màn hình</h3>
+                <button class="modal-close" id="battery-guide-close">✕</button>
+            </div>
+            <div class="modal-body battery-guide-body">
+                <p class="battery-guide-intro" data-i18n="batteryGuideIntro">
+                    Hệ điều hành Android thường bật chế độ <strong>"Tối ưu hóa pin"</strong> mặc định. Sau vài phút tắt màn hình, máy sẽ tự động đóng băng ứng dụng, khiến chuông nhắc việc bị trễ hoặc nín bặt.
+                </p>
+                <div class="battery-steps-list">
+                    <div class="battery-step-item">
+                        <div class="battery-step-num">1</div>
+                        <div class="battery-step-content">
+                            <h4 class="battery-step-heading" data-i18n="batteryStep1Title">Mở thông tin ứng dụng</h4>
+                            <p class="battery-step-text" data-i18n="batteryStep1Desc">Nhấn giữ icon <strong>FlowHub</strong> (hoặc Chrome) trên màn hình chính ➔ Chọn biểu tượng <strong>Thông tin ứng dụng (App info ⓘ)</strong>.</p>
+                        </div>
+                    </div>
+                    <div class="battery-step-item">
+                        <div class="battery-step-num">2</div>
+                        <div class="battery-step-content">
+                            <h4 class="battery-step-heading" data-i18n="batteryStep2Title">Đổi Pin sang "Không hạn chế"</h4>
+                            <p class="battery-step-text" data-i18n="batteryStep2Desc">Vào mục <strong>Pin (Battery)</strong> ➔ Chọn chế độ <strong>"Không hạn chế" (Unrestricted)</strong> thay vì <em>"Tối ưu hóa"</em>.</p>
+                        </div>
+                    </div>
+                    <div class="battery-step-item">
+                        <div class="battery-step-num">3</div>
+                        <div class="battery-step-content">
+                            <h4 class="battery-step-heading" data-i18n="batteryStep3Title">Bật trên màn hình khóa</h4>
+                            <p class="battery-step-text" data-i18n="batteryStep3Desc">Vào mục <strong>Thông báo</strong> ➔ Đảm bảo đã bật <strong>"Cho phép trên màn hình khóa"</strong> và <strong>"Bật âm thanh & rung"</strong>.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="battery-guide-tip">
+                    <span class="battery-tip-icon">💡</span>
+                    <span data-i18n="batteryGuideTipNote">Sau khi thiết lập, thông báo nhắc việc sẽ reo chuông và sáng màn hình chuẩn từng phút ngay cả khi tắt máy!</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-btn primary" id="battery-guide-ok" data-i18n="batteryGuideGotIt" style="width: 100%;">✓ Tôi đã hiểu & đã cài đặt</button>
             </div>
         </div>
     </div>

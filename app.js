@@ -90,7 +90,21 @@
             reminderStageLateBadge: 'Quá hạn 5 phút',
             snooze5m: '⏰ Báo lại 5p',
             dismiss: 'Đã hiểu (Tắt nhắc)',
-            snoozedToast: 'Đã hoãn nhắc nhở 5 phút'
+            snoozedToast: 'Đã hoãn nhắc nhở 5 phút',
+            reminderSetSuccessToast: '⏰ Đã lưu thời hạn: "{title}" (Hạn: {time})',
+            reminderSetSuccessTitle: '⏰ Đã đặt lịch task',
+            dueTimeLabel: 'Hạn hoàn thành',
+            batteryTipLink: 'Mẹo: Nhận thông báo chuẩn khi tắt màn hình',
+            batteryGuideTitle: '⚡ Mẹo nhận thông báo khi tắt màn hình',
+            batteryGuideIntro: 'Hệ điều hành Android thường bật chế độ "Tối ưu hóa pin" mặc định. Sau vài phút tắt màn hình, máy sẽ tự động đóng băng ứng dụng, khiến chuông nhắc việc bị trễ hoặc nín bặt.',
+            batteryStep1Title: 'Mở thông tin ứng dụng',
+            batteryStep1Desc: 'Nhấn giữ icon FlowHub (hoặc Chrome) trên màn hình chính ➔ Chọn biểu tượng Thông tin ứng dụng (App info ⓘ).',
+            batteryStep2Title: 'Đổi Pin sang "Không hạn chế"',
+            batteryStep2Desc: 'Vào mục Pin (Battery) ➔ Chọn chế độ "Không hạn chế" (Unrestricted) thay vì "Tối ưu hóa".',
+            batteryStep3Title: 'Bật trên màn hình khóa',
+            batteryStep3Desc: 'Vào mục Thông báo ➔ Đảm bảo đã bật "Cho phép trên màn hình khóa" và "Bật âm thanh & rung".',
+            batteryGuideTipNote: 'Sau khi thiết lập, thông báo nhắc việc sẽ reo chuông và sáng màn hình chuẩn từng phút ngay cả khi tắt máy!',
+            batteryGuideGotIt: '✓ Tôi đã hiểu & đã cài đặt'
         },
         en: {
             mode: 'Mode', mode30: '30 min', mode30Detail: "25' work + 5' rest",
@@ -135,35 +149,33 @@
             installBannerDesc: 'Add to home screen for smooth, native mobile experience',
             installBtn: 'Install',
             pwaGuideTitle: 'Install FlowHub',
-            pwaGuideIntro: 'To install FlowHub to your device home screen:',
+            pwaGuideIntro: 'To install FlowHub on your home screen:',
             iosStep1: 'Tap the <strong>Share</strong> button <span class="pwa-inline-icon">📤</span> in the browser toolbar.',
-            iosStep2: 'Scroll down and select <strong>"Add to Home Screen"</strong> <span class="pwa-inline-icon">➕</span>.',
-            iosStep3: 'Tap <strong>"Add"</strong> at the top right to complete.',
-            desktopStep1: 'Click the Install icon <span class="pwa-inline-icon">⊕</span> or <span class="pwa-inline-icon">💻</span> in the browser address bar.',
-            desktopStep2: 'Or open browser Menu <span class="pwa-inline-icon">⋮</span> -> select <strong>"Install FlowHub..."</strong>',
+            iosStep2: 'Scroll down and tap <strong>"Add to Home Screen"</strong> <span class="pwa-inline-icon">➕</span>.',
+            iosStep3: 'Tap <strong>"Add"</strong> in the top-right corner to complete.',
+            desktopStep1: 'Click the Install icon <span class="pwa-inline-icon">⊕</span> or <span class="pwa-inline-icon">💻</span> in the address bar.',
+            desktopStep2: 'Or open the browser menu <span class="pwa-inline-icon">⋮</span> -> select <strong>"Install FlowHub..."</strong>',
             desktopStep3: 'Confirm <strong>"Install"</strong> to launch FlowHub in a smooth standalone window.',
-            pwaTip: 'FlowHub will run smoothly in full-screen, standalone mode with offline data!',
+            pwaTip: 'FlowHub runs in full screen smoothly, works independently and saves data offline!',
             gotIt: 'Got it',
             installedToast: 'FlowHub installed successfully! 🎉',
             alreadyInstalledToast: 'FlowHub is already installed on your device! ✨',
-            setReminder: 'Set reminder',
-            clearReminder: 'Clear reminder',
             reminderTime: 'Time:',
             reminderFrequency: 'Repeat:',
             freqOnce: 'Once',
             freqDaily: 'Daily',
             freqWeekly: 'Weekly',
             freqMonthly: 'Monthly',
-            notificationNotice: 'Permission required to receive notifications on mobile / desktop',
+            notificationNotice: 'Permission required to receive reminders on phone / PC',
             enableNotification: 'Enable notifications',
             taskReminderAlertTitle: '⏰ Task Reminder',
             reminderToast: '⏰ Reminder: {title}',
-            taskReminderDue: 'Task is due',
+            taskReminderDue: 'Task Due',
             completeTask: '✓ Complete',
             taskCompletedToast: 'Task completed! 🎉',
-            reminderStageBeforeTitle: '⏰ Task due in 5 minutes',
-            reminderStageBeforeToast: '⏰ 5 minutes remaining for task: {title}',
-            reminderStageBeforeBadge: '5 min left',
+            reminderStageBeforeTitle: '⏰ Task due soon (5 min left)',
+            reminderStageBeforeToast: '⏰ 5 minutes until task: {title}',
+            reminderStageBeforeBadge: 'Upcoming (5m)',
             reminderStageDueTitle: '🔔 Task due now',
             reminderStageDueToast: '🔔 Task due now: {title}',
             reminderStageDueBadge: 'Due now',
@@ -172,7 +184,21 @@
             reminderStageLateBadge: '5 min overdue',
             snooze5m: '⏰ Snooze 5m',
             dismiss: 'Got it (Dismiss)',
-            snoozedToast: 'Reminder snoozed for 5 minutes'
+            snoozedToast: 'Reminder snoozed for 5 minutes',
+            reminderSetSuccessToast: '⏰ Deadline set: "{title}" (Due: {time})',
+            reminderSetSuccessTitle: '⏰ Task deadline set',
+            dueTimeLabel: 'Due time',
+            batteryTipLink: 'Tip: Reliable notifications when screen is off',
+            batteryGuideTitle: '⚡ Reliable Notifications When Screen Is Off',
+            batteryGuideIntro: 'Android OS enables "Battery Optimization" by default. After a few minutes of screen-off, the OS freezes background apps, delaying or muting task alarms.',
+            batteryStep1Title: 'Open App Info',
+            batteryStep1Desc: 'Long press FlowHub (or Chrome) icon on home screen ➔ Tap App Info (ⓘ).',
+            batteryStep2Title: 'Set Battery to "Unrestricted"',
+            batteryStep2Desc: 'Go to Battery ➔ Select "Unrestricted" instead of "Optimized".',
+            batteryStep3Title: 'Allow on Lock Screen',
+            batteryStep3Desc: 'Go to Notifications ➔ Ensure "Allow on Lock Screen" and "Sound & Vibration" are enabled.',
+            batteryGuideTipNote: 'Once configured, task reminders will ring and wake your screen on time even when your phone is locked!',
+            batteryGuideGotIt: '✓ Got it, all set'
         }
     };
 
@@ -294,18 +320,32 @@
         } catch (e) { /* ignore */ }
     }
 
-    function showSystemNotification(title, body) {
+    function showSystemNotification(title, body, actions, data) {
         if (!('Notification' in window)) return;
         if (Notification.permission !== 'granted') return;
+
+        var defaultActions = [
+            { action: 'complete', title: t('completeTask') || '✓ Hoàn thành' },
+            { action: 'snooze', title: t('snooze5m') || '⏰ Báo lại 5p' }
+        ];
+
+        var notifActions = (actions !== undefined) ? actions : defaultActions;
+        var tagKey = (data && data.taskId) ? ('flowhub-task-' + data.taskId + '-' + (data.stage || 'alert')) : ('flowhub-reminder-' + Date.now());
 
         var options = {
             body: body,
             icon: 'icon.svg',
             badge: 'icon.svg',
-            vibrate: [200, 100, 200],
-            tag: 'flowhub-reminder-' + Date.now(),
-            renotify: true
+            vibrate: [300, 100, 300, 100, 400],
+            tag: tagKey,
+            renotify: true,
+            requireInteraction: true,
+            data: data || {}
         };
+
+        if (Array.isArray(notifActions) && notifActions.length > 0) {
+            options.actions = notifActions;
+        }
 
         if ('serviceWorker' in navigator && navigator.serviceWorker.ready) {
             navigator.serviceWorker.ready.then(function (reg) {
@@ -939,8 +979,55 @@
             this._saveTasks();
             this._render();
             this._scheduleNextTimer();
+
+            if (task.endDate || task.startDate || (task.reminder && task.reminder.datetime)) {
+                self._notifyDateSet(task);
+            }
         }
         this.closeDateModal();
+    };
+
+    TodoList.prototype._notifyDateSet = function (task) {
+        if (!task) return;
+        var endOrDt = task.endDate || (task.reminder && task.reminder.datetime) || task.startDate;
+        if (!endOrDt) return;
+
+        var displayTime = '';
+        var labelPrefix = '';
+        if (task.startDate && task.endDate) {
+            displayTime = formatDisplayDate(task.startDate) + ' - ' + formatDisplayDate(task.endDate);
+            labelPrefix = t('dueTimeLabel');
+        } else if (task.endDate) {
+            displayTime = formatDisplayDate(task.endDate);
+            labelPrefix = t('dueTimeLabel');
+        } else {
+            displayTime = formatDisplayDate(task.startDate);
+            labelPrefix = t('from');
+        }
+
+        var toastMsg = t('reminderSetSuccessToast')
+            .replace('{title}', task.text)
+            .replace('{time}', labelPrefix + ' ' + displayTime);
+        var notifTitle = t('reminderSetSuccessTitle') + ': ' + task.text;
+        var notifBody = labelPrefix + ': ' + displayTime;
+
+        playChime();
+
+        if (typeof PwaManager !== 'undefined' && PwaManager.showToast) {
+            PwaManager.showToast(toastMsg, '⏰');
+        }
+
+        if ('Notification' in window) {
+            if (Notification.permission === 'granted') {
+                showSystemNotification(notifTitle, notifBody);
+            } else if (Notification.permission === 'default') {
+                Notification.requestPermission().then(function (perm) {
+                    if (perm === 'granted') {
+                        showSystemNotification(notifTitle, notifBody);
+                    }
+                }).catch(function () {});
+            }
+        }
     };
 
     TodoList.prototype.clearDateFromModal = function () {
@@ -988,6 +1075,10 @@
         this._saveTasks();
         this._render();
         this._scheduleNextTimer();
+
+        if (task.endDate || task.startDate) {
+            this._notifyDateSet(task);
+        }
     };
 
     TodoList.prototype.toggleTask = function (id) {
@@ -1290,6 +1381,8 @@
                 self._checkReminders();
             }, minDiff + 200);
         }
+
+        this._syncRemindersToWorker();
     };
 
     TodoList.prototype._checkReminders = function () {
@@ -1416,7 +1509,11 @@
             PwaManager.showToast(toastMsg, icon);
         }
 
-        showSystemNotification(alertTitle + ': ' + titleText, subtasksText);
+        showSystemNotification(alertTitle + ': ' + titleText, subtasksText, undefined, {
+            taskId: task.id,
+            stage: stage,
+            taskText: titleText
+        });
     };
 
     TodoList.prototype._showReminderAlertModal = function (task, stage, stageBadge) {
@@ -1465,13 +1562,10 @@
         this.activeAlertTaskId = null;
     };
 
-    TodoList.prototype._completeActiveTask = function () {
-        if (!this.activeAlertTaskId) {
-            this._closeReminderAlertModal();
-            return;
-        }
+    TodoList.prototype.completeTaskById = function (taskId) {
+        if (!taskId) return;
         var self = this;
-        var task = this.tasks.find(function (t) { return t.id === self.activeAlertTaskId; });
+        var task = this.tasks.find(function (t) { return t.id === taskId; });
         if (task) {
             task.completed = true;
             if (task.reminder) {
@@ -1485,11 +1579,45 @@
             this._saveTasks();
             this._render();
             this._scheduleNextTimer();
+            playChime();
             if (typeof PwaManager !== 'undefined' && PwaManager.showToast) {
                 PwaManager.showToast(t('taskCompletedToast'), '🎉');
             }
         }
-        this._closeReminderAlertModal();
+        if (this.activeAlertTaskId === taskId) {
+            this._closeReminderAlertModal();
+        }
+    };
+
+    TodoList.prototype.snoozeTaskById = function (taskId, minutes) {
+        if (!taskId) return;
+        var mins = minutes || 5;
+        var self = this;
+        var task = this.tasks.find(function (t) { return t.id === taskId; });
+        if (task && task.reminder) {
+            var snoozeDate = new Date(Date.now() + mins * 60 * 1000);
+            task.reminder.datetime = formatDateTimeLocal(snoozeDate);
+            task.reminder.stage = 1;
+            task.reminder.dismissed = false;
+            task.reminder.completed = false;
+            this._saveTasks();
+            this._render();
+            this._scheduleNextTimer();
+            if (typeof PwaManager !== 'undefined' && PwaManager.showToast) {
+                PwaManager.showToast(t('snoozedToast'), '⏰');
+            }
+        }
+        if (this.activeAlertTaskId === taskId) {
+            this._closeReminderAlertModal();
+        }
+    };
+
+    TodoList.prototype._completeActiveTask = function () {
+        if (!this.activeAlertTaskId) {
+            this._closeReminderAlertModal();
+            return;
+        }
+        this.completeTaskById(this.activeAlertTaskId);
     };
 
     TodoList.prototype._dismissActiveReminder = function () {
@@ -1521,22 +1649,51 @@
             this._closeReminderAlertModal();
             return;
         }
+        this.snoozeTaskById(this.activeAlertTaskId, minutes || 5);
+    };
+
+    TodoList.prototype._syncRemindersToWorker = function () {
+        if (!('serviceWorker' in navigator)) return;
         var self = this;
-        var task = this.tasks.find(function (t) { return t.id === self.activeAlertTaskId; });
-        if (task && task.reminder) {
-            var snoozeDate = new Date(Date.now() + minutes * 60 * 1000);
-            task.reminder.datetime = formatDateTimeLocal(snoozeDate);
-            task.reminder.stage = 1;
-            task.reminder.dismissed = false;
-            task.reminder.completed = false;
-            this._saveTasks();
-            this._render();
-            this._scheduleNextTimer();
-            if (typeof PwaManager !== 'undefined' && PwaManager.showToast) {
-                PwaManager.showToast(t('snoozedToast'), '⏰');
-            }
+        var activeTasks = [];
+        if (this.tasks && this.tasks.length > 0) {
+            this.tasks.forEach(function (task) {
+                if (task.completed) return;
+                if (!task.reminder || !task.reminder.enabled || task.reminder.completed) return;
+                var targetMs = self._getTaskTargetMs(task);
+                if (!targetMs) return;
+
+                var subtasksSummary = '';
+                if (Array.isArray(task.subtasks) && task.subtasks.length > 0) {
+                    var done = task.subtasks.filter(function (s) { return s.completed; }).length;
+                    subtasksSummary = '(' + done + '/' + task.subtasks.length + ' ' + t('subtasksCount') + ') ' +
+                        task.subtasks.map(function (s) { return (s.completed ? '☑ ' : '☐ ') + s.text; }).join(', ');
+                }
+
+                activeTasks.push({
+                    id: task.id,
+                    text: task.text,
+                    targetMs: targetMs,
+                    stage: typeof task.reminder.stage === 'number' ? task.reminder.stage : 0,
+                    dismissed: !!task.reminder.dismissed,
+                    subtasksSummary: subtasksSummary
+                });
+            });
         }
-        this._closeReminderAlertModal();
+
+        var payload = { type: 'SYNC_REMINDERS', tasks: activeTasks };
+        try {
+            if (navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage(payload);
+            }
+            navigator.serviceWorker.ready.then(function (reg) {
+                if (reg.active) {
+                    reg.active.postMessage(payload);
+                }
+            }).catch(function () {});
+        } catch (e) {
+            console.warn('[TodoList] syncReminders error:', e);
+        }
     };
 
     TodoList.prototype._advanceTaskRecurrence = function (task) {
@@ -1594,6 +1751,7 @@
     TodoList.prototype._saveTasks = function () {
         if (!currentUser) return;
         userDocRef('data').doc('todos').set({ items: this.tasks });
+        this._syncRemindersToWorker();
     };
     TodoList.prototype._loadTasks = function () {
         if (!currentUser) { this.tasks = []; this._render(); return; }
@@ -1602,6 +1760,7 @@
             self.tasks = (doc.exists && doc.data().items) ? doc.data().items : [];
             self._render();
             self._checkReminders();
+            self._syncRemindersToWorker();
         });
     };
 
@@ -2151,6 +2310,61 @@
     })();
 
     // =========================================================
+    //  BATTERY GUIDE MODAL & SERVICE WORKER MESSAGES
+    // =========================================================
+    function initBatteryGuideModal() {
+        var modal = document.getElementById('battery-guide-modal');
+        var triggerBtn = document.getElementById('todo-battery-tip-btn');
+        var closeBtn = document.getElementById('battery-guide-close');
+        var okBtn = document.getElementById('battery-guide-ok');
+
+        if (!modal) return;
+
+        function openModal() {
+            modal.classList.add('active');
+        }
+        function closeModal() {
+            modal.classList.remove('active');
+        }
+
+        if (triggerBtn) {
+            triggerBtn.addEventListener('click', openModal);
+        }
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeModal);
+        }
+        if (okBtn) {
+            okBtn.addEventListener('click', function () {
+                closeModal();
+                localStorage.setItem('flowhub_battery_guide_seen', 'true');
+            });
+        }
+
+        modal.addEventListener('click', function (e) {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+    }
+
+    // Listen for Service Worker lock screen actions (complete, snooze)
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.addEventListener('message', function (event) {
+            if (!event.data) return;
+            if (event.data.type === 'TASK_ACTION') {
+                var taskId = event.data.taskId;
+                if (window.__todoApp && taskId) {
+                    if (event.data.action === 'complete') {
+                        window.__todoApp.completeTaskById(taskId);
+                    } else if (event.data.action === 'snooze') {
+                        window.__todoApp.snoozeTaskById(taskId, event.data.minutes || 5);
+                    }
+                }
+            }
+        });
+    }
+
+    // =========================================================
     //  INITIALIZATION
     // =========================================================
     document.addEventListener('DOMContentLoaded', function () {
@@ -2158,6 +2372,7 @@
         setLanguage(currentLang);
         initAuth();
         initConfirmModal();
+        initBatteryGuideModal();
         PwaManager.init();
 
         // Language toggle

@@ -1,6 +1,6 @@
 # FlowHub - All in One Productivity App
 
-Tài liệu đặc tả yêu cầu và các tính năng hiện có của dự án **FlowHub** (phiên bản v1.3).
+Tài liệu đặc tả yêu cầu và các tính năng hiện có của dự án **FlowHub** (phiên bản v1.5).
 
 ---
 
@@ -54,7 +54,16 @@ Tài liệu đặc tả yêu cầu và các tính năng hiện có của dự á
   * Chuỗi lặp có giới hạn ngày kết thúc:
     * Nếu đặt cả `startDate` và `endDate` với tần suất lặp (ví dụ: Hàng ngày từ 05/09 đến 20/09): Mỗi ngày đúng giờ hẹn sẽ kích hoạt chu trình 3 tầng. Sau khi hoàn tất ngày cuối cùng (`endDate`), hệ thống tự động ngừng lặp.
   * Tự động dừng nhắc nhở ngay lập tức khi task được tích hoàn thành (✓).
-  * Hỗ trợ thông báo thiết bị (Web Notification API, Service Worker Push/PWA, popup modal và chuông báo).
+* **REQ 2.8 - 3 Giải pháp Kỹ thuật Đảm bảo Độ ổn định Thông báo khi Tắt màn hình**:
+  * **Giải pháp 1: Lập lịch ngầm Service Worker & Notification Triggers API (`TimestampTrigger`)**:
+    * Đưa mốc hẹn xuống Service Worker (`sw.js`). Sử dụng `TimestampTrigger` đăng ký mốc thời gian thẳng vào bộ đếm phần cứng **Alarm Manager** của hệ điều hành, đánh thức máy reo chuông đúng giờ ngay cả khi điện thoại tắt màn hình hoặc trình duyệt rơi vào chế độ ngủ sâu (Deep Doze Mode).
+    * Bộ đếm ngầm `setTimeout` trong Service Worker làm cơ chế fallback cho thiết bị chưa hỗ trợ trigger API.
+  * **Giải pháp 2: Thông báo Ưu tiên cao (High-Priority) & Thao tác ngay từ Màn hình khóa**:
+    * Cấu hình thông báo với `requireInteraction: true`, `renotify: true` và chuỗi rung cảnh báo mạnh `[300, 100, 300, 100, 400]`.
+    * Tích hợp 2 nút hành động trực tiếp trên màn hình khóa: `✓ Hoàn thành` và `⏰ Báo lại 5p`, cho phép người dùng xử lý công việc nhanh mà không cần mở khóa máy.
+  * **Giải pháp 3: Hướng dẫn Cấu hình Pin không hạn chế (Unrestricted Battery Guide)**:
+    * Tích hợp nút `⚡ Mẹo nhận thông báo khi tắt màn hình` trong modal đặt hạn công việc.
+    * Modal trực quan `#battery-guide-modal` hướng dẫn 3 bước đổi quyền Pin từ *"Tối ưu hóa"* sang *"Không hạn chế" (Unrestricted)* và cấp quyền thông báo màn hình khóa trên Android để đảm bảo hệ điều hành không bao giờ chặn chuông báo.
 
 ---
 

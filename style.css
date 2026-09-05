@@ -2055,6 +2055,39 @@ body {
     transform: translateY(-1px);
 }
 
+.battery-guide-trigger-wrap {
+    margin-top: 8px;
+    display: flex;
+    justify-content: center;
+}
+
+.battery-guide-trigger-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px dashed rgba(129, 140, 248, 0.4);
+    color: #a5b4fc;
+    border-radius: var(--radius-full);
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.battery-guide-trigger-btn:hover {
+    background: rgba(99, 102, 241, 0.2);
+    border-color: #818cf8;
+    color: #c7d2fe;
+    transform: translateY(-1px);
+}
+
+.battery-trigger-icon {
+    font-size: 0.95rem;
+    line-height: 1;
+}
+
 .modal-btn.success {
     background: linear-gradient(135deg, #10b981, #059669);
     color: #fff;
@@ -2774,6 +2807,109 @@ body {
     flex-shrink: 0;
 }
 
+/* ===== BATTERY GUIDE MODAL ===== */
+.battery-guide-container {
+    max-width: 480px !important;
+}
+
+.battery-guide-body {
+    padding: 16px 24px 20px;
+}
+
+.battery-guide-intro {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 16px;
+}
+
+.battery-guide-intro strong {
+    color: #fbbf24;
+}
+
+.battery-steps-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.battery-step-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    transition: var(--transition);
+}
+
+.battery-step-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(99, 102, 241, 0.3);
+}
+
+.battery-step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+}
+
+.battery-step-content {
+    flex: 1;
+}
+
+.battery-step-heading {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 4px 0;
+}
+
+.battery-step-text {
+    font-size: 0.83rem;
+    color: var(--text-secondary);
+    line-height: 1.45;
+    margin: 0;
+}
+
+.battery-step-text strong {
+    color: #a5b4fc;
+}
+
+.battery-step-text em {
+    color: #94a3b8;
+}
+
+.battery-guide-tip {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    border-radius: var(--radius-md);
+    font-size: 0.82rem;
+    color: #34d399;
+    line-height: 1.45;
+    margin-top: 16px;
+}
+
+.battery-tip-icon {
+    font-size: 1.15rem;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
 /* PWA Toast Notification */
 .pwa-toast {
     position: fixed;
@@ -2836,34 +2972,46 @@ body {
 }
 
 /* =========================================================
- *  RESPONSIVE TABLET & DESKTOP OVERHAUL (>= 768px, >= 992px, >= 1024px, >= 1360px)
+ *  RESPONSIVE TABLET & DESKTOP OVERHAUL (>= 768px, >= 1024px, >= 1360px)
  * ========================================================= */
+
+/* Mobile / Narrow Screen safeguard (< 640px) */
+@media (max-width: 640px) {
+    .todo-dates-picker-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+    }
+    .todo-dates-picker-row .todo-date-clear-btn {
+        align-self: flex-end;
+    }
+}
 
 /* --- TABLET & UP (min-width: 768px) --- */
 @media (min-width: 768px) {
     /* Container Expansion */
     .app-container {
-        max-width: 880px;
+        max-width: 900px;
         padding: 32px 24px 64px;
         transition: max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     /* Ambient Lighting Orbs */
     .orb-1 {
-        width: 460px;
-        height: 460px;
+        width: 480px;
+        height: 480px;
         top: -80px;
         right: -80px;
     }
     .orb-2 {
-        width: 400px;
-        height: 400px;
+        width: 420px;
+        height: 420px;
         bottom: -80px;
         left: -80px;
     }
     .orb-3 {
-        width: 320px;
-        height: 320px;
+        width: 340px;
+        height: 340px;
     }
 
     /* User Bar & Header */
@@ -2897,32 +3045,50 @@ body {
         margin-bottom: 20px;
     }
 
-    /* --- POMODORO SECTION (2-Column Split Dashboard) --- */
+    /* --- POMODORO SECTION (Symmetrical & Focused Hub) --- */
+    #pomodoro-section {
+        max-width: 680px;
+        margin: 0 auto;
+    }
+
     #pomodoro-section.active {
         display: grid;
-        grid-template-columns: 1.15fr 1fr;
+        grid-template-columns: 1fr 1fr;
         grid-template-areas:
-            "timer mode"
-            "timer reps"
-            "timer history";
-        grid-template-rows: auto auto 1fr;
-        gap: 20px;
-        align-items: start;
+            "mode reps"
+            "timer timer"
+            "history history";
+        gap: 16px;
+    }
+
+    #pomodoro-section .mode-selector {
+        grid-area: mode;
+        margin-bottom: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    #pomodoro-section .rep-selector {
+        grid-area: reps;
+        margin-bottom: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
     }
 
     #pomodoro-section .timer-card {
         grid-area: timer;
         margin-bottom: 0;
-        min-height: 460px;
+        padding: 32px 24px 28px;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        padding: 36px 24px;
     }
 
     #pomodoro-section .timer-ring-container {
-        margin: 18px auto 26px;
+        margin: 16px auto 24px;
     }
 
     #pomodoro-section .timer-ring {
@@ -2934,14 +3100,14 @@ body {
         font-size: 3.4rem;
     }
 
-    #pomodoro-section .mode-selector {
-        grid-area: mode;
-        margin-bottom: 0;
+    #pomodoro-section .timer-controls {
+        gap: 16px;
     }
 
-    #pomodoro-section .rep-selector {
-        grid-area: reps;
-        margin-bottom: 0;
+    #pomodoro-section .control-btn {
+        min-width: 140px;
+        padding: 13px 28px;
+        font-size: 0.95rem;
     }
 
     #pomodoro-section .history-card {
@@ -2949,25 +3115,74 @@ body {
         margin-bottom: 0;
     }
 
-    /* --- TO-DO SECTION (Tablet Centered) --- */
+    /* --- TO-DO SECTION (Spacious Centered Workspace) --- */
     #todo-section {
-        max-width: 800px;
+        max-width: 820px;
         margin: 0 auto;
     }
 
-    .todo-input-card {
+    #todo-section.active {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    #todo-section .todo-input-card {
+        margin-bottom: 0;
         padding: 20px 24px;
     }
 
-    .todo-dates-picker-row {
-        gap: 12px;
+    #todo-section .todo-dates-picker-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 14px;
+        width: 100%;
+        box-sizing: border-box;
     }
 
-    .todo-item {
+    #todo-section .todo-date-field {
+        flex: 1;
+        min-width: 0;
+    }
+
+    #todo-section .todo-date-input {
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        padding: 9px 12px;
+        font-size: 0.88rem;
+    }
+
+    #todo-section .todo-filter-card {
+        margin-bottom: 0;
+        padding: 10px 16px;
+    }
+
+    #todo-section .filter-bar {
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+    }
+
+    #todo-section .filter-btn {
+        flex: 1;
+        text-align: center;
+        padding: 10px 16px;
+        font-size: 0.9rem;
+        border-radius: var(--radius-md);
+    }
+
+    #todo-section .todo-list-card {
+        margin-bottom: 0;
+        min-height: 420px;
+        padding: 22px 24px;
+    }
+
+    #todo-section .todo-item {
         padding: 14px 18px;
     }
 
-    .todo-text {
+    #todo-section .todo-text {
         font-size: 0.96rem;
     }
 
@@ -3032,62 +3247,6 @@ body {
     }
 }
 
-/* --- DESKTOP & LAPTOP (min-width: 992px) --- */
-@media (min-width: 992px) {
-    /* --- TO-DO SECTION (2-Column Productivity Workspace) --- */
-    #todo-section {
-        max-width: 100%;
-        margin: 0;
-    }
-
-    #todo-section.active {
-        display: grid;
-        grid-template-columns: 350px 1fr;
-        grid-template-areas:
-            "input list"
-            "filter list";
-        grid-template-rows: auto 1fr;
-        gap: 22px;
-        align-items: start;
-    }
-
-    #todo-section .todo-input-card {
-        grid-area: input;
-        margin-bottom: 0;
-    }
-
-    #todo-section .todo-filter-card {
-        grid-area: filter;
-        margin-bottom: 0;
-        position: sticky;
-        top: 24px;
-        z-index: 10;
-    }
-
-    #todo-section .filter-bar {
-        flex-direction: column;
-        gap: 6px;
-    }
-
-    #todo-section .filter-btn {
-        text-align: left;
-        padding: 12px 16px;
-        font-size: 0.9rem;
-        border-radius: var(--radius-md);
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-        gap: 10px;
-    }
-
-    #todo-section .todo-list-card {
-        grid-area: list;
-        margin-bottom: 0;
-        min-height: 520px;
-        padding: 24px 26px;
-    }
-}
-
 /* --- LARGE SCREENS & DESKTOP (min-width: 1024px) --- */
 @media (min-width: 1024px) {
     /* Container Expansion */
@@ -3120,23 +3279,34 @@ body {
     }
 
     /* Pomodoro Desktop Polish */
-    #pomodoro-section.active {
-        grid-template-columns: 1.25fr 1fr;
-        gap: 24px;
+    #pomodoro-section {
+        max-width: 720px;
     }
 
     #pomodoro-section .timer-card {
-        padding: 44px 32px;
-        min-height: 500px;
+        padding: 36px 28px;
     }
 
     #pomodoro-section .timer-ring {
-        width: 270px;
-        height: 270px;
+        width: 260px;
+        height: 260px;
     }
 
     #pomodoro-section .timer-time {
-        font-size: 3.6rem;
+        font-size: 3.5rem;
+    }
+
+    /* To-do Desktop Polish */
+    #todo-section {
+        max-width: 860px;
+    }
+
+    #todo-section .todo-input-card {
+        padding: 22px 28px;
+    }
+
+    #todo-section .todo-list-card {
+        padding: 24px 28px;
     }
 
     /* Quick Notes Desktop (4 Columns Masonry Board) */
