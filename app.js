@@ -606,9 +606,12 @@
         this.isWorking = true; this.timeRemaining = MODES['30'].work;
         this.totalTime = MODES['30'].work; this.isRunning = false;
         this.isPaused = false; this.intervalId = null;
+        this.endTime = null;
 
         this._cacheElements(); this._bindEvents();
-        this._loadHistory(); this._updateDisplay();
+        this._loadHistory();
+        this._restoreSession();
+        this._updateDisplay();
     }
 
     PomodoroTimer.prototype._cacheElements = function () {
@@ -623,6 +626,174 @@
         this.historyListEl = document.getElementById('history-list');
         this.historyContent = document.getElementById('history-content');
         this.historyArrow = document.getElementById('history-arrow');
+    };
+
+    PomodoroTimer.prototype._saveSession = function () {
+        if (!this.isRunning && !this.isPaused) {
+            localStorage.removeItem('flowhub_pomodoro_session');
+            return;
+        }
+        var session = {
+            mode: this.mode,
+            totalReps: this.totalReps,
+            currentRep: this.currentRep,
+            isWorking: this.isWorking,
+            totalTime: this.totalTime,
+            isRunning: this.isRunning,
+            isPaused: this.isPaused,
+            timeRemaining: this.timeRemaining,
+            endTime: this.endTime,
+            pausedRemaining: this.isPaused ? this.timeRemaining : null
+        };
+        localStorage.setItem('flowhub_pomodoro_session', JSON.stringify(session));
+    };
+
+    PomodoroTimer.prototype._clearSession = function () {
+        localStorage.removeItem('flowhub_pomodoro_session');
+    };
+
+    PomodoroTimer.prototype._restoreSession = function () {
+        try {
+            var raw = localStorage.getItem('flowhub_pomodoro_session');
+            if (!raw) return;
+            var s = JSON.parse(raw);
+            if (!s) return;
+
+            this.mode = s.mode || '30';
+            this.totalReps = s.totalReps || 3;
+            this.currentRep = s.currentRep || 1;
+            this.isWorking = (s.isWorking !== undefined) ? s.isWorking : true;
+            this.totalTime = s.totalTime || (this.isWorking ? MODES[this.mode].work : MODES[this.mode].break);
+
+            // Cập nhật giao diện nút mode
+            var self = this;
+            document.querySelectorAll('.mode-btn').forEach(function (b) {
+                b.classList.toggle('active', b.getAttribute('data-mode') === self.mode);
+            });
+            if (this.repCountEl) this.repCountEl.textContent = this.totalReps;
+
+            // Cập nhật giao diện Work vs Break
+            if (!this.isWorking) {
+                this.ringEl.classList.add('break-mode');
+                this.timerCard.classList.add('break-active');
+            } else {
+                this.ringEl.classList.remove('break-mode');
+                this.timerCard.classList.remove('break-active');
+            }
+
+            if (s.isPaused) {
+                // Khôi phục trạng thái tạm dừng
+                this.isRunning = true;
+                this.isPaused = true;
+                this.timeRemaining = s.pausedRemaining || s.timeRemaining || this.totalTime;
+                this.startBtn.textContent = t('resume');
+                this.resetBtn.disabled = false;
+                this.timerCard.classList.remove('running');
+                this._setLockedUI(true);
+                this._updateStatus();
+            } else if (s.isRunning && s.endTime) {
+                var now = Date.now();
+                var diff = Math.round((s.endTime - now) / 1000);
+
+                if (diff > 0) {
+                    // Phiên hiện tại vẫn chưa kết thúc -> khôi phục tiếp tục đếm
+                    this.isRunning = true;
+                    this.isPaused = false;
+                    this.timeRemaining = diff;
+                    this.endTime = s.endTime;
+                    this.resetBtn.disabled = false;
+                    this.startBtn.textContent = t('pause');
+                    this.timerCard.classList.add('running');
+                    this._setLockedUI(true);
+                    this._updateStatus();
+
+                    if (this.intervalId) clearInterval(this.intervalId);
+                    this.intervalId = setInterval(function () { self._tick(); }, 1000);
+                } else {
+                    // Thời gian trôi qua trong lúc đóng tab/refresh đã vượt quá phiên hiện tại
+                    this._advanceElapsedSession(s, Math.abs(diff));
+                }
+            }
+        } catch (e) {
+            console.warn('Pomodoro session restore error:', e);
+            localStorage.removeItem('flowhub_pomodoro_session');
+        }
+    };
+
+    PomodoroTimer.prototype._advanceElapsedSession = function (s, elapsedPast) {
+        var isWork = s.isWorking;
+        var curRep = s.currentRep;
+        var totalR = s.totalReps;
+        var modeVal = s.mode;
+        var remainingOver = elapsedPast;
+        var self = this;
+
+        while (true) {
+            if (isWork) {
+                // Hết phiên làm việc -> chuyển sang phiên nghỉ ngơi
+                isWork = false;
+                var breakTime = MODES[modeVal].break;
+                if (remainingOver < breakTime) {
+                    this.isRunning = true;
+                    this.isPaused = false;
+                    this.isWorking = false;
+                    this.currentRep = curRep;
+                    this.totalTime = breakTime;
+                    this.timeRemaining = breakTime - remainingOver;
+                    this.endTime = Date.now() + this.timeRemaining * 1000;
+                    this.ringEl.classList.add('break-mode');
+                    this.timerCard.classList.add('break-active');
+                    this.timerCard.classList.add('running');
+                    this.startBtn.textContent = t('pause');
+                    this.resetBtn.disabled = false;
+                    this._setLockedUI(true);
+                    this._updateStatus();
+                    this._saveSession();
+
+                    if (this.intervalId) clearInterval(this.intervalId);
+                    this.intervalId = setInterval(function () { self._tick(); }, 1000);
+                    return;
+                } else {
+                    remainingOver -= breakTime;
+                }
+            } else {
+                // Hết phiên nghỉ ngơi -> chuyển sang rep tiếp theo hoặc hoàn thành
+                if (curRep < totalR) {
+                    curRep++;
+                    isWork = true;
+                    var workTime = MODES[modeVal].work;
+                    if (remainingOver < workTime) {
+                        this.isRunning = true;
+                        this.isPaused = false;
+                        this.isWorking = true;
+                        this.currentRep = curRep;
+                        this.totalTime = workTime;
+                        this.timeRemaining = workTime - remainingOver;
+                        this.endTime = Date.now() + this.timeRemaining * 1000;
+                        this.ringEl.classList.remove('break-mode');
+                        this.timerCard.classList.remove('break-active');
+                        this.timerCard.classList.add('running');
+                        this.startBtn.textContent = t('pause');
+                        this.resetBtn.disabled = false;
+                        this._setLockedUI(true);
+                        this._updateStatus();
+                        this._saveSession();
+
+                        if (this.intervalId) clearInterval(this.intervalId);
+                        this.intervalId = setInterval(function () { self._tick(); }, 1000);
+                        return;
+                    } else {
+                        remainingOver -= workTime;
+                    }
+                } else {
+                    // Đã hoàn thành toàn bộ chu kỳ
+                    this._clearSession();
+                    this.currentRep = totalR;
+                    this._onAllComplete();
+                    return;
+                }
+            }
+        }
     };
 
     PomodoroTimer.prototype._bindEvents = function () {
@@ -658,28 +829,50 @@
 
     PomodoroTimer.prototype._start = function () {
         var self = this;
-        this.isRunning = true; this.isPaused = false;
+        this.isRunning = true;
+        this.isPaused = false;
+        this.endTime = Date.now() + this.timeRemaining * 1000;
         this.resetBtn.disabled = false;
         this.startBtn.textContent = t('pause');
         this.timerCard.classList.add('running');
-        this._updateStatus(); this._setLockedUI(true);
+        this._updateStatus();
+        this._setLockedUI(true);
+        this._saveSession();
+
+        if (this.intervalId) clearInterval(this.intervalId);
         this.intervalId = setInterval(function () { self._tick(); }, 1000);
     };
+
     PomodoroTimer.prototype._pause = function () {
-        this.isPaused = true; clearInterval(this.intervalId);
+        this.isPaused = true;
+        if (this.intervalId) clearInterval(this.intervalId);
+        if (this.endTime) {
+            this.timeRemaining = Math.max(0, Math.round((this.endTime - Date.now()) / 1000));
+        }
         this.startBtn.textContent = t('resume');
         this.timerCard.classList.remove('running');
+        this._saveSession();
     };
+
     PomodoroTimer.prototype._resume = function () {
-        var self = this; this.isPaused = false;
+        var self = this;
+        this.isPaused = false;
+        this.endTime = Date.now() + this.timeRemaining * 1000;
         this.startBtn.textContent = t('pause');
         this.timerCard.classList.add('running');
+        this._saveSession();
+
+        if (this.intervalId) clearInterval(this.intervalId);
         this.intervalId = setInterval(function () { self._tick(); }, 1000);
     };
+
     PomodoroTimer.prototype._reset = function () {
-        clearInterval(this.intervalId);
-        this.isRunning = false; this.isPaused = false;
-        this.currentRep = 1; this.isWorking = true;
+        if (this.intervalId) clearInterval(this.intervalId);
+        this.isRunning = false;
+        this.isPaused = false;
+        this.endTime = null;
+        this.currentRep = 1;
+        this.isWorking = true;
         this.timeRemaining = MODES[this.mode].work;
         this.totalTime = MODES[this.mode].work;
         this.startBtn.textContent = t('start');
@@ -688,46 +881,74 @@
         this.statusEl.className = 'timer-status';
         this.timerCard.classList.remove('running', 'break-active');
         this.ringEl.classList.remove('break-mode');
-        this._setLockedUI(false); this._updateDisplay();
-    };
-    PomodoroTimer.prototype._tick = function () {
-        this.timeRemaining--;
-        if (this.timeRemaining <= 0) this._onPhaseComplete();
+        this._setLockedUI(false);
+        this._clearSession();
         this._updateDisplay();
     };
+
+    PomodoroTimer.prototype._tick = function () {
+        if (this.endTime) {
+            this.timeRemaining = Math.max(0, Math.round((this.endTime - Date.now()) / 1000));
+        } else {
+            this.timeRemaining--;
+        }
+
+        if (this.timeRemaining <= 0) {
+            this._onPhaseComplete();
+        } else {
+            this._updateDisplay();
+            // Lưu session định kỳ mỗi 5s để giảm I/O
+            if (this.timeRemaining % 5 === 0) {
+                this._saveSession();
+            }
+        }
+    };
+
     PomodoroTimer.prototype._onPhaseComplete = function () {
         if (this.isWorking) {
             playBeep(600, 200, 2);
             this.isWorking = false;
             this.timeRemaining = MODES[this.mode].break;
             this.totalTime = MODES[this.mode].break;
+            this.endTime = Date.now() + this.timeRemaining * 1000;
             this.ringEl.classList.add('break-mode');
             this.timerCard.classList.add('break-active');
         } else {
             this.ringEl.classList.remove('break-mode');
             this.timerCard.classList.remove('break-active');
             if (this.currentRep < this.totalReps) {
-                playBeep(800, 200, 2); this.currentRep++;
+                playBeep(800, 200, 2);
+                this.currentRep++;
                 this.isWorking = true;
                 this.timeRemaining = MODES[this.mode].work;
                 this.totalTime = MODES[this.mode].work;
+                this.endTime = Date.now() + this.timeRemaining * 1000;
             } else {
-                playBeep(1000, 300, 4); this._onAllComplete(); return;
+                playBeep(1000, 300, 4);
+                this._onAllComplete();
+                return;
             }
         }
         this._updateStatus();
+        this._updateDisplay();
+        this._saveSession();
     };
+
     PomodoroTimer.prototype._onAllComplete = function () {
-        clearInterval(this.intervalId);
-        this.isRunning = false; this.isPaused = false;
+        if (this.intervalId) clearInterval(this.intervalId);
+        this.isRunning = false;
+        this.isPaused = false;
+        this.endTime = null;
         this.statusEl.textContent = t('completed');
         this.statusEl.className = 'timer-status completed';
         this.startBtn.textContent = t('start');
         this.resetBtn.disabled = false;
         this.timerCard.classList.remove('running');
         this._setLockedUI(false);
+        this._clearSession();
         this._saveHistory();
     };
+
     PomodoroTimer.prototype._updateDisplay = function () {
         this.timeEl.textContent = formatTime(this.timeRemaining);
         this.repEl.textContent = 'Rep ' + this.currentRep + '/' + this.totalReps;
@@ -3301,7 +3522,17 @@
             if (doneCount > 0) {
                 streak++;
             } else if (d < currentDayNum) {
-                // broken streak in the past
+                // broken streak in the past -> ghi nhận vào lịch sử Quỹ kỷ luật nếu chưa có
+                var penaltyDate = dPad + '/' + mPad + '/' + this.viewYear;
+                if (!this.habitProfile.penalties) this.habitProfile.penalties = [];
+                var alreadyLogged = this.habitProfile.penalties.some(function (p) { return p.date === penaltyDate; });
+                if (!alreadyLogged && activeHabits.length > 0) {
+                    this.habitProfile.penalties.unshift({
+                        id: generateId(),
+                        date: penaltyDate,
+                        note: currentLang === 'vi' ? 'Bỏ lỡ toàn bộ thói quen trong ngày (Đứt chuỗi 🔥)' : 'Missed all daily habits (Streak broken 🔥)'
+                    });
+                }
                 break;
             }
         }

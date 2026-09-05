@@ -20,6 +20,9 @@ Tài liệu đặc tả yêu cầu và các tính năng hiện có của dự á
 * **REQ 1.5 - Lưu trữ & Hiển thị lịch sử**:
   * Tự động lưu lịch sử các phiên Pomodoro đã hoàn thành theo ngày vào Firebase Firestore.
   * Hiển thị danh sách lịch sử trực quan (ngày tháng, chế độ, số rep, thời gian hoàn thành).
+* **REQ 1.6 - Lưu trữ phiên đang chạy & Kháng tải lại trang (F5 / Refresh-Resistant)**:
+  * Sử dụng cơ chế mốc thời gian tuyệt đối (`endTime = Date.now() + timeRemaining * 1000`) lưu vào `localStorage`.
+  * Tự động khôi phục và tiếp tục đếm chuẩn xác khi người dùng tải lại trang (F5/Refresh), đóng trình duyệt hoặc tắt màn hình điện thoại mà không bị gián đoạn hay mất dữ liệu.
 
 ---
 
