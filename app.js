@@ -3214,14 +3214,25 @@
         // Quick Presets
         if (this.quickPresets) {
             var target = habit.target;
+            var isMlOrWater = (habit.unit && habit.unit.toLowerCase().indexOf('ml') !== -1) || 
+                              (habit.title && (habit.title.toLowerCase().indexOf('nước') !== -1 || habit.title.toLowerCase().indexOf('water') !== -1));
             var presets = [];
-            if (target >= 1000) {
-                presets = [250, 500, 1000, target];
+            if (isMlOrWater || target >= 1000) {
+                presets = [100, 150, 200, 250, 500, 1000, target];
+            } else if (target >= 500) {
+                presets = [50, 100, 150, 200, 250, target];
             } else if (target >= 100) {
-                presets = [10, 25, 50, target];
+                presets = [10, 25, 50, 100, target];
             } else {
                 presets = [1, 2, 5, target];
             }
+            // Lọc trùng và sắp xếp tăng dần
+            var uniquePresets = [];
+            presets.forEach(function (p) {
+                if (uniquePresets.indexOf(p) === -1 && p > 0) uniquePresets.push(p);
+            });
+            uniquePresets.sort(function (a, b) { return a - b; });
+            presets = uniquePresets;
             var self = this;
             var html = '';
             presets.forEach(function (p) {
