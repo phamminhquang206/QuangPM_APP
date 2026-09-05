@@ -36,21 +36,32 @@ Tài liệu đặc tả yêu cầu và các tính năng hiện có của dự á
   * Tạo danh sách các mục công việc con cho từng task cha.
   * Đánh dấu hoàn thành hoặc xóa từng việc con độc lập.
   * Thanh tiến độ mini hiển thị tỷ lệ hoàn thành các việc con.
-* **REQ 2.4 - Quản lý thời hạn (Start Date & End Date)**:
-  * Cửa sổ chọn ngày bắt đầu và ngày kết thúc cho từng task.
+* **REQ 2.4 - Quản lý thời hạn chi tiết (Start Date & End Date kèm Giờ/Phút)**:
+  * Thiết lập thời hạn chi tiết theo ngày, giờ, phút (`datetime-local`) cho từng task.
+  * Tùy chọn linh hoạt: Có thể chỉ đặt ngày bắt đầu (`startDate`), chỉ đặt ngày kết thúc (`endDate`), hoặc đặt cả hai.
   * Tự động gắn tag trạng thái: "Hôm nay" (Today) hoặc "Quá hạn" (Overdue) theo thời gian thực.
-  * Hỗ trợ xóa hạn ngày khi không cần thiết.
+  * Hỗ trợ xóa hạn ngày giờ khi không cần thiết.
 * **REQ 2.5 - Hộp thoại xác nhận (Confirm Modal)**:
   * Hiển thị modal xác nhận trước khi xóa task chính hoặc xóa việc con nhằm tránh thao tác nhầm.
 * **REQ 2.6 - Đồng bộ dữ liệu**:
   * Đồng bộ thời gian thực (Real-time Firestore) theo từng tài khoản cá nhân, hỗ trợ offline persistence.
+* **REQ 2.7 - Nhắc nhở công việc (Task Reminder) & Cơ chế 3 tầng thông báo**:
+  * Tùy chọn bật nhắc nhở với tần suất: Một lần, Hàng ngày, Hàng tuần, Hàng tháng.
+  * Cơ chế 3 tầng thông báo:
+    1. Thông báo trước 5 phút: Nhắc nhở còn 5 phút nữa đến giờ hẹn.
+    2. Thông báo đúng giờ hẹn (kèm Popup Modal cảnh báo, nút "✓ Hoàn thành task", "⏰ Báo lại 5p" và "Đã hiểu").
+    3. Thông báo trễ sau 5 phút: Nếu task chưa hoàn thành và người dùng chưa tắt nhắc, sau 5 phút sẽ phát thêm thông báo trễ.
+  * Chuỗi lặp có giới hạn ngày kết thúc:
+    * Nếu đặt cả `startDate` và `endDate` với tần suất lặp (ví dụ: Hàng ngày từ 05/09 đến 20/09): Mỗi ngày đúng giờ hẹn sẽ kích hoạt chu trình 3 tầng. Sau khi hoàn tất ngày cuối cùng (`endDate`), hệ thống tự động ngừng lặp.
+  * Tự động dừng nhắc nhở ngay lập tức khi task được tích hoàn thành (✓).
+  * Hỗ trợ thông báo thiết bị (Web Notification API, Service Worker Push/PWA, popup modal và chuông báo).
 
 ---
 
 ## 3. Quick Notes (Ghi chú nhanh)
 
 * **REQ 3.1 - Giao diện ghi chú dạng lưới (Google Keep Style)**:
-  * Bố cục thẻ ghi chú (cards) responsive dạng masonry/grid hiện đại.
+  * Bố cục thẻ ghi chú (cards) responsive dạng masonry/grid hiện đại, đơn giản, trực quan.
 * **REQ 3.2 - Tạo & Chỉnh sửa ghi chú**:
   * Nút "+ Ghi chú mới" mở modal soạn thảo đè lên màn hình (tiêu đề, nội dung ghi chú).
   * Cho phép bấm vào bất kỳ ghi chú nào để xem lại và chỉnh sửa nội dung.
@@ -61,9 +72,6 @@ Tài liệu đặc tả yêu cầu và các tính năng hiện có của dự á
   * Khi có ghi chú được chọn, xuất hiện nút "🗑 Xóa đã chọn" màu đỏ nổi bật.
 * **REQ 3.5 - Xác nhận xóa an toàn**:
   * Luôn hiển thị cửa sổ xác nhận trước khi xóa một hoặc nhiều ghi chú đã chọn.
-* **REQ 3.6 - Thêm phần tạo reminder cho Note**:
-  * Reminder Nhắc nhở theo Thời gian & Tần suất linh hoạt: Một lần, Mỗi 30 phút, Mỗi 1 tiếng, Hàng ngày, Hàng tuần, Hàng tháng.
-  * Có thông báo điện thoại / thiết bị (Web Notification API, Service Worker Push/PWA, rung & chuông báo).
 
 ---
 

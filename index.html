@@ -193,11 +193,11 @@
                 <div class="todo-dates-picker-row" id="todo-dates-picker-row" style="display: none;">
                     <div class="todo-date-field">
                         <label for="todo-start-date" data-i18n="startDate">Bắt đầu:</label>
-                        <input type="date" id="todo-start-date" class="todo-date-input" />
+                        <input type="datetime-local" id="todo-start-date" class="todo-date-input" />
                     </div>
                     <div class="todo-date-field">
                         <label for="todo-end-date" data-i18n="endDate">Kết thúc:</label>
-                        <input type="date" id="todo-end-date" class="todo-date-input" />
+                        <input type="datetime-local" id="todo-end-date" class="todo-date-input" />
                     </div>
                     <button class="todo-date-clear-btn" id="todo-date-clear-btn" title="Xóa ngày">✕</button>
                 </div>
@@ -342,43 +342,6 @@
                     <button class="color-dot" data-color="orange" style="background: rgba(245,158,11,0.25)"></button>
                     <button class="color-dot" data-color="red" style="background: rgba(239,68,68,0.25)"></button>
                 </div>
-
-                <!-- Reminder Section -->
-                <div class="note-reminder-section" id="note-reminder-section">
-                    <div class="note-reminder-header">
-                        <label class="note-reminder-toggle-label" for="note-reminder-enable">
-                            <input type="checkbox" id="note-reminder-enable" class="note-reminder-checkbox" />
-                            <span class="note-reminder-icon">🔔</span>
-                            <span class="note-reminder-title" data-i18n="setReminder">Đặt nhắc nhở</span>
-                        </label>
-                        <button type="button" class="note-reminder-clear-btn" id="note-reminder-clear" style="display: none;" data-i18n="clearReminder">Xóa nhắc nhở</button>
-                    </div>
-                    
-                    <div class="note-reminder-fields" id="note-reminder-fields" style="display: none;">
-                        <div class="note-reminder-field">
-                            <label for="note-reminder-datetime" data-i18n="reminderTime">Thời gian:</label>
-                            <input type="datetime-local" id="note-reminder-datetime" class="note-reminder-input" />
-                        </div>
-                        <div class="note-reminder-field">
-                            <label for="note-reminder-frequency" data-i18n="reminderFrequency">Lặp lại:</label>
-                            <select id="note-reminder-frequency" class="note-reminder-select">
-                                <option value="once" data-i18n="freqOnce">Một lần</option>
-                                <option value="30m" data-i18n="freq30m">Mỗi 30 phút</option>
-                                <option value="1h" data-i18n="freq1h">Mỗi 1 tiếng</option>
-                                <option value="daily" data-i18n="freqDaily">Hàng ngày</option>
-                                <option value="weekly" data-i18n="freqWeekly">Hàng tuần</option>
-                                <option value="monthly" data-i18n="freqMonthly">Hàng tháng</option>
-                            </select>
-                        </div>
-                        
-                        <!-- Notification Permission Warning / Action -->
-                        <div class="note-permission-notice" id="note-permission-notice" style="display: none;">
-                            <span class="permission-notice-icon">⚠️</span>
-                            <span class="permission-notice-text" data-i18n="notificationNotice">Cần cấp quyền để nhận thông báo trên điện thoại / máy tính</span>
-                            <button type="button" class="permission-request-btn" id="note-permission-request-btn" data-i18n="enableNotification">Bật thông báo</button>
-                        </div>
-                    </div>
-                </div>
             </div>
             <div class="modal-footer">
                 <button class="modal-btn secondary" id="note-modal-cancel" data-i18n="cancel">Hủy</button>
@@ -387,11 +350,34 @@
         </div>
     </div>
 
-    <!-- ===== TODO DATE MODAL OVERLAY ===== -->
+    <!-- ===== REMINDER ALERT POPUP MODAL ===== -->
+    <div class="modal-overlay reminder-alert-overlay" id="reminder-alert-modal">
+        <div class="modal-container reminder-alert-container">
+            <div class="reminder-alert-bell-wrapper">
+                <span class="reminder-alert-bell">🔔</span>
+            </div>
+            <h3 class="reminder-alert-title" id="reminder-alert-title" data-i18n="taskReminderAlertTitle">Nhắc nhở công việc</h3>
+            <div class="reminder-alert-meta" id="reminder-alert-meta">
+                <span class="reminder-alert-time" id="reminder-alert-time">09:23</span>
+                <span class="reminder-alert-stage-badge" id="reminder-alert-stage-badge">Đến giờ hẹn</span>
+                <span class="reminder-alert-freq" id="reminder-alert-freq">Một lần</span>
+            </div>
+            <div class="reminder-alert-content" id="reminder-alert-content">
+                Nội dung công việc...
+            </div>
+            <div class="reminder-alert-actions">
+                <button type="button" class="modal-btn success" id="reminder-alert-complete" data-i18n="completeTask">✓ Hoàn thành</button>
+                <button type="button" class="modal-btn secondary" id="reminder-alert-snooze" data-i18n="snooze5m">⏰ Báo lại 5p</button>
+                <button type="button" class="modal-btn primary" id="reminder-alert-dismiss" data-i18n="dismiss">Đã hiểu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== TODO DATE & REMINDER MODAL OVERLAY ===== -->
     <div class="modal-overlay" id="todo-date-modal-overlay">
         <div class="modal-container todo-date-modal-container">
             <div class="modal-header">
-                <h3 class="modal-title" id="todo-date-modal-title" data-i18n="setTaskDates">Thời hạn công việc</h3>
+                <h3 class="modal-title" id="todo-date-modal-title" data-i18n="setTaskDatesAndReminder">Thời hạn & Nhắc nhở</h3>
                 <button class="modal-close" id="todo-date-modal-close">✕</button>
             </div>
             <div class="modal-body">
@@ -399,16 +385,43 @@
                 <div class="todo-date-modal-fields">
                     <div class="todo-date-field">
                         <label for="modal-task-start-date" data-i18n="startDate">Bắt đầu:</label>
-                        <input type="date" id="modal-task-start-date" class="todo-date-input" />
+                        <input type="datetime-local" id="modal-task-start-date" class="todo-date-input" />
                     </div>
                     <div class="todo-date-field">
                         <label for="modal-task-end-date" data-i18n="endDate">Kết thúc:</label>
-                        <input type="date" id="modal-task-end-date" class="todo-date-input" />
+                        <input type="datetime-local" id="modal-task-end-date" class="todo-date-input" />
+                    </div>
+                </div>
+
+                <!-- Todo Reminder Section -->
+                <div class="todo-reminder-section" id="todo-reminder-section">
+                    <div class="todo-reminder-header">
+                        <label class="todo-reminder-toggle-label" for="modal-task-reminder-enable">
+                            <input type="checkbox" id="modal-task-reminder-enable" class="todo-reminder-checkbox" />
+                            <span class="todo-reminder-icon">🔔</span>
+                            <span class="todo-reminder-title" data-i18n="enableTaskReminder">Bật thông báo nhắc nhở</span>
+                        </label>
+                    </div>
+                    <div class="todo-reminder-fields" id="todo-reminder-fields" style="display: none;">
+                        <div class="todo-date-field">
+                            <label for="modal-task-reminder-frequency" data-i18n="reminderFrequency">Lặp lại:</label>
+                            <select id="modal-task-reminder-frequency" class="todo-reminder-select">
+                                <option value="once" data-i18n="freqOnce">Một lần</option>
+                                <option value="daily" data-i18n="freqDaily">Hàng ngày</option>
+                                <option value="weekly" data-i18n="freqWeekly">Hàng tuần</option>
+                                <option value="monthly" data-i18n="freqMonthly">Hàng tháng</option>
+                            </select>
+                        </div>
+                        <div class="todo-permission-notice" id="todo-permission-notice" style="display: none;">
+                            <span class="permission-notice-icon">⚠️</span>
+                            <span class="permission-notice-text" data-i18n="notificationNotice">Cần cấp quyền để nhận thông báo trên điện thoại / máy tính</span>
+                            <button type="button" class="permission-request-btn" id="todo-permission-request-btn" data-i18n="enableNotification">Bật thông báo</button>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer" style="justify-content: space-between;">
-                <button class="modal-btn secondary" id="modal-task-date-clear" data-i18n="clearDates" style="color: var(--accent-red);">Xóa ngày</button>
+                <button class="modal-btn secondary" id="modal-task-date-clear" data-i18n="clearDates" style="color: var(--accent-red);">Xóa ngày giờ</button>
                 <div style="display: flex; gap: 8px;">
                     <button class="modal-btn secondary" id="modal-task-date-cancel" data-i18n="cancel">Hủy</button>
                     <button class="modal-btn primary" id="modal-task-date-save" data-i18n="save">Lưu</button>

@@ -62,21 +62,35 @@
             gotIt: 'Đã hiểu',
             installedToast: 'Đã cài đặt FlowHub thành công! 🎉',
             alreadyInstalledToast: 'FlowHub đã được cài đặt trên thiết bị của bạn! ✨',
-            setReminder: 'Đặt nhắc nhở',
-            clearReminder: 'Xóa nhắc nhở',
+            setTaskDates: 'Thời hạn công việc',
+            setTaskDatesAndReminder: 'Thời hạn & Nhắc nhở',
+            enableTaskReminder: 'Bật thông báo nhắc nhở',
+            clearDates: 'Xóa ngày giờ',
             reminderTime: 'Thời gian:',
             reminderFrequency: 'Lặp lại:',
             freqOnce: 'Một lần',
-            freq30m: 'Mỗi 30 phút',
-            freq1h: 'Mỗi 1 tiếng',
             freqDaily: 'Hàng ngày',
             freqWeekly: 'Hàng tuần',
             freqMonthly: 'Hàng tháng',
             notificationNotice: 'Cần cấp quyền để nhận thông báo trên điện thoại / máy tính',
             enableNotification: 'Bật thông báo',
-            reminderAlertTitle: '⏰ Nhắc nhở FlowHub',
+            taskReminderAlertTitle: '⏰ Nhắc nhở công việc',
             reminderToast: '⏰ Nhắc nhở: {title}',
-            reminderDue: 'Đến hạn ghi chú'
+            taskReminderDue: 'Đến hạn công việc',
+            completeTask: '✓ Hoàn thành',
+            taskCompletedToast: 'Đã hoàn thành công việc! 🎉',
+            reminderStageBeforeTitle: '⏰ Sắp đến giờ task (còn 5 phút)',
+            reminderStageBeforeToast: '⏰ Còn 5 phút nữa đến giờ task: {title}',
+            reminderStageBeforeBadge: 'Sắp đến (còn 5p)',
+            reminderStageDueTitle: '🔔 Đến giờ làm task',
+            reminderStageDueToast: '🔔 Đến giờ làm task: {title}',
+            reminderStageDueBadge: 'Đến giờ hẹn',
+            reminderStageLateTitle: '⚠️ Quá hạn task 5 phút',
+            reminderStageLateToast: '⚠️ Quá hạn task 5 phút: {title}',
+            reminderStageLateBadge: 'Quá hạn 5 phút',
+            snooze5m: '⏰ Báo lại 5p',
+            dismiss: 'Đã hiểu (Tắt nhắc)',
+            snoozedToast: 'Đã hoãn nhắc nhở 5 phút'
         },
         en: {
             mode: 'Mode', mode30: '30 min', mode30Detail: "25' work + 5' rest",
@@ -91,7 +105,10 @@
             todayBadge: 'Today', overdueBadge: 'Overdue',
             subtasksCount: 'subtasks', addSubtaskPlaceholder: 'Add subtask...',
             addSubtaskBtn: '+',
-            setTaskDates: 'Task Dates', clearDates: 'Clear Dates',
+            setTaskDates: 'Task Dates',
+            setTaskDatesAndReminder: 'Task Dates & Reminder',
+            enableTaskReminder: 'Enable task reminder',
+            clearDates: 'Clear Dates',
             save: 'Save', addDate: '+ Date',
             confirmModalTitle: 'Confirm Delete', confirmDelete: 'Delete',
             confirmDeleteTaskMsg: 'Are you sure you want to delete this task?',
@@ -134,16 +151,28 @@
             reminderTime: 'Time:',
             reminderFrequency: 'Repeat:',
             freqOnce: 'Once',
-            freq30m: 'Every 30 mins',
-            freq1h: 'Every 1 hour',
             freqDaily: 'Daily',
             freqWeekly: 'Weekly',
             freqMonthly: 'Monthly',
             notificationNotice: 'Permission required to receive notifications on mobile / desktop',
             enableNotification: 'Enable notifications',
-            reminderAlertTitle: '⏰ FlowHub Reminder',
+            taskReminderAlertTitle: '⏰ Task Reminder',
             reminderToast: '⏰ Reminder: {title}',
-            reminderDue: 'Note reminder'
+            taskReminderDue: 'Task is due',
+            completeTask: '✓ Complete',
+            taskCompletedToast: 'Task completed! 🎉',
+            reminderStageBeforeTitle: '⏰ Task due in 5 minutes',
+            reminderStageBeforeToast: '⏰ 5 minutes remaining for task: {title}',
+            reminderStageBeforeBadge: '5 min left',
+            reminderStageDueTitle: '🔔 Task due now',
+            reminderStageDueToast: '🔔 Task due now: {title}',
+            reminderStageDueBadge: 'Due now',
+            reminderStageLateTitle: '⚠️ Task overdue by 5 minutes',
+            reminderStageLateToast: '⚠️ Task overdue by 5 minutes: {title}',
+            reminderStageLateBadge: '5 min overdue',
+            snooze5m: '⏰ Snooze 5m',
+            dismiss: 'Got it (Dismiss)',
+            snoozedToast: 'Reminder snoozed for 5 minutes'
         }
     };
 
@@ -218,6 +247,18 @@
 
     function formatDisplayDate(dateStr) {
         if (!dateStr) return '';
+        if (dateStr.indexOf('T') !== -1) {
+            var dtParts = dateStr.split('T');
+            var dParts = dtParts[0].split('-');
+            var timePart = dtParts[1] ? dtParts[1].substring(0, 5) : '';
+            var dFormatted = '';
+            if (dParts.length === 3) {
+                dFormatted = currentLang === 'vi' ? (dParts[2] + '/' + dParts[1]) : (dParts[1] + '/' + dParts[2]);
+            } else {
+                dFormatted = dtParts[0];
+            }
+            return timePart ? (dFormatted + ' ' + timePart) : dFormatted;
+        }
         var parts = dateStr.split('-');
         if (parts.length === 3) {
             return currentLang === 'vi' ? (parts[2] + '/' + parts[1]) : (parts[1] + '/' + parts[2]);
@@ -626,9 +667,12 @@
         this.filter = 'all';
         this.expandedTaskIds = new Set();
         this.editingDateTaskId = null;
+        this.activeAlertTaskId = null;
+        this._exactTimer = null;
         this._cacheElements();
         this._bindEvents();
         this._loadTasks();
+        this._startScheduler();
     }
 
     TodoList.prototype._cacheElements = function () {
@@ -641,15 +685,31 @@
         this.listEl = document.getElementById('todo-list');
         this.statsEl = document.getElementById('todo-stats');
 
-        // Date edit modal elements
+        // Date & Reminder edit modal elements
         this.dateModalOverlay = document.getElementById('todo-date-modal-overlay');
         this.dateModalTaskTitle = document.getElementById('todo-date-modal-task-title');
         this.modalStartDate = document.getElementById('modal-task-start-date');
         this.modalEndDate = document.getElementById('modal-task-end-date');
+        this.modalReminderEnable = document.getElementById('modal-task-reminder-enable');
+        this.modalReminderFields = document.getElementById('todo-reminder-fields');
+        this.modalReminderFreq = document.getElementById('modal-task-reminder-frequency');
+        this.modalPermissionNotice = document.getElementById('todo-permission-notice');
+        this.modalPermissionBtn = document.getElementById('todo-permission-request-btn');
         this.modalDateSaveBtn = document.getElementById('modal-task-date-save');
         this.modalDateCancelBtn = document.getElementById('modal-task-date-cancel');
         this.modalDateClearBtn = document.getElementById('modal-task-date-clear');
         this.modalDateCloseBtn = document.getElementById('todo-date-modal-close');
+
+        // Reminder Alert Popup elements
+        this.alertModal = document.getElementById('reminder-alert-modal');
+        this.alertTitle = document.getElementById('reminder-alert-title');
+        this.alertTime = document.getElementById('reminder-alert-time');
+        this.alertStageBadge = document.getElementById('reminder-alert-stage-badge');
+        this.alertFreq = document.getElementById('reminder-alert-freq');
+        this.alertContent = document.getElementById('reminder-alert-content');
+        this.alertCompleteBtn = document.getElementById('reminder-alert-complete');
+        this.alertSnoozeBtn = document.getElementById('reminder-alert-snooze');
+        this.alertDismissBtn = document.getElementById('reminder-alert-dismiss');
     };
 
     TodoList.prototype._bindEvents = function () {
@@ -682,6 +742,54 @@
         }
         if (this.modalDateSaveBtn) this.modalDateSaveBtn.addEventListener('click', function () { self.saveDateFromModal(); });
         if (this.modalDateClearBtn) this.modalDateClearBtn.addEventListener('click', function () { self.clearDateFromModal(); });
+
+        // Reminder toggle inside date modal
+        if (this.modalReminderEnable) {
+            this.modalReminderEnable.addEventListener('change', function () {
+                var isChecked = self.modalReminderEnable.checked;
+                if (self.modalReminderFields) self.modalReminderFields.style.display = isChecked ? 'flex' : 'none';
+                if (isChecked && 'Notification' in window && Notification.permission === 'default') {
+                    Notification.requestPermission().then(function () {
+                        self._checkPermissionUI();
+                    }).catch(function () {});
+                }
+                self._checkPermissionUI();
+            });
+        }
+
+        if (this.modalPermissionBtn) {
+            this.modalPermissionBtn.addEventListener('click', function () {
+                if ('Notification' in window) {
+                    Notification.requestPermission().then(function () {
+                        self._checkPermissionUI();
+                    }).catch(function () {});
+                }
+            });
+        }
+
+        // Reminder Alert Popup events
+        if (this.alertCompleteBtn) {
+            this.alertCompleteBtn.addEventListener('click', function () {
+                self._completeActiveTask();
+            });
+        }
+        if (this.alertDismissBtn) {
+            this.alertDismissBtn.addEventListener('click', function () {
+                self._dismissActiveReminder();
+            });
+        }
+        if (this.alertSnoozeBtn) {
+            this.alertSnoozeBtn.addEventListener('click', function () {
+                self._snoozeActiveReminder(5);
+            });
+        }
+        if (this.alertModal) {
+            this.alertModal.addEventListener('click', function (e) {
+                if (e.target === self.alertModal) {
+                    self._dismissActiveReminder();
+                }
+            });
+        }
 
         document.querySelectorAll('.filter-btn').forEach(function (btn) {
             btn.addEventListener('click', function () {
@@ -743,6 +851,19 @@
         });
     };
 
+    TodoList.prototype._checkPermissionUI = function () {
+        if (!this.modalPermissionNotice) return;
+        if (!('Notification' in window)) {
+            this.modalPermissionNotice.style.display = 'none';
+            return;
+        }
+        if (Notification.permission === 'granted') {
+            this.modalPermissionNotice.style.display = 'none';
+        } else {
+            this.modalPermissionNotice.style.display = (this.modalReminderEnable && this.modalReminderEnable.checked) ? 'flex' : 'none';
+        }
+    };
+
     TodoList.prototype.openDateModal = function (taskId) {
         var task = this.tasks.find(function (t) { return t.id === taskId; });
         if (!task) return;
@@ -750,6 +871,12 @@
         if (this.dateModalTaskTitle) this.dateModalTaskTitle.textContent = task.text;
         if (this.modalStartDate) this.modalStartDate.value = task.startDate || '';
         if (this.modalEndDate) this.modalEndDate.value = task.endDate || '';
+
+        var hasReminder = !!(task.reminder && task.reminder.enabled);
+        if (this.modalReminderEnable) this.modalReminderEnable.checked = hasReminder;
+        if (this.modalReminderFields) this.modalReminderFields.style.display = hasReminder ? 'flex' : 'none';
+        if (this.modalReminderFreq) this.modalReminderFreq.value = (task.reminder && task.reminder.frequency) || 'once';
+        this._checkPermissionUI();
         if (this.dateModalOverlay) this.dateModalOverlay.classList.add('active');
     };
 
@@ -765,8 +892,53 @@
         if (task) {
             task.startDate = this.modalStartDate ? this.modalStartDate.value : '';
             task.endDate = this.modalEndDate ? this.modalEndDate.value : '';
+
+            var isReminder = this.modalReminderEnable && this.modalReminderEnable.checked;
+            if (isReminder) {
+                var freq = (this.modalReminderFreq && this.modalReminderFreq.value) || 'once';
+                var initialDt = '';
+                if (freq !== 'once' && task.startDate) {
+                    initialDt = task.startDate;
+                } else {
+                    initialDt = task.endDate || task.startDate || '';
+                }
+                if (initialDt && initialDt.indexOf('T') === -1) {
+                    initialDt += 'T09:00';
+                }
+
+                var targetMs = initialDt ? new Date(initialDt).getTime() : NaN;
+                var nowMs = Date.now();
+                var initStage = 0;
+                if (!isNaN(targetMs)) {
+                    if (nowMs >= targetMs) initStage = 2;
+                    else if (nowMs >= targetMs - 5 * 60 * 1000) initStage = 1;
+                    else initStage = 0;
+                }
+
+                if (task.reminder && task.reminder.datetime === initialDt && typeof task.reminder.stage === 'number') {
+                    initStage = task.reminder.stage;
+                }
+
+                task.reminder = {
+                    enabled: true,
+                    datetime: initialDt,
+                    frequency: freq,
+                    stage: initStage,
+                    dismissed: false,
+                    completed: false,
+                    lastTriggered: null
+                };
+
+                if ('Notification' in window && Notification.permission === 'default') {
+                    Notification.requestPermission().catch(function () {});
+                }
+            } else {
+                task.reminder = null;
+            }
+
             this._saveTasks();
             this._render();
+            this._scheduleNextTimer();
         }
         this.closeDateModal();
     };
@@ -778,8 +950,10 @@
         if (task) {
             task.startDate = '';
             task.endDate = '';
+            task.reminder = null;
             this._saveTasks();
             this._render();
+            this._scheduleNextTimer();
         }
         this.closeDateModal();
     };
@@ -797,6 +971,7 @@
             completed: false,
             startDate: startDate,
             endDate: endDate,
+            reminder: null,
             subtasks: [],
             createdAt: new Date().toISOString()
         };
@@ -812,14 +987,32 @@
 
         this._saveTasks();
         this._render();
+        this._scheduleNextTimer();
     };
 
     TodoList.prototype.toggleTask = function (id) {
         var task = this.tasks.find(function (t) { return t.id === id; });
         if (task) {
             task.completed = !task.completed;
+            if (task.completed) {
+                if (this.activeAlertTaskId === id) {
+                    this._closeReminderAlertModal();
+                }
+                if (task.reminder) {
+                    task.reminder.dismissed = true;
+                    if (task.reminder.frequency === 'once') {
+                        task.reminder.completed = true;
+                    }
+                }
+            } else {
+                if (task.reminder) {
+                    task.reminder.completed = false;
+                    task.reminder.dismissed = false;
+                }
+            }
             this._saveTasks();
             this._render();
+            this._scheduleNextTimer();
         }
     };
 
@@ -832,8 +1025,12 @@
             onConfirm: function () {
                 self.tasks = self.tasks.filter(function (t) { return t.id !== id; });
                 self.expandedTaskIds.delete(id);
+                if (self.activeAlertTaskId === id) {
+                    self._closeReminderAlertModal();
+                }
                 self._saveTasks();
                 self._render();
+                self._scheduleNextTimer();
             }
         });
     };
@@ -915,26 +1112,25 @@
             var doneSubs = subtasks.filter(function (s) { return s.completed; }).length;
             var isExpanded = self.expandedTaskIds.has(task.id);
 
-            // Date badge
+            // Date & Reminder badge
             var dateBadgeHtml = '';
             if (task.startDate || task.endDate) {
                 var dateStatusCls = '';
                 var dateLabel = '';
 
                 if (task.endDate && !task.completed) {
-                    if (task.endDate < today) {
+                    var endTarget = new Date(task.endDate.indexOf('T') !== -1 ? task.endDate : (task.endDate + 'T23:59:59')).getTime();
+                    var now = Date.now();
+                    var endDayStr = task.endDate.split('T')[0];
+                    if (endTarget < now) {
                         dateStatusCls = ' overdue';
-                    } else if (task.endDate === today) {
+                    } else if (endDayStr === today) {
                         dateStatusCls = ' today';
                     }
                 }
 
                 if (task.startDate && task.endDate) {
-                    if (task.startDate === task.endDate) {
-                        dateLabel = formatDisplayDate(task.startDate);
-                    } else {
-                        dateLabel = formatDisplayDate(task.startDate) + ' - ' + formatDisplayDate(task.endDate);
-                    }
+                    dateLabel = formatDisplayDate(task.startDate) + ' - ' + formatDisplayDate(task.endDate);
                 } else if (task.startDate) {
                     dateLabel = t('from') + ' ' + formatDisplayDate(task.startDate);
                 } else if (task.endDate) {
@@ -946,9 +1142,10 @@
                 else if (dateStatusCls === ' today') statusPrefix = '⏰ ' + t('todayBadge') + ': ';
                 else statusPrefix = '📅 ';
 
-                dateBadgeHtml = '<span class="todo-date-badge' + dateStatusCls + '" data-action="edit-dates" data-task-id="' + task.id + '" title="' + t('setTaskDates') + '">' + statusPrefix + dateLabel + ' ✎</span>';
+                var reminderIcon = (task.reminder && task.reminder.enabled && !task.reminder.completed && !task.completed) ? ' 🔔' : '';
+                dateBadgeHtml = '<span class="todo-date-badge' + dateStatusCls + '" data-action="edit-dates" data-task-id="' + task.id + '" title="' + t('setTaskDatesAndReminder') + '">' + statusPrefix + dateLabel + reminderIcon + ' ✎</span>';
             } else {
-                dateBadgeHtml = '<span class="todo-date-badge empty" data-action="edit-dates" data-task-id="' + task.id + '" title="' + t('setTaskDates') + '">📅 ' + t('addDate') + '</span>';
+                dateBadgeHtml = '<span class="todo-date-badge empty" data-action="edit-dates" data-task-id="' + task.id + '" title="' + t('setTaskDatesAndReminder') + '">📅 ' + t('addDate') + '</span>';
             }
 
             // Subtask toggle button & count
@@ -996,6 +1193,403 @@
         this.listEl.innerHTML = html;
     };
 
+    // Scheduler and high-precision reminder check for tasks
+    TodoList.prototype._startScheduler = function () {
+        var self = this;
+        setTimeout(function () {
+            self._checkReminders();
+        }, 500);
+
+        this._scheduleNextTimer();
+
+        this.schedulerInterval = setInterval(function () {
+            self._checkReminders();
+        }, 10000);
+
+        document.addEventListener('visibilitychange', function () {
+            if (!document.hidden) {
+                self._checkReminders();
+            }
+        });
+        window.addEventListener('focus', function () {
+            self._checkReminders();
+        });
+    };
+
+    TodoList.prototype._getTaskTargetMs = function (task) {
+        if (!task || !task.reminder || !task.reminder.enabled || task.reminder.completed || task.completed) return null;
+        var dt = task.reminder.datetime;
+        if (!dt) {
+            var freq = task.reminder.frequency || 'once';
+            if (freq !== 'once' && task.startDate) {
+                dt = task.startDate;
+            } else {
+                dt = task.endDate || task.startDate;
+            }
+        }
+        if (!dt) return null;
+        if (dt.indexOf('T') === -1) {
+            dt += 'T09:00';
+        }
+        var target = new Date(dt).getTime();
+        return isNaN(target) ? null : target;
+    };
+
+    TodoList.prototype._scheduleNextTimer = function () {
+        if (this._exactTimer) {
+            clearTimeout(this._exactTimer);
+            this._exactTimer = null;
+        }
+        if (!this.tasks || this.tasks.length === 0) return;
+        var now = Date.now();
+        var minDiff = Infinity;
+        var self = this;
+
+        this.tasks.forEach(function (task) {
+            if (task.completed) return;
+            if (!task.reminder || !task.reminder.enabled || task.reminder.completed) return;
+
+            var target = self._getTaskTargetMs(task);
+            if (!target) return;
+
+            var stage = typeof task.reminder.stage === 'number' ? task.reminder.stage : 0;
+            var dismissed = !!task.reminder.dismissed;
+
+            var cp1 = target - 5 * 60 * 1000; // -5m
+            var cp2 = target;                  // on-time
+            var cp3 = target + 5 * 60 * 1000; // +5m (late)
+
+            var candidate = null;
+            if (stage === 0) {
+                if (cp1 > now) {
+                    candidate = cp1 - now;
+                } else if (cp2 > now) {
+                    candidate = cp2 - now;
+                } else if (!dismissed && cp3 > now) {
+                    candidate = cp3 - now;
+                }
+            } else if (stage === 1) {
+                if (cp2 > now) {
+                    candidate = cp2 - now;
+                } else if (!dismissed && cp3 > now) {
+                    candidate = cp3 - now;
+                }
+            } else if (stage === 2) {
+                if (!dismissed && cp3 > now) {
+                    candidate = cp3 - now;
+                }
+            }
+
+            if (candidate !== null && candidate > 0 && candidate < minDiff) {
+                minDiff = candidate;
+            }
+        });
+
+        if (minDiff !== Infinity && minDiff < 2147483647) {
+            this._exactTimer = setTimeout(function () {
+                self._checkReminders();
+            }, minDiff + 200);
+        }
+    };
+
+    TodoList.prototype._checkReminders = function () {
+        if (!this.tasks || this.tasks.length === 0) return;
+        var now = Date.now();
+        var hasChanges = false;
+        var self = this;
+
+        this.tasks.forEach(function (task) {
+            if (task.completed) return;
+            if (!task.reminder || !task.reminder.enabled || task.reminder.completed) return;
+
+            var target = self._getTaskTargetMs(task);
+            if (!target) return;
+
+            var cp1 = target - 5 * 60 * 1000; // -5m
+            var cp2 = target;                  // on-time
+            var cp3 = target + 5 * 60 * 1000; // +5m (late)
+
+            var stage = typeof task.reminder.stage === 'number' ? task.reminder.stage : 0;
+            var dismissed = !!task.reminder.dismissed;
+
+            if (stage === 0) {
+                if (now >= cp3) {
+                    if (!dismissed) {
+                        task.reminder.stage = 3;
+                        task.reminder.lastTriggered = new Date().toISOString();
+                        self._triggerReminderStage(task, 3);
+                    }
+                    if (task.reminder.frequency === 'once') {
+                        task.reminder.completed = true;
+                    } else {
+                        self._advanceTaskRecurrence(task);
+                    }
+                    hasChanges = true;
+                } else if (now >= cp2) {
+                    task.reminder.stage = 2;
+                    task.reminder.lastTriggered = new Date().toISOString();
+                    self._triggerReminderStage(task, 2);
+                    hasChanges = true;
+                } else if (now >= cp1) {
+                    task.reminder.stage = 1;
+                    task.reminder.lastTriggered = new Date().toISOString();
+                    self._triggerReminderStage(task, 1);
+                    hasChanges = true;
+                }
+            } else if (stage === 1) {
+                if (now >= cp3) {
+                    if (!dismissed) {
+                        task.reminder.stage = 3;
+                        task.reminder.lastTriggered = new Date().toISOString();
+                        self._triggerReminderStage(task, 3);
+                    }
+                    if (task.reminder.frequency === 'once') {
+                        task.reminder.completed = true;
+                    } else {
+                        self._advanceTaskRecurrence(task);
+                    }
+                    hasChanges = true;
+                } else if (now >= cp2) {
+                    task.reminder.stage = 2;
+                    task.reminder.lastTriggered = new Date().toISOString();
+                    self._triggerReminderStage(task, 2);
+                    hasChanges = true;
+                }
+            } else if (stage === 2) {
+                if (now >= cp3) {
+                    if (!dismissed) {
+                        task.reminder.stage = 3;
+                        task.reminder.lastTriggered = new Date().toISOString();
+                        self._triggerReminderStage(task, 3);
+                    }
+                    if (task.reminder.frequency === 'once') {
+                        task.reminder.completed = true;
+                    } else {
+                        self._advanceTaskRecurrence(task);
+                    }
+                    hasChanges = true;
+                }
+            }
+        });
+
+        if (hasChanges) {
+            this._saveTasks();
+            this._render();
+        }
+
+        this._scheduleNextTimer();
+    };
+
+    TodoList.prototype._triggerReminderStage = function (task, stage) {
+        var titleText = task.text || t('taskReminderDue');
+        var subtasksText = '';
+        if (Array.isArray(task.subtasks) && task.subtasks.length > 0) {
+            var done = task.subtasks.filter(function (s) { return s.completed; }).length;
+            subtasksText = '(' + done + '/' + task.subtasks.length + ' ' + t('subtasksCount') + ')';
+        }
+
+        // 1. Play sweet audio chime
+        playChime();
+
+        var alertTitle = '';
+        var toastMsg = '';
+        var stageBadge = '';
+
+        if (stage === 1) {
+            alertTitle = t('reminderStageBeforeTitle');
+            toastMsg = t('reminderStageBeforeToast').replace('{title}', titleText);
+            stageBadge = t('reminderStageBeforeBadge');
+        } else if (stage === 2) {
+            alertTitle = t('reminderStageDueTitle');
+            toastMsg = t('reminderStageDueToast').replace('{title}', titleText);
+            stageBadge = t('reminderStageDueBadge');
+            this._showReminderAlertModal(task, 2, stageBadge);
+        } else if (stage === 3) {
+            alertTitle = t('reminderStageLateTitle');
+            toastMsg = t('reminderStageLateToast').replace('{title}', titleText);
+            stageBadge = t('reminderStageLateBadge');
+            this._showReminderAlertModal(task, 3, stageBadge);
+        }
+
+        if (typeof PwaManager !== 'undefined' && PwaManager.showToast) {
+            var icon = stage === 3 ? '⚠️' : '⏰';
+            PwaManager.showToast(toastMsg, icon);
+        }
+
+        showSystemNotification(alertTitle + ': ' + titleText, subtasksText);
+    };
+
+    TodoList.prototype._showReminderAlertModal = function (task, stage, stageBadge) {
+        if (!this.alertModal) return;
+        this.activeAlertTaskId = task.id;
+        this.alertTitle.textContent = task.text || t('taskReminderDue');
+
+        var subtasksText = '';
+        if (Array.isArray(task.subtasks) && task.subtasks.length > 0) {
+            subtasksText = task.subtasks.map(function (s) {
+                return (s.completed ? '☑ ' : '☐ ') + s.text;
+            }).join('\n');
+        }
+        this.alertContent.textContent = subtasksText || task.text;
+
+        var targetMs = this._getTaskTargetMs(task) || Date.now();
+        var rDate = new Date(targetMs);
+        var locale = currentLang === 'vi' ? 'vi-VN' : 'en-US';
+        var timeFormatted = rDate.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+        this.alertTime.textContent = timeFormatted;
+
+        if (this.alertStageBadge) {
+            this.alertStageBadge.textContent = stageBadge || (stage === 3 ? t('reminderStageLateBadge') : t('reminderStageDueBadge'));
+            if (stage === 3) {
+                this.alertStageBadge.classList.add('late');
+            } else {
+                this.alertStageBadge.classList.remove('late');
+            }
+        }
+
+        var freqLabels = {
+            'once': t('freqOnce'),
+            'daily': t('freqDaily'),
+            'weekly': t('freqWeekly'),
+            'monthly': t('freqMonthly')
+        };
+        var freq = (task.reminder && task.reminder.frequency) || 'once';
+        this.alertFreq.textContent = freqLabels[freq] || t('freqOnce');
+        this.alertModal.classList.add('active');
+    };
+
+    TodoList.prototype._closeReminderAlertModal = function () {
+        if (this.alertModal) {
+            this.alertModal.classList.remove('active');
+        }
+        this.activeAlertTaskId = null;
+    };
+
+    TodoList.prototype._completeActiveTask = function () {
+        if (!this.activeAlertTaskId) {
+            this._closeReminderAlertModal();
+            return;
+        }
+        var self = this;
+        var task = this.tasks.find(function (t) { return t.id === self.activeAlertTaskId; });
+        if (task) {
+            task.completed = true;
+            if (task.reminder) {
+                task.reminder.dismissed = true;
+                if (task.reminder.frequency === 'once') {
+                    task.reminder.completed = true;
+                } else {
+                    self._advanceTaskRecurrence(task);
+                }
+            }
+            this._saveTasks();
+            this._render();
+            this._scheduleNextTimer();
+            if (typeof PwaManager !== 'undefined' && PwaManager.showToast) {
+                PwaManager.showToast(t('taskCompletedToast'), '🎉');
+            }
+        }
+        this._closeReminderAlertModal();
+    };
+
+    TodoList.prototype._dismissActiveReminder = function () {
+        if (!this.activeAlertTaskId) {
+            this._closeReminderAlertModal();
+            return;
+        }
+        var self = this;
+        var task = this.tasks.find(function (t) { return t.id === self.activeAlertTaskId; });
+        if (task && task.reminder) {
+            task.reminder.dismissed = true;
+            if (task.reminder.frequency === 'once') {
+                task.reminder.completed = true;
+            } else {
+                var targetMs = self._getTaskTargetMs(task);
+                if (targetMs && targetMs <= Date.now()) {
+                    self._advanceTaskRecurrence(task);
+                }
+            }
+            this._saveTasks();
+            this._render();
+            this._scheduleNextTimer();
+        }
+        this._closeReminderAlertModal();
+    };
+
+    TodoList.prototype._snoozeActiveReminder = function (minutes) {
+        if (!this.activeAlertTaskId) {
+            this._closeReminderAlertModal();
+            return;
+        }
+        var self = this;
+        var task = this.tasks.find(function (t) { return t.id === self.activeAlertTaskId; });
+        if (task && task.reminder) {
+            var snoozeDate = new Date(Date.now() + minutes * 60 * 1000);
+            task.reminder.datetime = formatDateTimeLocal(snoozeDate);
+            task.reminder.stage = 1;
+            task.reminder.dismissed = false;
+            task.reminder.completed = false;
+            this._saveTasks();
+            this._render();
+            this._scheduleNextTimer();
+            if (typeof PwaManager !== 'undefined' && PwaManager.showToast) {
+                PwaManager.showToast(t('snoozedToast'), '⏰');
+            }
+        }
+        this._closeReminderAlertModal();
+    };
+
+    TodoList.prototype._advanceTaskRecurrence = function (task) {
+        var reminder = task.reminder;
+        if (!reminder) return;
+        var freq = reminder.frequency || 'once';
+        if (freq === 'once') {
+            reminder.completed = true;
+            return;
+        }
+        var now = new Date();
+        var curTime = reminder.datetime ? new Date(reminder.datetime) : new Date();
+        if (isNaN(curTime.getTime())) curTime = new Date();
+
+        if (freq === 'daily') {
+            curTime.setDate(curTime.getDate() + 1);
+            while (curTime <= now) {
+                curTime.setDate(curTime.getDate() + 1);
+            }
+        } else if (freq === 'weekly') {
+            curTime.setDate(curTime.getDate() + 7);
+            while (curTime <= now) {
+                curTime.setDate(curTime.getDate() + 7);
+            }
+        } else if (freq === 'monthly') {
+            curTime.setMonth(curTime.getMonth() + 1);
+            while (curTime <= now) {
+                curTime.setMonth(curTime.getMonth() + 1);
+            }
+        } else {
+            reminder.completed = true;
+            return;
+        }
+
+        reminder.datetime = formatDateTimeLocal(curTime);
+
+        // Check if task has endDate limit:
+        if (task.endDate) {
+            var endStr = task.endDate;
+            if (endStr.indexOf('T') === -1) endStr += 'T23:59:59';
+            var endLimitMs = new Date(endStr).getTime();
+            if (!isNaN(endLimitMs) && curTime.getTime() > endLimitMs) {
+                // Reached or exceeded end date! Stop repeating.
+                reminder.completed = true;
+                return;
+            }
+        }
+
+        reminder.stage = 0;
+        reminder.dismissed = false;
+        reminder.completed = false;
+    };
+
     // Firestore persistence
     TodoList.prototype._saveTasks = function () {
         if (!currentUser) return;
@@ -1007,6 +1601,7 @@
         userDocRef('data').doc('todos').get().then(function (doc) {
             self.tasks = (doc.exists && doc.data().items) ? doc.data().items : [];
             self._render();
+            self._checkReminders();
         });
     };
 
@@ -1017,7 +1612,6 @@
         this.notes = []; this.selectedIds = new Set();
         this.editingNoteId = null; this.currentColor = 'default';
         this._cacheElements(); this._bindEvents(); this._loadNotes();
-        this._startScheduler();
     }
     NoteApp.prototype._cacheElements = function () {
         this.gridEl = document.getElementById('notes-grid');
@@ -1027,15 +1621,6 @@
         this.titleInput = document.getElementById('note-title-input');
         this.contentInput = document.getElementById('note-content-input');
         this.colorDots = document.querySelectorAll('.color-dot');
-
-        // Reminder elements
-        this.reminderCheckbox = document.getElementById('note-reminder-enable');
-        this.reminderFields = document.getElementById('note-reminder-fields');
-        this.reminderDatetime = document.getElementById('note-reminder-datetime');
-        this.reminderFrequency = document.getElementById('note-reminder-frequency');
-        this.reminderClearBtn = document.getElementById('note-reminder-clear');
-        this.permissionNotice = document.getElementById('note-permission-notice');
-        this.permissionBtn = document.getElementById('note-permission-request-btn');
     };
     NoteApp.prototype._bindEvents = function () {
         var self = this;
@@ -1055,40 +1640,6 @@
                 self.currentColor = dot.getAttribute('data-color');
             });
         });
-
-        // Reminder toggle & clear
-        if (this.reminderCheckbox) {
-            this.reminderCheckbox.addEventListener('change', function () {
-                var isChecked = self.reminderCheckbox.checked;
-                self.reminderFields.style.display = isChecked ? 'grid' : 'none';
-                self.reminderClearBtn.style.display = isChecked ? 'inline-block' : 'none';
-                if (isChecked && !self.reminderDatetime.value) {
-                    var nextTime = new Date(Date.now() + 30 * 60 * 1000);
-                    self.reminderDatetime.value = formatDateTimeLocal(nextTime);
-                }
-                self._checkPermissionUI();
-            });
-        }
-
-        if (this.reminderClearBtn) {
-            this.reminderClearBtn.addEventListener('click', function () {
-                self.reminderCheckbox.checked = false;
-                self.reminderFields.style.display = 'none';
-                self.reminderClearBtn.style.display = 'none';
-                self.reminderDatetime.value = '';
-                self.reminderFrequency.value = 'once';
-            });
-        }
-
-        if (this.permissionBtn) {
-            this.permissionBtn.addEventListener('click', function () {
-                if ('Notification' in window) {
-                    Notification.requestPermission().then(function () {
-                        self._checkPermissionUI();
-                    }).catch(function () {});
-                }
-            });
-        }
 
         this.gridEl.addEventListener('change', function (e) {
             if (e.target.classList.contains('note-select')) {
@@ -1168,19 +1719,6 @@
         });
     };
 
-    NoteApp.prototype._checkPermissionUI = function () {
-        if (!this.permissionNotice) return;
-        if (!('Notification' in window)) {
-            this.permissionNotice.style.display = 'none';
-            return;
-        }
-        if (Notification.permission === 'granted') {
-            this.permissionNotice.style.display = 'none';
-        } else {
-            this.permissionNotice.style.display = (this.reminderCheckbox && this.reminderCheckbox.checked) ? 'flex' : 'none';
-        }
-    };
-
     NoteApp.prototype._openModal = function (noteId) {
         this.editingNoteId = noteId;
         this.colorDots.forEach(function (d) { d.classList.remove('active'); });
@@ -1190,36 +1728,15 @@
             this.modalTitle.textContent = t('editNote');
             this.titleInput.value = note.title; this.contentInput.value = note.content;
             this.currentColor = note.color || 'default';
-
-            if (note.reminder && note.reminder.enabled) {
-                this.reminderCheckbox.checked = true;
-                this.reminderFields.style.display = 'grid';
-                this.reminderClearBtn.style.display = 'inline-block';
-                this.reminderDatetime.value = note.reminder.datetime || '';
-                this.reminderFrequency.value = note.reminder.frequency || 'once';
-            } else {
-                this.reminderCheckbox.checked = false;
-                this.reminderFields.style.display = 'none';
-                this.reminderClearBtn.style.display = 'none';
-                this.reminderDatetime.value = '';
-                this.reminderFrequency.value = 'once';
-            }
         } else {
             this.modalTitle.textContent = t('newNote');
             this.titleInput.value = ''; this.contentInput.value = '';
             this.currentColor = 'default';
-
-            this.reminderCheckbox.checked = false;
-            this.reminderFields.style.display = 'none';
-            this.reminderClearBtn.style.display = 'none';
-            this.reminderDatetime.value = '';
-            this.reminderFrequency.value = 'once';
         }
         var self = this;
         this.colorDots.forEach(function (d) {
             if (d.getAttribute('data-color') === self.currentColor) d.classList.add('active');
         });
-        this._checkPermissionUI();
         this.overlay.classList.add('active');
         setTimeout(function () { self.titleInput.focus(); }, 300);
     };
@@ -1233,39 +1750,22 @@
         var content = this.contentInput.value.trim();
         if (!title && !content) return;
 
-        var reminderData = null;
-        if (this.reminderCheckbox && this.reminderCheckbox.checked && this.reminderDatetime.value) {
-            reminderData = {
-                enabled: true,
-                datetime: this.reminderDatetime.value,
-                frequency: this.reminderFrequency.value || 'once',
-                completed: false,
-                lastTriggered: null
-            };
-            if ('Notification' in window && Notification.permission === 'default') {
-                Notification.requestPermission().catch(function () {});
-            }
-        }
-
         if (this.editingNoteId) {
             var note = this.notes.find(function (n) { return n.id === this.editingNoteId; }.bind(this));
             if (note) {
                 note.title = title; note.content = content;
                 note.color = this.currentColor; note.updatedAt = new Date().toISOString();
-                note.reminder = reminderData;
             }
         } else {
             this.notes.unshift({
                 id: generateId(), title: title, content: content,
                 color: this.currentColor,
-                reminder: reminderData,
                 createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
             });
         }
         this._saveNotes();
         this._render();
         this._closeModal();
-        this._checkReminders(); // Immediate check on save
     };
 
     NoteApp.prototype._deleteSelected = function () {
@@ -1303,14 +1803,6 @@
             return;
         }
         var html = '', locale = currentLang === 'vi' ? 'vi-VN' : 'en-US', sel = this.selectedIds;
-        var freqLabels = {
-            'once': '',
-            '30m': t('freq30m'),
-            '1h': t('freq1h'),
-            'daily': t('freqDaily'),
-            'weekly': t('freqWeekly'),
-            'monthly': t('freqMonthly')
-        };
 
         this.notes.forEach(function (note) {
             var checked = sel.has(note.id), colorAttr = note.color && note.color !== 'default' ? ' data-color="' + note.color + '"' : '';
@@ -1318,130 +1810,13 @@
             var dateStr = dateObj.toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' +
                 dateObj.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
 
-            var reminderHtml = '';
-            if (note.reminder && note.reminder.enabled && note.reminder.datetime) {
-                var r = note.reminder;
-                var rDate = new Date(r.datetime);
-                var isDone = !!r.completed;
-                var freqStr = freqLabels[r.frequency] ? ' (' + freqLabels[r.frequency] + ')' : '';
-                var timeFormatted = rDate.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' }) + ' ' +
-                    rDate.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
-
-                reminderHtml = '<div class="note-reminder-badge' + (isDone ? ' completed' : '') + '">' +
-                    '<span class="reminder-badge-icon">🔔</span>' +
-                    '<span class="reminder-badge-text">' + timeFormatted + freqStr + '</span>' +
-                    '</div>';
-            }
-
             html += '<div class="note-card' + (checked ? ' selected' : '') + '" data-id="' + note.id + '"' + colorAttr + '>' +
                 '<input type="checkbox" class="note-select" data-note-id="' + note.id + '"' + (checked ? ' checked' : '') + ' />' +
                 (note.title ? '<div class="note-title">' + escapeHtml(note.title) + '</div>' : '') +
                 (note.content ? '<div class="note-body">' + escapeHtml(note.content) + '</div>' : '') +
-                reminderHtml +
                 '<div class="note-date">' + dateStr + '</div></div>';
         });
         this.gridEl.innerHTML = html;
-    };
-
-    // Scheduler and reminder check
-    NoteApp.prototype._startScheduler = function () {
-        var self = this;
-        // Check once right after initialization
-        setTimeout(function () {
-            self._checkReminders();
-        }, 1200);
-
-        // Check every 5 minutes (300,000 ms) as specified
-        this.schedulerInterval = setInterval(function () {
-            self._checkReminders();
-        }, 5 * 60 * 1000);
-    };
-
-    NoteApp.prototype._checkReminders = function () {
-        if (!this.notes || this.notes.length === 0) return;
-        var now = new Date();
-        var hasChanges = false;
-        var self = this;
-
-        this.notes.forEach(function (note) {
-            if (!note.reminder || !note.reminder.enabled || note.reminder.completed) return;
-            if (!note.reminder.datetime) return;
-
-            var reminderTime = new Date(note.reminder.datetime);
-            if (reminderTime <= now) {
-                self._triggerReminder(note);
-                hasChanges = true;
-            }
-        });
-
-        if (hasChanges) {
-            this._saveNotes();
-            this._render();
-        }
-    };
-
-    NoteApp.prototype._triggerReminder = function (note) {
-        var reminder = note.reminder;
-        reminder.lastTriggered = new Date().toISOString();
-
-        var titleText = note.title || t('reminderDue');
-        var bodyText = note.content || '';
-
-        // 1. Play sweet audio chime
-        playChime();
-
-        // 2. In-app toast
-        var toastMsg = t('reminderToast').replace('{title}', titleText);
-        if (typeof PwaManager !== 'undefined' && PwaManager.showToast) {
-            PwaManager.showToast(toastMsg, '⏰');
-        }
-
-        // 3. Device System Notification
-        showSystemNotification(t('reminderAlertTitle') + ': ' + titleText, bodyText);
-
-        // 4. Calculate next occurrence or mark completed
-        var freq = reminder.frequency || 'once';
-        var now = new Date();
-
-        if (freq === '30m') {
-            var curTime = new Date(reminder.datetime);
-            var nextTime = new Date(curTime.getTime() + 30 * 60 * 1000);
-            while (nextTime <= now) {
-                nextTime = new Date(nextTime.getTime() + 30 * 60 * 1000);
-            }
-            reminder.datetime = formatDateTimeLocal(nextTime);
-        } else if (freq === '1h') {
-            var curTime = new Date(reminder.datetime);
-            var nextTime = new Date(curTime.getTime() + 60 * 60 * 1000);
-            while (nextTime <= now) {
-                nextTime = new Date(nextTime.getTime() + 60 * 60 * 1000);
-            }
-            reminder.datetime = formatDateTimeLocal(nextTime);
-        } else if (freq === 'daily') {
-            var nextTime = new Date(reminder.datetime);
-            nextTime.setDate(nextTime.getDate() + 1);
-            while (nextTime <= now) {
-                nextTime.setDate(nextTime.getDate() + 1);
-            }
-            reminder.datetime = formatDateTimeLocal(nextTime);
-        } else if (freq === 'weekly') {
-            var nextTime = new Date(reminder.datetime);
-            nextTime.setDate(nextTime.getDate() + 7);
-            while (nextTime <= now) {
-                nextTime.setDate(nextTime.getDate() + 7);
-            }
-            reminder.datetime = formatDateTimeLocal(nextTime);
-        } else if (freq === 'monthly') {
-            var nextTime = new Date(reminder.datetime);
-            nextTime.setMonth(nextTime.getMonth() + 1);
-            while (nextTime <= now) {
-                nextTime.setMonth(nextTime.getMonth() + 1);
-            }
-            reminder.datetime = formatDateTimeLocal(nextTime);
-        } else {
-            // 'once'
-            reminder.completed = true;
-        }
     };
 
     // Firestore persistence
@@ -1455,7 +1830,6 @@
         userDocRef('data').doc('notes').get().then(function (doc) {
             self.notes = (doc.exists && doc.data().items) ? doc.data().items : [];
             self._render();
-            self._checkReminders();
         });
     };
 
