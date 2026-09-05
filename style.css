@@ -1525,6 +1525,13 @@ body {
     color: var(--accent-red);
 }
 
+@media (hover: none), (max-width: 768px) {
+    .todo-edit-btn,
+    .todo-delete {
+        opacity: 1 !important;
+    }
+}
+
 /* Todo Empty State */
 .todo-empty {
     text-align: center;

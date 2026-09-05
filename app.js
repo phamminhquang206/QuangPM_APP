@@ -1106,6 +1106,15 @@
         }
         if (this.modalDateSaveBtn) this.modalDateSaveBtn.addEventListener('click', function () { self.saveDateFromModal(); });
         if (this.modalDateClearBtn) this.modalDateClearBtn.addEventListener('click', function () { self.clearDateFromModal(); });
+        var modalTitleInput = document.getElementById('modal-task-title-input') || this.modalTaskTitleInput;
+        if (modalTitleInput) {
+            modalTitleInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    self.saveDateFromModal();
+                }
+            });
+        }
 
         // Reminder toggle inside date modal
         if (this.modalReminderEnable) {
@@ -1272,8 +1281,11 @@
         var task = this.tasks.find(function (t) { return t.id === taskId; });
         if (!task) return;
         this.editingDateTaskId = taskId;
-        if (this.modalTaskTitleInput) this.modalTaskTitleInput.value = task.text || '';
-        if (this.dateModalTaskTitle) this.dateModalTaskTitle.textContent = task.text;
+        var titleEl = document.getElementById('modal-task-title-input') || this.modalTaskTitleInput;
+        if (titleEl) {
+            titleEl.value = task.text || '';
+        }
+        if (this.dateModalTaskTitle) this.dateModalTaskTitle.textContent = task.text || '';
         if (this.modalStartDate) this.modalStartDate.value = task.startDate || '';
         if (this.modalEndDate) this.modalEndDate.value = task.endDate || '';
 
@@ -1295,12 +1307,15 @@
         var self = this;
         var task = this.tasks.find(function (t) { return t.id === self.editingDateTaskId; });
         if (task) {
-            var updatedTitle = this.modalTaskTitleInput ? this.modalTaskTitleInput.value.trim() : '';
-            if (updatedTitle) {
+            var titleEl = document.getElementById('modal-task-title-input') || this.modalTaskTitleInput;
+            var updatedTitle = titleEl ? titleEl.value.trim() : '';
+            var titleChanged = false;
+            if (updatedTitle && updatedTitle !== task.text) {
                 task.text = updatedTitle;
+                titleChanged = true;
             }
-            task.startDate = this.modalStartDate ? this.modalStartDate.value : '';
-            task.endDate = this.modalEndDate ? this.modalEndDate.value : '';
+            task.startDate = this.modalStartDate ? this.modalStartDate.value : (document.getElementById('modal-task-start-date') ? document.getElementById('modal-task-start-date').value : '');
+            task.endDate = this.modalEndDate ? this.modalEndDate.value : (document.getElementById('modal-task-end-date') ? document.getElementById('modal-task-end-date').value : '');
 
             var isReminder = this.modalReminderEnable && this.modalReminderEnable.checked;
             if (isReminder) {
@@ -1349,7 +1364,9 @@
             this._render();
             this._scheduleNextTimer();
 
-            if (task.endDate || task.startDate || (task.reminder && task.reminder.datetime)) {
+            if (titleChanged && typeof PwaManager !== 'undefined' && PwaManager.showToast) {
+                PwaManager.showToast(t('taskUpdatedToast') || 'Đã cập nhật tên công việc! ✏️', '✏️');
+            } else if (task.endDate || task.startDate || (task.reminder && task.reminder.datetime)) {
                 self._notifyDateSet(task);
             }
         }
