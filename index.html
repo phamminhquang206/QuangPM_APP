@@ -342,6 +342,43 @@
                     <button class="color-dot" data-color="orange" style="background: rgba(245,158,11,0.25)"></button>
                     <button class="color-dot" data-color="red" style="background: rgba(239,68,68,0.25)"></button>
                 </div>
+
+                <!-- Reminder Section -->
+                <div class="note-reminder-section" id="note-reminder-section">
+                    <div class="note-reminder-header">
+                        <label class="note-reminder-toggle-label" for="note-reminder-enable">
+                            <input type="checkbox" id="note-reminder-enable" class="note-reminder-checkbox" />
+                            <span class="note-reminder-icon">🔔</span>
+                            <span class="note-reminder-title" data-i18n="setReminder">Đặt nhắc nhở</span>
+                        </label>
+                        <button type="button" class="note-reminder-clear-btn" id="note-reminder-clear" style="display: none;" data-i18n="clearReminder">Xóa nhắc nhở</button>
+                    </div>
+                    
+                    <div class="note-reminder-fields" id="note-reminder-fields" style="display: none;">
+                        <div class="note-reminder-field">
+                            <label for="note-reminder-datetime" data-i18n="reminderTime">Thời gian:</label>
+                            <input type="datetime-local" id="note-reminder-datetime" class="note-reminder-input" />
+                        </div>
+                        <div class="note-reminder-field">
+                            <label for="note-reminder-frequency" data-i18n="reminderFrequency">Lặp lại:</label>
+                            <select id="note-reminder-frequency" class="note-reminder-select">
+                                <option value="once" data-i18n="freqOnce">Một lần</option>
+                                <option value="30m" data-i18n="freq30m">Mỗi 30 phút</option>
+                                <option value="1h" data-i18n="freq1h">Mỗi 1 tiếng</option>
+                                <option value="daily" data-i18n="freqDaily">Hàng ngày</option>
+                                <option value="weekly" data-i18n="freqWeekly">Hàng tuần</option>
+                                <option value="monthly" data-i18n="freqMonthly">Hàng tháng</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Notification Permission Warning / Action -->
+                        <div class="note-permission-notice" id="note-permission-notice" style="display: none;">
+                            <span class="permission-notice-icon">⚠️</span>
+                            <span class="permission-notice-text" data-i18n="notificationNotice">Cần cấp quyền để nhận thông báo trên điện thoại / máy tính</span>
+                            <button type="button" class="permission-request-btn" id="note-permission-request-btn" data-i18n="enableNotification">Bật thông báo</button>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="modal-btn secondary" id="note-modal-cancel" data-i18n="cancel">Hủy</button>

@@ -61,7 +61,22 @@
             pwaTip: 'FlowHub sẽ hoạt động toàn màn hình mượt mà, độc lập và lưu dữ liệu offline!',
             gotIt: 'Đã hiểu',
             installedToast: 'Đã cài đặt FlowHub thành công! 🎉',
-            alreadyInstalledToast: 'FlowHub đã được cài đặt trên thiết bị của bạn! ✨'
+            alreadyInstalledToast: 'FlowHub đã được cài đặt trên thiết bị của bạn! ✨',
+            setReminder: 'Đặt nhắc nhở',
+            clearReminder: 'Xóa nhắc nhở',
+            reminderTime: 'Thời gian:',
+            reminderFrequency: 'Lặp lại:',
+            freqOnce: 'Một lần',
+            freq30m: 'Mỗi 30 phút',
+            freq1h: 'Mỗi 1 tiếng',
+            freqDaily: 'Hàng ngày',
+            freqWeekly: 'Hàng tuần',
+            freqMonthly: 'Hàng tháng',
+            notificationNotice: 'Cần cấp quyền để nhận thông báo trên điện thoại / máy tính',
+            enableNotification: 'Bật thông báo',
+            reminderAlertTitle: '⏰ Nhắc nhở FlowHub',
+            reminderToast: '⏰ Nhắc nhở: {title}',
+            reminderDue: 'Đến hạn ghi chú'
         },
         en: {
             mode: 'Mode', mode30: '30 min', mode30Detail: "25' work + 5' rest",
@@ -113,7 +128,22 @@
             pwaTip: 'FlowHub will run smoothly in full-screen, standalone mode with offline data!',
             gotIt: 'Got it',
             installedToast: 'FlowHub installed successfully! 🎉',
-            alreadyInstalledToast: 'FlowHub is already installed on your device! ✨'
+            alreadyInstalledToast: 'FlowHub is already installed on your device! ✨',
+            setReminder: 'Set reminder',
+            clearReminder: 'Clear reminder',
+            reminderTime: 'Time:',
+            reminderFrequency: 'Repeat:',
+            freqOnce: 'Once',
+            freq30m: 'Every 30 mins',
+            freq1h: 'Every 1 hour',
+            freqDaily: 'Daily',
+            freqWeekly: 'Weekly',
+            freqMonthly: 'Monthly',
+            notificationNotice: 'Permission required to receive notifications on mobile / desktop',
+            enableNotification: 'Enable notifications',
+            reminderAlertTitle: '⏰ FlowHub Reminder',
+            reminderToast: '⏰ Reminder: {title}',
+            reminderDue: 'Note reminder'
         }
     };
 
@@ -193,6 +223,62 @@
             return currentLang === 'vi' ? (parts[2] + '/' + parts[1]) : (parts[1] + '/' + parts[2]);
         }
         return dateStr;
+    }
+
+    function formatDateTimeLocal(d) {
+        var pad = function (n) { return String(n).padStart(2, '0'); };
+        return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+    }
+
+    function playChime() {
+        try {
+            var Ctx = window.AudioContext || window.webkitAudioContext;
+            if (!Ctx) return;
+            var ctx = new Ctx();
+            var notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+            notes.forEach(function (freq, index) {
+                var osc = ctx.createOscillator();
+                var gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                var startTime = ctx.currentTime + index * 0.12;
+                gain.gain.setValueAtTime(0, startTime);
+                gain.gain.linearRampToValueAtTime(0.25, startTime + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.35);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(startTime);
+                osc.stop(startTime + 0.36);
+            });
+        } catch (e) { /* ignore */ }
+    }
+
+    function showSystemNotification(title, body) {
+        if (!('Notification' in window)) return;
+        if (Notification.permission !== 'granted') return;
+
+        var options = {
+            body: body,
+            icon: 'icon.svg',
+            badge: 'icon.svg',
+            vibrate: [200, 100, 200],
+            tag: 'flowhub-reminder-' + Date.now(),
+            renotify: true
+        };
+
+        if ('serviceWorker' in navigator && navigator.serviceWorker.ready) {
+            navigator.serviceWorker.ready.then(function (reg) {
+                reg.showNotification(title, options);
+            }).catch(function () {
+                try {
+                    new Notification(title, options);
+                } catch (e) {}
+            });
+        } else {
+            try {
+                new Notification(title, options);
+            } catch (e) {}
+        }
     }
 
     // ===== CONFIRM MODAL MANAGER =====
@@ -931,6 +1017,7 @@
         this.notes = []; this.selectedIds = new Set();
         this.editingNoteId = null; this.currentColor = 'default';
         this._cacheElements(); this._bindEvents(); this._loadNotes();
+        this._startScheduler();
     }
     NoteApp.prototype._cacheElements = function () {
         this.gridEl = document.getElementById('notes-grid');
@@ -940,6 +1027,15 @@
         this.titleInput = document.getElementById('note-title-input');
         this.contentInput = document.getElementById('note-content-input');
         this.colorDots = document.querySelectorAll('.color-dot');
+
+        // Reminder elements
+        this.reminderCheckbox = document.getElementById('note-reminder-enable');
+        this.reminderFields = document.getElementById('note-reminder-fields');
+        this.reminderDatetime = document.getElementById('note-reminder-datetime');
+        this.reminderFrequency = document.getElementById('note-reminder-frequency');
+        this.reminderClearBtn = document.getElementById('note-reminder-clear');
+        this.permissionNotice = document.getElementById('note-permission-notice');
+        this.permissionBtn = document.getElementById('note-permission-request-btn');
     };
     NoteApp.prototype._bindEvents = function () {
         var self = this;
@@ -959,6 +1055,41 @@
                 self.currentColor = dot.getAttribute('data-color');
             });
         });
+
+        // Reminder toggle & clear
+        if (this.reminderCheckbox) {
+            this.reminderCheckbox.addEventListener('change', function () {
+                var isChecked = self.reminderCheckbox.checked;
+                self.reminderFields.style.display = isChecked ? 'grid' : 'none';
+                self.reminderClearBtn.style.display = isChecked ? 'inline-block' : 'none';
+                if (isChecked && !self.reminderDatetime.value) {
+                    var nextTime = new Date(Date.now() + 30 * 60 * 1000);
+                    self.reminderDatetime.value = formatDateTimeLocal(nextTime);
+                }
+                self._checkPermissionUI();
+            });
+        }
+
+        if (this.reminderClearBtn) {
+            this.reminderClearBtn.addEventListener('click', function () {
+                self.reminderCheckbox.checked = false;
+                self.reminderFields.style.display = 'none';
+                self.reminderClearBtn.style.display = 'none';
+                self.reminderDatetime.value = '';
+                self.reminderFrequency.value = 'once';
+            });
+        }
+
+        if (this.permissionBtn) {
+            this.permissionBtn.addEventListener('click', function () {
+                if ('Notification' in window) {
+                    Notification.requestPermission().then(function () {
+                        self._checkPermissionUI();
+                    }).catch(function () {});
+                }
+            });
+        }
+
         this.gridEl.addEventListener('change', function (e) {
             if (e.target.classList.contains('note-select')) {
                 var nid = e.target.getAttribute('data-note-id');
@@ -985,7 +1116,6 @@
             isLongPress = false;
             longPressTimer = setTimeout(function () {
                 isLongPress = true;
-                // Vibrate on mobile to indicate successful long press
                 if (navigator.vibrate) navigator.vibrate(50);
                 var checkbox = card.querySelector('.note-select');
                 if (checkbox) {
@@ -993,7 +1123,7 @@
                     checkbox.dispatchEvent(new Event('change', { bubbles: true }));
                 }
                 longPressTimer = null;
-            }, 500); // 500ms for better mobile feel
+            }, 500);
         };
 
         var cancelPress = function () {
@@ -1021,7 +1151,6 @@
         this.gridEl.addEventListener('touchmove', touchMoveCancel, { passive: true });
 
         this.gridEl.addEventListener('contextmenu', function (e) {
-            // Prevent default context menu on long press on mobile
             var card = e.target.closest('.note-card');
             if (card) e.preventDefault();
         });
@@ -1038,6 +1167,20 @@
             if (card) self._openModal(card.getAttribute('data-id'));
         });
     };
+
+    NoteApp.prototype._checkPermissionUI = function () {
+        if (!this.permissionNotice) return;
+        if (!('Notification' in window)) {
+            this.permissionNotice.style.display = 'none';
+            return;
+        }
+        if (Notification.permission === 'granted') {
+            this.permissionNotice.style.display = 'none';
+        } else {
+            this.permissionNotice.style.display = (this.reminderCheckbox && this.reminderCheckbox.checked) ? 'flex' : 'none';
+        }
+    };
+
     NoteApp.prototype._openModal = function (noteId) {
         this.editingNoteId = noteId;
         this.colorDots.forEach(function (d) { d.classList.remove('active'); });
@@ -1047,40 +1190,84 @@
             this.modalTitle.textContent = t('editNote');
             this.titleInput.value = note.title; this.contentInput.value = note.content;
             this.currentColor = note.color || 'default';
+
+            if (note.reminder && note.reminder.enabled) {
+                this.reminderCheckbox.checked = true;
+                this.reminderFields.style.display = 'grid';
+                this.reminderClearBtn.style.display = 'inline-block';
+                this.reminderDatetime.value = note.reminder.datetime || '';
+                this.reminderFrequency.value = note.reminder.frequency || 'once';
+            } else {
+                this.reminderCheckbox.checked = false;
+                this.reminderFields.style.display = 'none';
+                this.reminderClearBtn.style.display = 'none';
+                this.reminderDatetime.value = '';
+                this.reminderFrequency.value = 'once';
+            }
         } else {
             this.modalTitle.textContent = t('newNote');
             this.titleInput.value = ''; this.contentInput.value = '';
             this.currentColor = 'default';
+
+            this.reminderCheckbox.checked = false;
+            this.reminderFields.style.display = 'none';
+            this.reminderClearBtn.style.display = 'none';
+            this.reminderDatetime.value = '';
+            this.reminderFrequency.value = 'once';
         }
         var self = this;
         this.colorDots.forEach(function (d) {
             if (d.getAttribute('data-color') === self.currentColor) d.classList.add('active');
         });
+        this._checkPermissionUI();
         this.overlay.classList.add('active');
         setTimeout(function () { self.titleInput.focus(); }, 300);
     };
+
     NoteApp.prototype._closeModal = function () {
         this.overlay.classList.remove('active'); this.editingNoteId = null;
     };
+
     NoteApp.prototype._saveFromModal = function () {
         var title = this.titleInput.value.trim();
         var content = this.contentInput.value.trim();
         if (!title && !content) return;
+
+        var reminderData = null;
+        if (this.reminderCheckbox && this.reminderCheckbox.checked && this.reminderDatetime.value) {
+            reminderData = {
+                enabled: true,
+                datetime: this.reminderDatetime.value,
+                frequency: this.reminderFrequency.value || 'once',
+                completed: false,
+                lastTriggered: null
+            };
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission().catch(function () {});
+            }
+        }
+
         if (this.editingNoteId) {
             var note = this.notes.find(function (n) { return n.id === this.editingNoteId; }.bind(this));
             if (note) {
                 note.title = title; note.content = content;
                 note.color = this.currentColor; note.updatedAt = new Date().toISOString();
+                note.reminder = reminderData;
             }
         } else {
             this.notes.unshift({
                 id: generateId(), title: title, content: content,
                 color: this.currentColor,
+                reminder: reminderData,
                 createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
             });
         }
-        this._saveNotes(); this._render(); this._closeModal();
+        this._saveNotes();
+        this._render();
+        this._closeModal();
+        this._checkReminders(); // Immediate check on save
     };
+
     NoteApp.prototype._deleteSelected = function () {
         if (this.selectedIds.size === 0) return;
         var self = this;
@@ -1098,33 +1285,163 @@
             }
         });
     };
+
     NoteApp.prototype._updateDeleteBtn = function () {
         this.deleteBtn.classList[this.selectedIds.size > 0 ? 'add' : 'remove']('visible');
     };
+
     NoteApp.prototype._updateCardSelection = function () {
         var sel = this.selectedIds;
         this.gridEl.querySelectorAll('.note-card').forEach(function (c) {
             c.classList[sel.has(c.getAttribute('data-id')) ? 'add' : 'remove']('selected');
         });
     };
+
     NoteApp.prototype._render = function () {
         if (this.notes.length === 0) {
             this.gridEl.innerHTML = '<div class="notes-empty"><span class="empty-icon">📌</span><p>' + t('emptyNotes') + '</p></div>';
             return;
         }
         var html = '', locale = currentLang === 'vi' ? 'vi-VN' : 'en-US', sel = this.selectedIds;
+        var freqLabels = {
+            'once': '',
+            '30m': t('freq30m'),
+            '1h': t('freq1h'),
+            'daily': t('freqDaily'),
+            'weekly': t('freqWeekly'),
+            'monthly': t('freqMonthly')
+        };
+
         this.notes.forEach(function (note) {
             var checked = sel.has(note.id), colorAttr = note.color && note.color !== 'default' ? ' data-color="' + note.color + '"' : '';
             var dateObj = new Date(note.updatedAt || note.createdAt);
             var dateStr = dateObj.toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' +
                 dateObj.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+
+            var reminderHtml = '';
+            if (note.reminder && note.reminder.enabled && note.reminder.datetime) {
+                var r = note.reminder;
+                var rDate = new Date(r.datetime);
+                var isDone = !!r.completed;
+                var freqStr = freqLabels[r.frequency] ? ' (' + freqLabels[r.frequency] + ')' : '';
+                var timeFormatted = rDate.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' }) + ' ' +
+                    rDate.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+
+                reminderHtml = '<div class="note-reminder-badge' + (isDone ? ' completed' : '') + '">' +
+                    '<span class="reminder-badge-icon">🔔</span>' +
+                    '<span class="reminder-badge-text">' + timeFormatted + freqStr + '</span>' +
+                    '</div>';
+            }
+
             html += '<div class="note-card' + (checked ? ' selected' : '') + '" data-id="' + note.id + '"' + colorAttr + '>' +
                 '<input type="checkbox" class="note-select" data-note-id="' + note.id + '"' + (checked ? ' checked' : '') + ' />' +
                 (note.title ? '<div class="note-title">' + escapeHtml(note.title) + '</div>' : '') +
                 (note.content ? '<div class="note-body">' + escapeHtml(note.content) + '</div>' : '') +
+                reminderHtml +
                 '<div class="note-date">' + dateStr + '</div></div>';
         });
         this.gridEl.innerHTML = html;
+    };
+
+    // Scheduler and reminder check
+    NoteApp.prototype._startScheduler = function () {
+        var self = this;
+        // Check once right after initialization
+        setTimeout(function () {
+            self._checkReminders();
+        }, 1200);
+
+        // Check every 5 minutes (300,000 ms) as specified
+        this.schedulerInterval = setInterval(function () {
+            self._checkReminders();
+        }, 5 * 60 * 1000);
+    };
+
+    NoteApp.prototype._checkReminders = function () {
+        if (!this.notes || this.notes.length === 0) return;
+        var now = new Date();
+        var hasChanges = false;
+        var self = this;
+
+        this.notes.forEach(function (note) {
+            if (!note.reminder || !note.reminder.enabled || note.reminder.completed) return;
+            if (!note.reminder.datetime) return;
+
+            var reminderTime = new Date(note.reminder.datetime);
+            if (reminderTime <= now) {
+                self._triggerReminder(note);
+                hasChanges = true;
+            }
+        });
+
+        if (hasChanges) {
+            this._saveNotes();
+            this._render();
+        }
+    };
+
+    NoteApp.prototype._triggerReminder = function (note) {
+        var reminder = note.reminder;
+        reminder.lastTriggered = new Date().toISOString();
+
+        var titleText = note.title || t('reminderDue');
+        var bodyText = note.content || '';
+
+        // 1. Play sweet audio chime
+        playChime();
+
+        // 2. In-app toast
+        var toastMsg = t('reminderToast').replace('{title}', titleText);
+        if (typeof PwaManager !== 'undefined' && PwaManager.showToast) {
+            PwaManager.showToast(toastMsg, '⏰');
+        }
+
+        // 3. Device System Notification
+        showSystemNotification(t('reminderAlertTitle') + ': ' + titleText, bodyText);
+
+        // 4. Calculate next occurrence or mark completed
+        var freq = reminder.frequency || 'once';
+        var now = new Date();
+
+        if (freq === '30m') {
+            var curTime = new Date(reminder.datetime);
+            var nextTime = new Date(curTime.getTime() + 30 * 60 * 1000);
+            while (nextTime <= now) {
+                nextTime = new Date(nextTime.getTime() + 30 * 60 * 1000);
+            }
+            reminder.datetime = formatDateTimeLocal(nextTime);
+        } else if (freq === '1h') {
+            var curTime = new Date(reminder.datetime);
+            var nextTime = new Date(curTime.getTime() + 60 * 60 * 1000);
+            while (nextTime <= now) {
+                nextTime = new Date(nextTime.getTime() + 60 * 60 * 1000);
+            }
+            reminder.datetime = formatDateTimeLocal(nextTime);
+        } else if (freq === 'daily') {
+            var nextTime = new Date(reminder.datetime);
+            nextTime.setDate(nextTime.getDate() + 1);
+            while (nextTime <= now) {
+                nextTime.setDate(nextTime.getDate() + 1);
+            }
+            reminder.datetime = formatDateTimeLocal(nextTime);
+        } else if (freq === 'weekly') {
+            var nextTime = new Date(reminder.datetime);
+            nextTime.setDate(nextTime.getDate() + 7);
+            while (nextTime <= now) {
+                nextTime.setDate(nextTime.getDate() + 7);
+            }
+            reminder.datetime = formatDateTimeLocal(nextTime);
+        } else if (freq === 'monthly') {
+            var nextTime = new Date(reminder.datetime);
+            nextTime.setMonth(nextTime.getMonth() + 1);
+            while (nextTime <= now) {
+                nextTime.setMonth(nextTime.getMonth() + 1);
+            }
+            reminder.datetime = formatDateTimeLocal(nextTime);
+        } else {
+            // 'once'
+            reminder.completed = true;
+        }
     };
 
     // Firestore persistence
@@ -1138,6 +1455,7 @@
         userDocRef('data').doc('notes').get().then(function (doc) {
             self.notes = (doc.exists && doc.data().items) ? doc.data().items : [];
             self._render();
+            self._checkReminders();
         });
     };
 
