@@ -121,6 +121,9 @@
                 <button class="tab-btn" data-tab="prices" role="tab" id="tab-prices">
                     💰 Prices
                 </button>
+                <button class="tab-btn" data-tab="habits" role="tab" id="tab-habits">
+                    🎯 <span data-i18n="habitsTab">Habits</span>
+                </button>
             </nav>
         </header>
 
@@ -321,6 +324,96 @@
 
             </div>
         </section>
+
+        <!-- ===== HABIT TRACKER SECTION ===== -->
+        <section id="habits-section" class="section" role="tabpanel">
+            <!-- Gamification & Stats Banner -->
+            <div class="habit-stats-banner">
+                <div class="habit-stat-card streak-card">
+                    <div class="streak-icon-wrap">
+                        <span class="streak-icon">🔥</span>
+                    </div>
+                    <div class="streak-info">
+                        <div class="streak-count" id="habit-current-streak">0 <span class="streak-unit" data-i18n="daysUnit">ngày</span></div>
+                        <div class="streak-label" data-i18n="currentStreak">Chuỗi hiện tại</div>
+                        <div class="streak-record" id="habit-record-streak">Kỷ lục: 0 ngày</div>
+                    </div>
+                </div>
+                <div class="habit-stat-card level-card">
+                    <div class="level-header">
+                        <div class="level-badge" id="habit-level-badge">Lv 1</div>
+                        <div class="level-title" id="habit-level-title" data-i18n="habitRank1">Tập sự kỷ luật</div>
+                        <div class="xp-display"><span id="habit-current-xp">0</span> / <span id="habit-next-xp">100</span> XP</div>
+                    </div>
+                    <div class="xp-progress-bg">
+                        <div class="xp-progress-bar" id="habit-xp-bar" style="width: 0%;"></div>
+                    </div>
+                </div>
+                <div class="habit-stat-actions">
+                    <button type="button" class="habit-action-pill" id="btn-open-habit-shop">
+                        <span class="pill-icon">🎁</span>
+                        <span data-i18n="habitShop">Cửa hàng tự thưởng</span>
+                    </button>
+                    <button type="button" class="habit-action-pill" id="btn-open-habit-badges">
+                        <span class="pill-icon">🏆</span>
+                        <span data-i18n="habitBadges">Huy hiệu</span>
+                    </button>
+                    <button type="button" class="habit-action-pill" id="btn-open-habit-discipline">
+                        <span class="pill-icon">⚖️</span>
+                        <span data-i18n="habitDiscipline">Quỹ kỷ luật</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Month Navigation & Controls Toolbar -->
+            <div class="habit-toolbar">
+                <div class="habit-month-nav">
+                    <button type="button" class="month-nav-btn" id="btn-habit-prev-month" title="Tháng trước">◀</button>
+                    <span class="habit-month-title" id="habit-month-title">Tháng --/----</span>
+                    <button type="button" class="month-nav-btn" id="btn-habit-next-month" title="Tháng sau">▶</button>
+                    <button type="button" class="btn-today-quick" id="btn-habit-today" data-i18n="todayQuick">Hôm nay</button>
+                </div>
+                <div class="habit-actions-group">
+                    <button type="button" class="habit-btn secondary" id="btn-habit-sync-month" title="Khởi tạo hoặc làm mới bảng theo dõi của tháng">
+                        <span class="btn-icon">📋</span>
+                        <span data-i18n="initMonthTable">Tạo bảng tháng</span>
+                    </button>
+                    <button type="button" class="habit-btn secondary" id="btn-manage-habits" title="Quản lý danh sách thói quen">
+                        <span class="btn-icon">⚙️</span>
+                        <span data-i18n="manageHabits">Quản lý</span>
+                    </button>
+                    <button type="button" class="habit-btn primary" id="btn-add-habit">
+                        <span class="btn-icon">+</span>
+                        <span data-i18n="addHabit">Thêm thói quen</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Matrix Table Container -->
+            <div class="habit-matrix-container">
+                <!-- Empty State (hidden when habits exist) -->
+                <div class="habit-empty-state" id="habit-empty-state" style="display: none;">
+                    <div class="empty-icon">🌱</div>
+                    <h3 data-i18n="emptyHabitTitle">Chưa có thói quen nào</h3>
+                    <p data-i18n="emptyHabitDesc">Hãy bấm "+ Thêm thói quen" để bắt đầu hành trình xây dựng kỷ luật bản thân!</p>
+                    <button type="button" class="habit-btn primary" id="btn-empty-add-habit">
+                        <span>+</span> <span data-i18n="addFirstHabit">Tạo thói quen đầu tiên</span>
+                    </button>
+                </div>
+
+                <!-- The Table -->
+                <div class="habit-table-wrapper" id="habit-table-wrapper">
+                    <table class="habit-table" id="habit-table">
+                        <thead id="habit-table-head">
+                            <!-- Dynamic headers will be rendered here -->
+                        </thead>
+                        <tbody id="habit-table-body">
+                            <!-- 28-31 rows will be rendered here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
     </div>
 
     <!-- ===== NOTE MODAL OVERLAY ===== -->
@@ -445,6 +538,236 @@
             <div class="confirm-modal-actions">
                 <button class="modal-btn secondary" id="confirm-modal-cancel" data-i18n="cancel">Hủy</button>
                 <button class="modal-btn danger" id="confirm-modal-ok" data-i18n="confirmDelete">Xóa</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== HABIT MODAL (Add / Edit Habit) ===== -->
+    <div class="modal-overlay" id="habit-modal">
+        <div class="modal-container habit-modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title" id="habit-modal-title" data-i18n="addHabit">Thêm thói quen mới</h3>
+                <button type="button" class="modal-close" id="habit-modal-close">✕</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="habit-edit-id" value="" />
+                <div class="form-group">
+                    <label for="habit-name-input" data-i18n="habitNameLabel">Tên thói quen</label>
+                    <input type="text" id="habit-name-input" class="habit-form-input" placeholder="ví dụ: Uống 2L nước, Đọc sách..." data-i18n-placeholder="habitNamePlaceholder" autocomplete="off" />
+                </div>
+                <div class="form-group">
+                    <label data-i18n="trackerTypeLabel">Kiểu theo dõi</label>
+                    <div class="habit-type-selector">
+                        <button type="button" class="habit-type-pill active" data-type="checkbox" id="type-pill-checkbox">
+                            <span class="pill-icon">✓</span>
+                            <div class="pill-text">
+                                <span class="pill-name" data-i18n="typeCheckbox">Checkbox</span>
+                                <span class="pill-sub" data-i18n="typeCheckboxSub">Hoàn thành Có / Không</span>
+                            </div>
+                        </button>
+                        <button type="button" class="habit-type-pill" data-type="numeric" id="type-pill-numeric">
+                            <span class="pill-icon">🔢</span>
+                            <div class="pill-text">
+                                <span class="pill-name" data-i18n="typeNumeric">Số lượng</span>
+                                <span class="pill-sub" data-i18n="typeNumericSub">Nhập chỉ tiêu theo số</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+                <!-- Numeric details (hidden for checkbox) -->
+                <div class="habit-numeric-row" id="habit-numeric-row" style="display: none;">
+                    <div class="form-group flex-1">
+                        <label for="habit-target-input" data-i18n="targetAmount">Chỉ tiêu mỗi ngày</label>
+                        <input type="number" id="habit-target-input" class="habit-form-input" placeholder="2000" min="1" step="any" />
+                    </div>
+                    <div class="form-group flex-1">
+                        <label for="habit-unit-input" data-i18n="unitLabel">Đơn vị đo</label>
+                        <input type="text" id="habit-unit-input" class="habit-form-input" placeholder="ml, trang, cái..." data-i18n-placeholder="unitPlaceholder" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="iconLabel">Biểu tượng</label>
+                    <div class="habit-icon-picker" id="habit-icon-picker">
+                        <button type="button" class="icon-preset-btn active" data-icon="💧">💧</button>
+                        <button type="button" class="icon-preset-btn" data-icon="📚">📚</button>
+                        <button type="button" class="icon-preset-btn" data-icon="🏃">🏃</button>
+                        <button type="button" class="icon-preset-btn" data-icon="🧘">🧘</button>
+                        <button type="button" class="icon-preset-btn" data-icon="🥗">🥗</button>
+                        <button type="button" class="icon-preset-btn" data-icon="💤">💤</button>
+                        <button type="button" class="icon-preset-btn" data-icon="💻">💻</button>
+                        <button type="button" class="icon-preset-btn" data-icon="🎯">🎯</button>
+                        <button type="button" class="icon-preset-btn" data-icon="✍️">✍️</button>
+                        <button type="button" class="icon-preset-btn" data-icon="🚴">🚴</button>
+                        <button type="button" class="icon-preset-btn" data-icon="🧹">🧹</button>
+                        <button type="button" class="icon-preset-btn" data-icon="🍎">🍎</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="colorTagLabel">Màu nhận diện</label>
+                    <div class="habit-color-picker" id="habit-color-picker">
+                        <button type="button" class="color-dot active" data-color="purple" style="background: #7c3aed;"></button>
+                        <button type="button" class="color-dot" data-color="blue" style="background: #3b82f6;"></button>
+                        <button type="button" class="color-dot" data-color="green" style="background: #10b981;"></button>
+                        <button type="button" class="color-dot" data-color="orange" style="background: #f59e0b;"></button>
+                        <button type="button" class="color-dot" data-color="red" style="background: #ef4444;"></button>
+                        <button type="button" class="color-dot" data-color="pink" style="background: #ec4899;"></button>
+                        <button type="button" class="color-dot" data-color="cyan" style="background: #06b6d4;"></button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-btn secondary" id="habit-modal-cancel" data-i18n="cancel">Hủy</button>
+                <button type="button" class="modal-btn primary" id="habit-modal-save" data-i18n="save">Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== HABIT MANAGE MODAL ===== -->
+    <div class="modal-overlay" id="habit-manage-modal">
+        <div class="modal-container habit-manage-container">
+            <div class="modal-header">
+                <h3 class="modal-title" data-i18n="manageHabits">Quản lý thói quen</h3>
+                <button type="button" class="modal-close" id="habit-manage-close">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="habit-manage-list" id="habit-manage-list">
+                    <!-- List items rendered dynamically -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-btn primary" id="habit-manage-done" data-i18n="gotIt" style="width: 100%;">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== HABIT NUMERIC INPUT MODAL ===== -->
+    <div class="modal-overlay" id="habit-numeric-modal">
+        <div class="modal-container habit-numeric-container">
+            <div class="modal-header">
+                <h3 class="modal-title" id="numeric-modal-title">Cập nhật số lượng</h3>
+                <button type="button" class="modal-close" id="habit-numeric-close">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="numeric-modal-meta">
+                    <span class="numeric-modal-icon" id="numeric-modal-icon">💧</span>
+                    <div>
+                        <div class="numeric-modal-habit-name" id="numeric-modal-name">Uống nước</div>
+                        <div class="numeric-modal-target" id="numeric-modal-target">Mục tiêu: 2000 ml</div>
+                    </div>
+                </div>
+                <div class="numeric-input-stepper">
+                    <button type="button" class="stepper-btn" id="numeric-step-down">−</button>
+                    <input type="number" class="numeric-modal-input" id="numeric-modal-val" step="any" min="0" />
+                    <span class="numeric-unit-suffix" id="numeric-modal-unit">ml</span>
+                    <button type="button" class="stepper-btn" id="numeric-step-up">+</button>
+                </div>
+                <div class="numeric-quick-presets" id="numeric-quick-presets">
+                    <!-- Quick preset buttons -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-btn secondary" id="numeric-modal-cancel" data-i18n="cancel">Hủy</button>
+                <button type="button" class="modal-btn primary" id="numeric-modal-save" data-i18n="save">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== HABIT REWARDS SHOP MODAL ===== -->
+    <div class="modal-overlay" id="habit-shop-modal">
+        <div class="modal-container habit-shop-container">
+            <div class="modal-header">
+                <h3 class="modal-title" data-i18n="habitShop">🎁 Cửa hàng tự thưởng</h3>
+                <button type="button" class="modal-close" id="habit-shop-close">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="shop-balance-card">
+                    <div class="shop-balance-label" data-i18n="yourXpBalance">Điểm XP hiện có</div>
+                    <div class="shop-balance-val"><span id="shop-xp-balance">0</span> <span class="shop-xp-unit">XP</span></div>
+                    <div class="shop-balance-desc" data-i18n="shopDesc">Dùng điểm kỷ luật đã tích lũy để tự thưởng cho bản thân!</div>
+                </div>
+                
+                <!-- Add new custom reward -->
+                <div class="shop-add-form">
+                    <h4 data-i18n="addCustomReward">Thêm phần thưởng mới</h4>
+                    <div class="shop-add-fields">
+                        <input type="text" id="shop-reward-title" class="habit-form-input" placeholder="ví dụ: 1 cốc trà sữa, Xem 1 tập phim..." data-i18n-placeholder="rewardTitlePlaceholder" />
+                        <div class="shop-add-row">
+                            <input type="number" id="shop-reward-cost" class="habit-form-input" placeholder="Chi phí XP (vd: 100)" min="10" step="10" />
+                            <select id="shop-reward-icon" class="habit-form-input" style="width: 80px;">
+                                <option value="🧋">🧋</option>
+                                <option value="🎬">🎬</option>
+                                <option value="🎮">🎮</option>
+                                <option value="🍕">🍕</option>
+                                <option value="☕">☕</option>
+                                <option value="🛍️">🛍️</option>
+                                <option value="🏖️">🏖️</option>
+                            </select>
+                            <button type="button" class="habit-btn primary" id="btn-add-reward">+ Thêm</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reward items list -->
+                <div class="shop-items-list" id="shop-items-list">
+                    <!-- Dynamic rewards list -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-btn secondary" id="habit-shop-done" data-i18n="gotIt" style="width: 100%;">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== HABIT BADGES MODAL ===== -->
+    <div class="modal-overlay" id="habit-badges-modal">
+        <div class="modal-container habit-badges-container">
+            <div class="modal-header">
+                <h3 class="modal-title" data-i18n="habitBadges">🏆 Huy hiệu & Thành tựu</h3>
+                <button type="button" class="modal-close" id="habit-badges-close">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="badges-grid" id="habit-badges-grid">
+                    <!-- Rendered badges dynamically -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-btn primary" id="habit-badges-done" data-i18n="gotIt" style="width: 100%;">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== HABIT DISCIPLINE MODAL (Quỹ kỷ luật) ===== -->
+    <div class="modal-overlay" id="habit-discipline-modal">
+        <div class="modal-container habit-discipline-container">
+            <div class="modal-header">
+                <h3 class="modal-title" data-i18n="habitDiscipline">⚖️ Quỹ kỷ luật cá nhân</h3>
+                <button type="button" class="modal-close" id="habit-discipline-close">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="discipline-intro">
+                    <p data-i18n="disciplineIntro">Tự cam kết kỷ luật: Khi bỏ lỡ thói quen trong ngày, bạn có thể ghi nhận tiền phạt vào quỹ tiết kiệm hoặc làm một thử thách rèn luyện!</p>
+                </div>
+                <div class="discipline-pledge-card">
+                    <div class="form-group">
+                        <label data-i18n="disciplinePledgeLabel">Mức phạt cam kết mỗi lần vi phạm</label>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="discipline-pledge-input" class="habit-form-input" placeholder="ví dụ: 10.000 VNĐ vào heo đất, 30 cái thụt dầu..." />
+                            <button type="button" class="habit-btn secondary" id="btn-save-pledge" data-i18n="save">Lưu</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="discipline-logs-section">
+                    <div class="discipline-logs-header">
+                        <h4 data-i18n="penaltyHistory">Lịch sử vi phạm kỷ luật</h4>
+                        <button type="button" class="habit-btn danger-outline" id="btn-clear-penalties" data-i18n="clearHistory">Xóa lịch sử</button>
+                    </div>
+                    <div class="discipline-logs-list" id="discipline-logs-list">
+                        <!-- Dynamic logs -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-btn primary" id="habit-discipline-done" data-i18n="gotIt" style="width: 100%;">Đóng</button>
             </div>
         </div>
     </div>

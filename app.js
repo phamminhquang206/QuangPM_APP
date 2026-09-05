@@ -104,7 +104,52 @@
             batteryStep3Title: 'Bật trên màn hình khóa',
             batteryStep3Desc: 'Vào mục Thông báo ➔ Đảm bảo đã bật "Cho phép trên màn hình khóa" và "Bật âm thanh & rung".',
             batteryGuideTipNote: 'Sau khi thiết lập, thông báo nhắc việc sẽ reo chuông và sáng màn hình chuẩn từng phút ngay cả khi tắt máy!',
-            batteryGuideGotIt: '✓ Tôi đã hiểu & đã cài đặt'
+            batteryGuideGotIt: '✓ Tôi đã hiểu & đã cài đặt',
+
+            // Habit Tracker
+            habitsTab: 'Thói quen',
+            currentStreak: 'Chuỗi hiện tại',
+            daysUnit: 'ngày',
+            habitRank1: 'Tập sự kỷ luật',
+            habitRank2: 'Chiến binh kiên trì',
+            habitRank3: 'Bậc thầy thói quen',
+            habitRank4: 'Đại sư kỷ luật',
+            habitShop: 'Cửa hàng tự thưởng',
+            habitBadges: 'Huy hiệu',
+            habitDiscipline: 'Quỹ kỷ luật',
+            todayQuick: 'Hôm nay',
+            initMonthTable: 'Tạo bảng tháng',
+            manageHabits: 'Quản lý',
+            addHabit: 'Thêm thói quen',
+            editHabit: 'Sửa thói quen',
+            emptyHabitTitle: 'Chưa có thói quen nào',
+            emptyHabitDesc: 'Hãy bấm "+ Thêm thói quen" để bắt đầu hành trình xây dựng kỷ luật bản thân!',
+            addFirstHabit: 'Tạo thói quen đầu tiên',
+            habitNameLabel: 'Tên thói quen',
+            habitNamePlaceholder: 'ví dụ: Uống 2L nước, Đọc sách...',
+            trackerTypeLabel: 'Kiểu theo dõi',
+            typeCheckbox: 'Checkbox',
+            typeCheckboxSub: 'Hoàn thành Có / Không',
+            typeNumeric: 'Số lượng',
+            typeNumericSub: 'Nhập chỉ tiêu theo số',
+            targetAmount: 'Chỉ tiêu mỗi ngày',
+            unitLabel: 'Đơn vị đo',
+            unitPlaceholder: 'ml, trang, cái...',
+            iconLabel: 'Biểu tượng',
+            colorTagLabel: 'Màu nhận diện',
+            confirmDeleteHabit: 'Bạn có chắc chắn muốn xóa thói quen này?',
+            yourXpBalance: 'Điểm XP hiện có',
+            shopDesc: 'Dùng điểm kỷ luật đã tích lũy để tự thưởng cho bản thân!',
+            addCustomReward: 'Thêm phần thưởng mới',
+            rewardTitlePlaceholder: 'ví dụ: 1 cốc trà sữa, Xem 1 tập phim...',
+            disciplineIntro: 'Tự cam kết kỷ luật: Khi bỏ lỡ thói quen trong ngày, bạn có thể ghi nhận tiền phạt vào quỹ tiết kiệm hoặc làm một thử thách rèn luyện!',
+            disciplinePledgeLabel: 'Mức phạt cam kết mỗi lần vi phạm',
+            penaltyHistory: 'Lịch sử vi phạm kỷ luật',
+            clearHistory: 'Xóa lịch sử',
+            perfectDayToast: '🎉 Ngày hoàn hảo! Bạn đã hoàn thành 100% thói quen hôm nay (+50 XP Bonus)!',
+            habitCompletedToast: '+10 XP! Hoàn thành thói quen: {title}',
+            redeemSuccess: '🎉 Đã đổi thưởng: {title} (-{xp} XP). Hãy tận hưởng nhé!',
+            notEnoughXp: 'Bạn chưa đủ điểm XP để đổi phần thưởng này!'
         },
         en: {
             mode: 'Mode', mode30: '30 min', mode30Detail: "25' work + 5' rest",
@@ -198,7 +243,52 @@
             batteryStep3Title: 'Allow on Lock Screen',
             batteryStep3Desc: 'Go to Notifications ➔ Ensure "Allow on Lock Screen" and "Sound & Vibration" are enabled.',
             batteryGuideTipNote: 'Once configured, task reminders will ring and wake your screen on time even when your phone is locked!',
-            batteryGuideGotIt: '✓ Got it, all set'
+            batteryGuideGotIt: '✓ Got it, all set',
+
+            // Habit Tracker
+            habitsTab: 'Habits',
+            currentStreak: 'Current Streak',
+            daysUnit: 'days',
+            habitRank1: 'Discipline Novice',
+            habitRank2: 'Persistent Warrior',
+            habitRank3: 'Habit Master',
+            habitRank4: 'Discipline Grandmaster',
+            habitShop: 'Rewards Shop',
+            habitBadges: 'Badges',
+            habitDiscipline: 'Discipline Fund',
+            todayQuick: 'Today',
+            initMonthTable: 'Init Month Table',
+            manageHabits: 'Manage',
+            addHabit: 'Add Habit',
+            editHabit: 'Edit Habit',
+            emptyHabitTitle: 'No habits yet',
+            emptyHabitDesc: 'Click "+ Add Habit" to start building self-discipline today!',
+            addFirstHabit: 'Create your first habit',
+            habitNameLabel: 'Habit Name',
+            habitNamePlaceholder: 'e.g., Drink 2L water, Read 20 pages...',
+            trackerTypeLabel: 'Tracker Type',
+            typeCheckbox: 'Checkbox',
+            typeCheckboxSub: 'Done Yes / No',
+            typeNumeric: 'Numeric',
+            typeNumericSub: 'Track by quantity & target',
+            targetAmount: 'Daily Target',
+            unitLabel: 'Unit',
+            unitPlaceholder: 'ml, pages, reps...',
+            iconLabel: 'Icon',
+            colorTagLabel: 'Color Tag',
+            confirmDeleteHabit: 'Are you sure you want to delete this habit?',
+            yourXpBalance: 'Current XP Balance',
+            shopDesc: 'Spend earned discipline XP to reward yourself!',
+            addCustomReward: 'Add New Reward',
+            rewardTitlePlaceholder: 'e.g., 1 Boba Tea, 1 Netflix episode...',
+            disciplineIntro: 'Self-discipline commitment: When missing habits, pledge penalty money to savings or do a workout challenge!',
+            disciplinePledgeLabel: 'Pledged penalty per missed habit',
+            penaltyHistory: 'Penalty History',
+            clearHistory: 'Clear History',
+            perfectDayToast: '🎉 Perfect Day! You completed 100% of habits today (+50 XP Bonus)!',
+            habitCompletedToast: '+10 XP! Completed habit: {title}',
+            redeemSuccess: '🎉 Redeemed: {title} (-{xp} XP). Enjoy!',
+            notEnoughXp: 'Not enough XP to redeem this reward!'
         }
     };
 
@@ -485,6 +575,7 @@
         if (window.__pomodoroApp) window.__pomodoroApp._loadHistory();
         if (window.__todoApp) window.__todoApp._loadTasks();
         if (window.__noteApp) window.__noteApp._loadNotes();
+        if (window.__habitApp) window.__habitApp._loadData();
     }
 
     // =========================================================
@@ -2128,6 +2219,1244 @@
     };
 
     // =========================================================
+    //  8. HABIT TRACKER APP (FEATURE 8)
+    // =========================================================
+    var ALL_HABIT_BADGES = [
+        { id: 'streak_3', icon: '🌱', nameVi: 'Mầm Xanh Kỷ Luật', nameEn: 'Discipline Seed', descVi: 'Duy trì chuỗi 3 ngày liên tiếp', descEn: 'Maintain a 3-day streak', reqStreak: 3 },
+        { id: 'streak_7', icon: '🥉', nameVi: 'Đà Tiến Tới', nameEn: 'Momentum Builder', descVi: 'Duy trì chuỗi 7 ngày liên tiếp', descEn: 'Maintain a 7-day streak', reqStreak: 7 },
+        { id: 'streak_21', icon: '🥈', nameVi: 'Kỷ Luật Thép', nameEn: 'Iron Discipline', descVi: 'Duy trì chuỗi 21 ngày hình thành thói quen', descEn: 'Maintain a 21-day streak', reqStreak: 21 },
+        { id: 'streak_30', icon: '🥇', nameVi: 'Bậc Thầy Thói Quen', nameEn: 'Habit Master', descVi: 'Duy trì chuỗi trọn vẹn 30 ngày', descEn: 'Complete a full 30-day streak', reqStreak: 30 },
+        { id: 'perfect_1', icon: '⭐', nameVi: 'Ngày Hoàn Hảo', nameEn: 'Perfect Day', descVi: 'Hoàn thành 100% thói quen trong 1 ngày', descEn: 'Complete 100% habits in a single day', reqPerfect: 1 },
+        { id: 'xp_500', icon: '⚡', nameVi: 'Tia Chớp Năng Lượng', nameEn: 'Energy Spark', descVi: 'Đạt mốc 500 điểm XP', descEn: 'Reach 500 XP', reqXp: 500 },
+        { id: 'xp_1000', icon: '👑', nameVi: 'Đại Sư Kỷ Luật', nameEn: 'Grandmaster', descVi: 'Đạt mốc 1000 điểm XP', descEn: 'Reach 1000 XP', reqXp: 1000 }
+    ];
+
+    function HabitApp() {
+        this.habits = [];
+        this.habitLogs = {}; // monthKey -> { days: { "YYYY-MM-DD": { [habitId]: { completed: true, value: 2000 } } } }
+        this.habitProfile = {
+            xp: 0,
+            currentStreak: 0,
+            longestStreak: 0,
+            badges: [],
+            rewards: [
+                { id: 'rw1', title: '1 cốc trà sữa', cost: 100, icon: '🧋' },
+                { id: 'rw2', title: 'Xem 1 tập phim Netflix', cost: 150, icon: '🎬' },
+                { id: 'rw3', title: 'Chơi game 1 tiếng', cost: 200, icon: '🎮' }
+            ],
+            penalties: [],
+            pledge: '10.000 VNĐ vào heo đất'
+        };
+
+        var now = new Date();
+        this.viewYear = now.getFullYear();
+        this.viewMonth = now.getMonth() + 1; // 1-indexed (1..12)
+
+        this.selectedType = 'checkbox';
+        this.selectedIcon = '💧';
+        this.selectedColor = 'purple';
+        this.editingHabitId = null;
+
+        this.activeNumericCell = null; // { dateStr, habitId, target, unit, name }
+
+        this._cacheElements();
+        this._bindEvents();
+        this._loadLocalData();
+        this._render();
+    }
+
+    HabitApp.prototype._cacheElements = function () {
+        // Stats
+        this.currentStreakEl = document.getElementById('habit-current-streak');
+        this.recordStreakEl = document.getElementById('habit-record-streak');
+        this.levelBadgeEl = document.getElementById('habit-level-badge');
+        this.levelTitleEl = document.getElementById('habit-level-title');
+        this.currentXpEl = document.getElementById('habit-current-xp');
+        this.nextXpEl = document.getElementById('habit-next-xp');
+        this.xpBarEl = document.getElementById('habit-xp-bar');
+
+        // Stat Action buttons
+        this.btnShop = document.getElementById('btn-open-habit-shop');
+        this.btnBadges = document.getElementById('btn-open-habit-badges');
+        this.btnDiscipline = document.getElementById('btn-open-habit-discipline');
+
+        // Toolbar
+        this.prevMonthBtn = document.getElementById('btn-habit-prev-month');
+        this.monthTitleEl = document.getElementById('habit-month-title');
+        this.nextMonthBtn = document.getElementById('btn-habit-next-month');
+        this.todayBtn = document.getElementById('btn-habit-today');
+        this.syncMonthBtn = document.getElementById('btn-habit-sync-month');
+        this.manageHabitsBtn = document.getElementById('btn-manage-habits');
+        this.addHabitBtn = document.getElementById('btn-add-habit');
+        this.emptyAddHabitBtn = document.getElementById('btn-empty-add-habit');
+
+        // Matrix
+        this.emptyStateEl = document.getElementById('habit-empty-state');
+        this.tableWrapperEl = document.getElementById('habit-table-wrapper');
+        this.tableHeadEl = document.getElementById('habit-table-head');
+        this.tableBodyEl = document.getElementById('habit-table-body');
+
+        // Modal Add/Edit
+        this.habitModal = document.getElementById('habit-modal');
+        this.habitModalTitle = document.getElementById('habit-modal-title');
+        this.habitModalClose = document.getElementById('habit-modal-close');
+        this.habitModalCancel = document.getElementById('habit-modal-cancel');
+        this.habitModalSave = document.getElementById('habit-modal-save');
+        this.habitEditId = document.getElementById('habit-edit-id');
+        this.habitNameInput = document.getElementById('habit-name-input');
+        this.typePillCheckbox = document.getElementById('type-pill-checkbox');
+        this.typePillNumeric = document.getElementById('type-pill-numeric');
+        this.numericRow = document.getElementById('habit-numeric-row');
+        this.targetInput = document.getElementById('habit-target-input');
+        this.unitInput = document.getElementById('habit-unit-input');
+        this.iconPicker = document.getElementById('habit-icon-picker');
+        this.colorPicker = document.getElementById('habit-color-picker');
+
+        // Modal Manage
+        this.manageModal = document.getElementById('habit-manage-modal');
+        this.manageClose = document.getElementById('habit-manage-close');
+        this.manageDone = document.getElementById('habit-manage-done');
+        this.manageList = document.getElementById('habit-manage-list');
+
+        // Modal Numeric Input
+        this.numericModal = document.getElementById('habit-numeric-modal');
+        this.numericClose = document.getElementById('habit-numeric-close');
+        this.numericCancel = document.getElementById('numeric-modal-cancel');
+        this.numericSave = document.getElementById('numeric-modal-save');
+        this.numericName = document.getElementById('numeric-modal-name');
+        this.numericTarget = document.getElementById('numeric-modal-target');
+        this.numericIcon = document.getElementById('numeric-modal-icon');
+        this.numericUnit = document.getElementById('numeric-modal-unit');
+        this.numericValInput = document.getElementById('numeric-modal-val');
+        this.numericStepDown = document.getElementById('numeric-step-down');
+        this.numericStepUp = document.getElementById('numeric-step-up');
+        this.quickPresets = document.getElementById('numeric-quick-presets');
+
+        // Modal Shop
+        this.shopModal = document.getElementById('habit-shop-modal');
+        this.shopClose = document.getElementById('habit-shop-close');
+        this.shopDone = document.getElementById('habit-shop-done');
+        this.shopXpBalance = document.getElementById('shop-xp-balance');
+        this.shopRewardTitle = document.getElementById('shop-reward-title');
+        this.shopRewardCost = document.getElementById('shop-reward-cost');
+        this.shopRewardIcon = document.getElementById('shop-reward-icon');
+        this.btnAddReward = document.getElementById('btn-add-reward');
+        this.shopItemsList = document.getElementById('shop-items-list');
+
+        // Modal Badges
+        this.badgesModal = document.getElementById('habit-badges-modal');
+        this.badgesClose = document.getElementById('habit-badges-close');
+        this.badgesDone = document.getElementById('habit-badges-done');
+        this.badgesGrid = document.getElementById('habit-badges-grid');
+
+        // Modal Discipline
+        this.disciplineModal = document.getElementById('habit-discipline-modal');
+        this.disciplineClose = document.getElementById('habit-discipline-close');
+        this.disciplineDone = document.getElementById('habit-discipline-done');
+        this.disciplinePledgeInput = document.getElementById('discipline-pledge-input');
+        this.btnSavePledge = document.getElementById('btn-save-pledge');
+        this.btnClearPenalties = document.getElementById('btn-clear-penalties');
+        this.disciplineLogsList = document.getElementById('discipline-logs-list');
+    };
+
+    HabitApp.prototype._getMonthKey = function () {
+        return this.viewYear + '-' + String(this.viewMonth).padStart(2, '0');
+    };
+
+    HabitApp.prototype._bindEvents = function () {
+        var self = this;
+
+        // Month Switcher
+        if (this.prevMonthBtn) {
+            this.prevMonthBtn.addEventListener('click', function () {
+                self.viewMonth--;
+                if (self.viewMonth < 1) {
+                    self.viewMonth = 12;
+                    self.viewYear--;
+                }
+                self._onMonthChanged();
+            });
+        }
+        if (this.nextMonthBtn) {
+            this.nextMonthBtn.addEventListener('click', function () {
+                self.viewMonth++;
+                if (self.viewMonth > 12) {
+                    self.viewMonth = 1;
+                    self.viewYear++;
+                }
+                self._onMonthChanged();
+            });
+        }
+        if (this.todayBtn) {
+            this.todayBtn.addEventListener('click', function () {
+                var now = new Date();
+                self.viewYear = now.getFullYear();
+                self.viewMonth = now.getMonth() + 1;
+                self._onMonthChanged();
+                setTimeout(function () {
+                    var todayRow = document.querySelector('.habit-table tbody tr.row-today');
+                    if (todayRow) todayRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+            });
+        }
+
+        // Action Toolbar
+        if (this.syncMonthBtn) {
+            this.syncMonthBtn.addEventListener('click', function () {
+                self._syncMonthTable();
+            });
+        }
+        if (this.addHabitBtn) {
+            this.addHabitBtn.addEventListener('click', function () {
+                self._openAddHabitModal();
+            });
+        }
+        if (this.emptyAddHabitBtn) {
+            this.emptyAddHabitBtn.addEventListener('click', function () {
+                self._openAddHabitModal();
+            });
+        }
+        if (this.manageHabitsBtn) {
+            this.manageHabitsBtn.addEventListener('click', function () {
+                self._openManageModal();
+            });
+        }
+
+        // Quick Modal Openers
+        if (this.btnShop) {
+            this.btnShop.addEventListener('click', function () {
+                self._openShopModal();
+            });
+        }
+        if (this.btnBadges) {
+            this.btnBadges.addEventListener('click', function () {
+                self._openBadgesModal();
+            });
+        }
+        if (this.btnDiscipline) {
+            this.btnDiscipline.addEventListener('click', function () {
+                self._openDisciplineModal();
+            });
+        }
+
+        // Habit Add/Edit Form
+        if (this.typePillCheckbox && this.typePillNumeric) {
+            this.typePillCheckbox.addEventListener('click', function () {
+                self.selectedType = 'checkbox';
+                self.typePillCheckbox.classList.add('active');
+                self.typePillNumeric.classList.remove('active');
+                self.numericRow.style.display = 'none';
+            });
+            this.typePillNumeric.addEventListener('click', function () {
+                self.selectedType = 'numeric';
+                self.typePillNumeric.classList.add('active');
+                self.typePillCheckbox.classList.remove('active');
+                self.numericRow.style.display = 'flex';
+            });
+        }
+
+        if (this.iconPicker) {
+            this.iconPicker.addEventListener('click', function (e) {
+                var btn = e.target.closest('.icon-preset-btn');
+                if (!btn) return;
+                self.selectedIcon = btn.getAttribute('data-icon') || '💧';
+                self.iconPicker.querySelectorAll('.icon-preset-btn').forEach(function (b) { b.classList.remove('active'); });
+                btn.classList.add('active');
+            });
+        }
+
+        if (this.colorPicker) {
+            this.colorPicker.addEventListener('click', function (e) {
+                var dot = e.target.closest('.color-dot');
+                if (!dot) return;
+                self.selectedColor = dot.getAttribute('data-color') || 'purple';
+                self.colorPicker.querySelectorAll('.color-dot').forEach(function (d) { d.classList.remove('active'); });
+                dot.classList.add('active');
+            });
+        }
+
+        if (this.habitModalClose) this.habitModalClose.addEventListener('click', function () { self._closeHabitModal(); });
+        if (this.habitModalCancel) this.habitModalCancel.addEventListener('click', function () { self._closeHabitModal(); });
+        if (this.habitModalSave) this.habitModalSave.addEventListener('click', function () { self._saveHabitModal(); });
+
+        // Manage Modal
+        if (this.manageClose) this.manageClose.addEventListener('click', function () { self.manageModal.classList.remove('active'); });
+        if (this.manageDone) this.manageDone.addEventListener('click', function () { self.manageModal.classList.remove('active'); });
+
+        // Numeric Modal
+        if (this.numericClose) this.numericClose.addEventListener('click', function () { self.numericModal.classList.remove('active'); });
+        if (this.numericCancel) this.numericCancel.addEventListener('click', function () { self.numericModal.classList.remove('active'); });
+        if (this.numericSave) this.numericSave.addEventListener('click', function () { self._saveNumericModal(); });
+        if (this.numericStepDown) {
+            this.numericStepDown.addEventListener('click', function () {
+                var cur = parseFloat(self.numericValInput.value) || 0;
+                var step = (self.activeNumericCell && self.activeNumericCell.target >= 100) ? 50 : 1;
+                self.numericValInput.value = Math.max(0, cur - step);
+            });
+        }
+        if (this.numericStepUp) {
+            this.numericStepUp.addEventListener('click', function () {
+                var cur = parseFloat(self.numericValInput.value) || 0;
+                var step = (self.activeNumericCell && self.activeNumericCell.target >= 100) ? 50 : 1;
+                self.numericValInput.value = cur + step;
+            });
+        }
+
+        // Shop Modal
+        if (this.shopClose) this.shopClose.addEventListener('click', function () { self.shopModal.classList.remove('active'); });
+        if (this.shopDone) this.shopDone.addEventListener('click', function () { self.shopModal.classList.remove('active'); });
+        if (this.btnAddReward) {
+            this.btnAddReward.addEventListener('click', function () {
+                var title = (self.shopRewardTitle.value || '').trim();
+                var cost = parseInt(self.shopRewardCost.value, 10);
+                var icon = self.shopRewardIcon.value || '🎁';
+                if (!title || !cost || cost < 10) {
+                    alert(currentLang === 'vi' ? 'Vui lòng nhập tên phần thưởng và chi phí XP hợp lệ!' : 'Please enter valid reward title and XP cost!');
+                    return;
+                }
+                self.habitProfile.rewards.push({
+                    id: generateId(),
+                    title: title,
+                    cost: cost,
+                    icon: icon
+                });
+                self.shopRewardTitle.value = '';
+                self.shopRewardCost.value = '';
+                self._saveProfile();
+                self._renderShop();
+            });
+        }
+
+        // Badges Modal
+        if (this.badgesClose) this.badgesClose.addEventListener('click', function () { self.badgesModal.classList.remove('active'); });
+        if (this.badgesDone) this.badgesDone.addEventListener('click', function () { self.badgesModal.classList.remove('active'); });
+
+        // Discipline Modal
+        if (this.disciplineClose) this.disciplineClose.addEventListener('click', function () { self.disciplineModal.classList.remove('active'); });
+        if (this.disciplineDone) this.disciplineDone.addEventListener('click', function () { self.disciplineModal.classList.remove('active'); });
+        if (this.btnSavePledge) {
+            this.btnSavePledge.addEventListener('click', function () {
+                self.habitProfile.pledge = (self.disciplinePledgeInput.value || '').trim();
+                self._saveProfile();
+                PwaManager.showToast(currentLang === 'vi' ? 'Đã lưu cam kết kỷ luật cá nhân!' : 'Saved discipline pledge!', '⚖️');
+            });
+        }
+        if (this.btnClearPenalties) {
+            this.btnClearPenalties.addEventListener('click', function () {
+                self.habitProfile.penalties = [];
+                self._saveProfile();
+                self._renderDiscipline();
+            });
+        }
+
+        // Matrix Table Delegated Cell Clicks
+        if (this.tableBodyEl) {
+            this.tableBodyEl.addEventListener('click', function (e) {
+                var checkBtn = e.target.closest('.habit-cell-checkbox');
+                if (checkBtn) {
+                    var dStr = checkBtn.getAttribute('data-date');
+                    var hId = checkBtn.getAttribute('data-id');
+                    if (dStr && hId) self._toggleCheckbox(dStr, hId, e);
+                    return;
+                }
+
+                var numBtn = e.target.closest('.habit-cell-numeric');
+                if (numBtn) {
+                    var dStrNum = numBtn.getAttribute('data-date');
+                    var hIdNum = numBtn.getAttribute('data-id');
+                    if (dStrNum && hIdNum) self._openNumericModal(dStrNum, hIdNum);
+                    return;
+                }
+            });
+        }
+    };
+
+    HabitApp.prototype._onMonthChanged = function () {
+        this._render();
+        this._loadMonthLogs();
+    };
+
+    // --- Data Persistence ---
+    HabitApp.prototype._loadLocalData = function () {
+        var keySuffix = currentUser ? currentUser.uid : 'local';
+        try {
+            var rawHabits = localStorage.getItem('flowhub_habits_' + keySuffix);
+            if (rawHabits) this.habits = JSON.parse(rawHabits);
+            else if (!currentUser && this.habits.length === 0) {
+                // Default starter habits if completely fresh
+                this.habits = [
+                    { id: 'h_water', title: 'Uống 2L nước', type: 'numeric', target: 2000, unit: 'ml', icon: '💧', color: 'blue', active: true, order: 1 },
+                    { id: 'h_read', title: 'Đọc sách 20 trang', type: 'numeric', target: 20, unit: 'trang', icon: '📚', color: 'purple', active: true, order: 2 },
+                    { id: 'h_sleep', title: 'Dậy trước 6:30', type: 'checkbox', target: 1, unit: '', icon: '⏰', color: 'orange', active: true, order: 3 },
+                    { id: 'h_gym', title: 'Tập thể dục 30p', type: 'checkbox', target: 1, unit: '', icon: '🏃', color: 'green', active: true, order: 4 }
+                ];
+            }
+
+            var rawLogs = localStorage.getItem('flowhub_habit_logs_' + keySuffix + '_' + this._getMonthKey());
+            if (rawLogs) this.habitLogs[this._getMonthKey()] = JSON.parse(rawLogs);
+
+            var rawProfile = localStorage.getItem('flowhub_habit_profile_' + keySuffix);
+            if (rawProfile) {
+                var p = JSON.parse(rawProfile);
+                this.habitProfile.xp = p.xp || 0;
+                this.habitProfile.currentStreak = p.currentStreak || 0;
+                this.habitProfile.longestStreak = p.longestStreak || 0;
+                if (p.badges) this.habitProfile.badges = p.badges;
+                if (p.rewards) this.habitProfile.rewards = p.rewards;
+                if (p.penalties) this.habitProfile.penalties = p.penalties;
+                if (p.pledge) this.habitProfile.pledge = p.pledge;
+            }
+        } catch (e) {
+            console.warn('Local habit data load error:', e);
+        }
+    };
+
+    HabitApp.prototype._loadData = function () {
+        var self = this;
+        if (!currentUser) {
+            this._loadLocalData();
+            this._render();
+            return;
+        }
+
+        // Firestore Realtime Listeners
+        // 1. Habits list
+        try {
+            userDocRef('habits').orderBy('order', 'asc').onSnapshot(function (snapshot) {
+                var items = [];
+                snapshot.forEach(function (doc) {
+                    var data = doc.data();
+                    data.id = doc.id;
+                    items.push(data);
+                });
+                if (items.length > 0) {
+                    self.habits = items;
+                    localStorage.setItem('flowhub_habits_' + currentUser.uid, JSON.stringify(items));
+                    self._render();
+                } else {
+                    // Initialize default habits to firestore if brand new user
+                    self._seedDefaultHabits();
+                }
+            }, function () {
+                self._loadLocalData();
+                self._render();
+            });
+
+            // 2. Profile & stats
+            userDocRef('habit_profile').doc('stats').onSnapshot(function (doc) {
+                if (doc.exists) {
+                    var p = doc.data();
+                    self.habitProfile.xp = p.xp || 0;
+                    self.habitProfile.currentStreak = p.currentStreak || 0;
+                    self.habitProfile.longestStreak = p.longestStreak || 0;
+                    if (p.badges) self.habitProfile.badges = p.badges;
+                    if (p.rewards) self.habitProfile.rewards = p.rewards;
+                    if (p.penalties) self.habitProfile.penalties = p.penalties;
+                    if (p.pledge) self.habitProfile.pledge = p.pledge;
+                    localStorage.setItem('flowhub_habit_profile_' + currentUser.uid, JSON.stringify(self.habitProfile));
+                    self._renderStats();
+                } else {
+                    self._saveProfile();
+                }
+            });
+
+            // 3. Current month logs
+            this._loadMonthLogs();
+        } catch (e) {
+            self._loadLocalData();
+            self._render();
+        }
+    };
+
+    HabitApp.prototype._seedDefaultHabits = function () {
+        var self = this;
+        var defaultList = [
+            { title: 'Uống 2L nước', type: 'numeric', target: 2000, unit: 'ml', icon: '💧', color: 'blue', active: true, order: 1 },
+            { title: 'Đọc sách 20 trang', type: 'numeric', target: 20, unit: 'trang', icon: '📚', color: 'purple', active: true, order: 2 },
+            { title: 'Dậy trước 6:30', type: 'checkbox', target: 1, unit: '', icon: '⏰', color: 'orange', active: true, order: 3 },
+            { title: 'Tập thể dục 30p', type: 'checkbox', target: 1, unit: '', icon: '🏃', color: 'green', active: true, order: 4 }
+        ];
+        defaultList.forEach(function (h) {
+            userDocRef('habits').add(h);
+        });
+    };
+
+    HabitApp.prototype._loadMonthLogs = function () {
+        var self = this;
+        var mKey = this._getMonthKey();
+        if (!currentUser) {
+            this._renderMatrix();
+            return;
+        }
+
+        userDocRef('habit_logs').doc(mKey).onSnapshot(function (doc) {
+            if (doc.exists) {
+                self.habitLogs[mKey] = doc.data();
+            } else {
+                if (!self.habitLogs[mKey]) self.habitLogs[mKey] = { month: mKey, days: {} };
+            }
+            localStorage.setItem('flowhub_habit_logs_' + currentUser.uid + '_' + mKey, JSON.stringify(self.habitLogs[mKey]));
+            self._calculateStreaks();
+            self._renderMatrix();
+        }, function () {
+            self._renderMatrix();
+        });
+    };
+
+    HabitApp.prototype._saveHabitToDb = function (habit) {
+        var keySuffix = currentUser ? currentUser.uid : 'local';
+        localStorage.setItem('flowhub_habits_' + keySuffix, JSON.stringify(this.habits));
+
+        if (currentUser) {
+            if (habit.id && !habit.id.startsWith('temp_')) {
+                userDocRef('habits').doc(habit.id).set(habit, { merge: true });
+            } else {
+                var newRef = userDocRef('habits').doc();
+                habit.id = newRef.id;
+                newRef.set(habit);
+            }
+        }
+    };
+
+    HabitApp.prototype._deleteHabitFromDb = function (habitId) {
+        var keySuffix = currentUser ? currentUser.uid : 'local';
+        this.habits = this.habits.filter(function (h) { return h.id !== habitId; });
+        localStorage.setItem('flowhub_habits_' + keySuffix, JSON.stringify(this.habits));
+
+        if (currentUser) {
+            userDocRef('habits').doc(habitId).delete().catch(function () {});
+        }
+        this._render();
+    };
+
+    HabitApp.prototype._saveMonthLogs = function () {
+        var mKey = this._getMonthKey();
+        var keySuffix = currentUser ? currentUser.uid : 'local';
+        var logsData = this.habitLogs[mKey] || { month: mKey, days: {} };
+        localStorage.setItem('flowhub_habit_logs_' + keySuffix + '_' + mKey, JSON.stringify(logsData));
+
+        if (currentUser) {
+            userDocRef('habit_logs').doc(mKey).set(logsData, { merge: true }).catch(function () {});
+        }
+    };
+
+    HabitApp.prototype._saveProfile = function () {
+        var keySuffix = currentUser ? currentUser.uid : 'local';
+        localStorage.setItem('flowhub_habit_profile_' + keySuffix, JSON.stringify(this.habitProfile));
+
+        if (currentUser) {
+            userDocRef('habit_profile').doc('stats').set(this.habitProfile, { merge: true }).catch(function () {});
+        }
+        this._renderStats();
+    };
+
+    // --- Rendering ---
+    HabitApp.prototype._render = function () {
+        this._renderMonthTitle();
+        this._renderStats();
+        this._renderMatrix();
+    };
+
+    HabitApp.prototype._renderMonthTitle = function () {
+        if (!this.monthTitleEl) return;
+        var monthNamesVi = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
+        var monthNamesEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        if (currentLang === 'vi') {
+            this.monthTitleEl.textContent = 'Tháng ' + monthNamesVi[this.viewMonth - 1] + ' / ' + this.viewYear;
+        } else {
+            this.monthTitleEl.textContent = monthNamesEn[this.viewMonth - 1] + ' ' + this.viewYear;
+        }
+    };
+
+    HabitApp.prototype._renderStats = function () {
+        var xp = this.habitProfile.xp || 0;
+        var level = 1;
+        var currentLevelFloor = 0;
+        var nextLevelXp = 100;
+        var titleKey = 'habitRank1';
+
+        if (xp >= 1500) {
+            level = 5;
+            currentLevelFloor = 1500;
+            nextLevelXp = 3000;
+            titleKey = 'habitRank4';
+        } else if (xp >= 700) {
+            level = 4;
+            currentLevelFloor = 700;
+            nextLevelXp = 1500;
+            titleKey = 'habitRank4';
+        } else if (xp >= 300) {
+            level = 3;
+            currentLevelFloor = 300;
+            nextLevelXp = 700;
+            titleKey = 'habitRank3';
+        } else if (xp >= 100) {
+            level = 2;
+            currentLevelFloor = 100;
+            nextLevelXp = 300;
+            titleKey = 'habitRank2';
+        }
+
+        if (this.currentStreakEl) {
+            this.currentStreakEl.innerHTML = (this.habitProfile.currentStreak || 0) + ' <span class="streak-unit">' + t('daysUnit') + '</span>';
+        }
+        if (this.recordStreakEl) {
+            this.recordStreakEl.textContent = (currentLang === 'vi' ? 'Kỷ lục: ' : 'Best: ') + (this.habitProfile.longestStreak || 0) + ' ' + t('daysUnit');
+        }
+
+        if (this.levelBadgeEl) this.levelBadgeEl.textContent = 'Lv ' + level;
+        if (this.levelTitleEl) this.levelTitleEl.textContent = t(titleKey);
+        if (this.currentXpEl) this.currentXpEl.textContent = xp;
+        if (this.nextXpEl) this.nextXpEl.textContent = nextLevelXp;
+
+        if (this.xpBarEl) {
+            var pct = Math.min(100, Math.max(0, Math.round(((xp - currentLevelFloor) / (nextLevelXp - currentLevelFloor)) * 100)));
+            this.xpBarEl.style.width = pct + '%';
+        }
+    };
+
+    HabitApp.prototype._renderMatrix = function () {
+        var self = this;
+        var activeHabits = this.habits.filter(function (h) { return h.active !== false; });
+
+        if (activeHabits.length === 0) {
+            if (this.emptyStateEl) this.emptyStateEl.style.display = 'flex';
+            if (this.tableWrapperEl) this.tableWrapperEl.style.display = 'none';
+            return;
+        }
+
+        if (this.emptyStateEl) this.emptyStateEl.style.display = 'none';
+        if (this.tableWrapperEl) this.tableWrapperEl.style.display = 'block';
+
+        // 1. Render Thead
+        var headHtml = '<tr>';
+        headHtml += '<th class="habit-th-date">' + (currentLang === 'vi' ? 'Ngày' : 'Date') + '</th>';
+        activeHabits.forEach(function (h) {
+            var targetText = h.type === 'numeric' ? (h.target + ' ' + (h.unit || '')) : '✓';
+            headHtml += '<th class="habit-th-col">';
+            headHtml += '  <div class="habit-th-wrap">';
+            headHtml += '    <span class="habit-th-icon">' + (h.icon || '🎯') + '</span>';
+            headHtml += '    <span class="habit-th-title" title="' + escapeHtml(h.title) + '">' + escapeHtml(h.title) + '</span>';
+            headHtml += '    <span class="habit-th-target">' + targetText + '</span>';
+            headHtml += '  </div>';
+            headHtml += '</th>';
+        });
+        headHtml += '<th class="habit-th-stats">' + (currentLang === 'vi' ? 'Tiến độ ngày' : 'Daily Progress') + '</th>';
+        headHtml += '</tr>';
+        this.tableHeadEl.innerHTML = headHtml;
+
+        // 2. Render Tbody (28 to 31 rows)
+        var totalDays = new Date(this.viewYear, this.viewMonth, 0).getDate();
+        var todayStr = getTodayStr();
+        var mKey = this._getMonthKey();
+        var logs = (this.habitLogs[mKey] && this.habitLogs[mKey].days) || {};
+
+        var weekdaysVi = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+        var weekdaysEn = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+        var bodyHtml = '';
+
+        for (var d = 1; d <= totalDays; d++) {
+            var dPad = String(d).padStart(2, '0');
+            var mPad = String(this.viewMonth).padStart(2, '0');
+            var dateStr = this.viewYear + '-' + mPad + '-' + dPad;
+            var dateObj = new Date(this.viewYear, this.viewMonth - 1, d);
+            var dayOfWeek = dateObj.getDay();
+            var isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+            var isToday = dateStr === todayStr;
+            var dayLabel = currentLang === 'vi' ? weekdaysVi[dayOfWeek] : weekdaysEn[dayOfWeek];
+
+            var rowClasses = [];
+            if (isWeekend) rowClasses.push('row-weekend');
+            if (isToday) rowClasses.push('row-today');
+
+            var completedHabitsCount = 0;
+
+            var cellsHtml = '';
+            activeHabits.forEach(function (h) {
+                var cellData = (logs[dateStr] && logs[dateStr][h.id]) || { completed: false, value: 0 };
+                var isDone = false;
+                if (h.type === 'numeric') {
+                    var val = cellData.value || 0;
+                    isDone = val >= h.target;
+                    if (isDone) completedHabitsCount++;
+                    var pct = Math.min(100, Math.round((val / h.target) * 100));
+                    cellsHtml += '<td>';
+                    cellsHtml += '  <button type="button" class="habit-cell-numeric ' + (isDone ? 'completed' : '') + '" data-date="' + dateStr + '" data-id="' + h.id + '">';
+                    cellsHtml += '    <span class="numeric-val-text">' + val + ' / ' + h.target + ' ' + (h.unit || '') + '</span>';
+                    cellsHtml += '    <div class="numeric-mini-bar-bg"><div class="numeric-mini-bar-fill" style="width: ' + pct + '%;"></div></div>';
+                    cellsHtml += '  </button>';
+                    cellsHtml += '</td>';
+                } else {
+                    isDone = !!cellData.completed;
+                    if (isDone) completedHabitsCount++;
+                    cellsHtml += '<td>';
+                    cellsHtml += '  <button type="button" class="habit-cell-checkbox ' + (isDone ? 'checked' : '') + '" data-date="' + dateStr + '" data-id="' + h.id + '">';
+                    cellsHtml += isDone ? '✓' : '';
+                    cellsHtml += '  </button>';
+                    cellsHtml += '</td>';
+                }
+            });
+
+            var dailyPercent = activeHabits.length > 0 ? Math.round((completedHabitsCount / activeHabits.length) * 100) : 0;
+            var isPerfect = activeHabits.length > 0 && completedHabitsCount === activeHabits.length;
+
+            bodyHtml += '<tr class="' + rowClasses.join(' ') + '">';
+            bodyHtml += '  <td class="col-date">';
+            if (isToday) bodyHtml += '<span class="today-dot"></span>';
+            bodyHtml += '    <span class="date-num">' + dPad + '</span>';
+            bodyHtml += '    <span class="date-weekday">' + dayLabel + '</span>';
+            bodyHtml += '  </td>';
+            bodyHtml += cellsHtml;
+            bodyHtml += '  <td>';
+            bodyHtml += '    <div class="daily-progress-cell">';
+            bodyHtml += '      <div class="daily-progress-bar-bg">';
+            bodyHtml += '        <div class="daily-progress-bar-fill" style="width: ' + dailyPercent + '%;"></div>';
+            bodyHtml += '      </div>';
+            bodyHtml += '      <span class="daily-progress-text">' + completedHabitsCount + '/' + activeHabits.length + ' (' + dailyPercent + '%)</span>';
+            if (isPerfect) bodyHtml += '      <span class="daily-perfect-badge">⭐ 100%</span>';
+            bodyHtml += '    </div>';
+            bodyHtml += '  </td>';
+            bodyHtml += '</tr>';
+        }
+
+        this.tableBodyEl.innerHTML = bodyHtml;
+    };
+
+    // --- Cell Interaction Handlers ---
+    HabitApp.prototype._toggleCheckbox = function (dateStr, habitId, e) {
+        var mKey = this._getMonthKey();
+        if (!this.habitLogs[mKey]) this.habitLogs[mKey] = { month: mKey, days: {} };
+        if (!this.habitLogs[mKey].days[dateStr]) this.habitLogs[mKey].days[dateStr] = {};
+
+        var cur = this.habitLogs[mKey].days[dateStr][habitId] || { completed: false, value: 0 };
+        var willComplete = !cur.completed;
+
+        this.habitLogs[mKey].days[dateStr][habitId] = {
+            completed: willComplete,
+            value: willComplete ? 1 : 0
+        };
+
+        var habit = this.habits.find(function (h) { return h.id === habitId; });
+
+        if (willComplete) {
+            playChime();
+            this.awardXP(10, 'Hoàn thành thói quen', e);
+            if (habit) {
+                PwaManager.showToast(t('habitCompletedToast').replace('{title}', habit.title), '🎉');
+            }
+
+            // Check if day is 100% completed
+            var activeHabits = this.habits.filter(function (h) { return h.active !== false; });
+            var dayData = this.habitLogs[mKey].days[dateStr];
+            var allDone = activeHabits.length > 0 && activeHabits.every(function (h) {
+                var entry = dayData[h.id];
+                return entry && (h.type === 'numeric' ? entry.value >= h.target : entry.completed);
+            });
+
+            if (allDone) {
+                this.awardXP(50, 'Ngày hoàn hảo 100%', e);
+                PwaManager.showToast(t('perfectDayToast'), '⭐');
+            }
+        } else {
+            // Deduct XP
+            this.habitProfile.xp = Math.max(0, (this.habitProfile.xp || 0) - 10);
+            this._saveProfile();
+        }
+
+        this._saveMonthLogs();
+        this._calculateStreaks();
+        this._renderMatrix();
+    };
+
+    HabitApp.prototype._openNumericModal = function (dateStr, habitId) {
+        var habit = this.habits.find(function (h) { return h.id === habitId; });
+        if (!habit) return;
+
+        var mKey = this._getMonthKey();
+        var entry = (this.habitLogs[mKey] && this.habitLogs[mKey].days && this.habitLogs[mKey].days[dateStr] && this.habitLogs[mKey].days[dateStr][habitId]) || { value: 0 };
+
+        this.activeNumericCell = {
+            dateStr: dateStr,
+            habitId: habitId,
+            target: habit.target,
+            unit: habit.unit || '',
+            name: habit.title
+        };
+
+        if (this.numericName) this.numericName.textContent = habit.title;
+        if (this.numericTarget) this.numericTarget.textContent = (currentLang === 'vi' ? 'Mục tiêu: ' : 'Target: ') + habit.target + ' ' + (habit.unit || '');
+        if (this.numericIcon) this.numericIcon.textContent = habit.icon || '🔢';
+        if (this.numericUnit) this.numericUnit.textContent = habit.unit || '';
+        if (this.numericValInput) this.numericValInput.value = entry.value || 0;
+
+        // Quick Presets
+        if (this.quickPresets) {
+            var target = habit.target;
+            var presets = [];
+            if (target >= 1000) {
+                presets = [250, 500, 1000, target];
+            } else if (target >= 100) {
+                presets = [10, 25, 50, target];
+            } else {
+                presets = [1, 2, 5, target];
+            }
+            var self = this;
+            var html = '';
+            presets.forEach(function (p) {
+                html += '<button type="button" class="preset-chip" data-val="' + p + '">+' + p + ' ' + (habit.unit || '') + '</button>';
+            });
+            this.quickPresets.innerHTML = html;
+
+            this.quickPresets.querySelectorAll('.preset-chip').forEach(function (chip) {
+                chip.addEventListener('click', function () {
+                    var addVal = parseFloat(chip.getAttribute('data-val')) || 0;
+                    var cur = parseFloat(self.numericValInput.value) || 0;
+                    self.numericValInput.value = cur + addVal;
+                });
+            });
+        }
+
+        if (this.numericModal) this.numericModal.classList.add('active');
+    };
+
+    HabitApp.prototype._saveNumericModal = function () {
+        if (!this.activeNumericCell) return;
+        var dateStr = this.activeNumericCell.dateStr;
+        var habitId = this.activeNumericCell.habitId;
+        var target = this.activeNumericCell.target;
+        var newVal = parseFloat(this.numericValInput.value) || 0;
+
+        var mKey = this._getMonthKey();
+        if (!this.habitLogs[mKey]) this.habitLogs[mKey] = { month: mKey, days: {} };
+        if (!this.habitLogs[mKey].days[dateStr]) this.habitLogs[mKey].days[dateStr] = {};
+
+        var oldEntry = this.habitLogs[mKey].days[dateStr][habitId] || { value: 0 };
+        var wasDone = oldEntry.value >= target;
+        var nowDone = newVal >= target;
+
+        this.habitLogs[mKey].days[dateStr][habitId] = {
+            completed: nowDone,
+            value: newVal
+        };
+
+        if (!wasDone && nowDone) {
+            playChime();
+            this.awardXP(10, 'Đạt chỉ tiêu thói quen');
+            PwaManager.showToast(t('habitCompletedToast').replace('{title}', this.activeNumericCell.name), '🎉');
+        }
+
+        this._saveMonthLogs();
+        this._calculateStreaks();
+        this._renderMatrix();
+        if (this.numericModal) this.numericModal.classList.remove('active');
+    };
+
+    // --- Add / Edit Habit Modal ---
+    HabitApp.prototype._openAddHabitModal = function () {
+        this.editingHabitId = null;
+        if (this.habitModalTitle) this.habitModalTitle.textContent = t('addHabit');
+        if (this.habitNameInput) this.habitNameInput.value = '';
+        if (this.targetInput) this.targetInput.value = '2000';
+        if (this.unitInput) this.unitInput.value = 'ml';
+
+        this.selectedType = 'checkbox';
+        if (this.typePillCheckbox) this.typePillCheckbox.classList.add('active');
+        if (this.typePillNumeric) this.typePillNumeric.classList.remove('active');
+        if (this.numericRow) this.numericRow.style.display = 'none';
+
+        this.selectedIcon = '💧';
+        if (this.iconPicker) {
+            this.iconPicker.querySelectorAll('.icon-preset-btn').forEach(function (b) {
+                b.classList.toggle('active', b.getAttribute('data-icon') === '💧');
+            });
+        }
+
+        this.selectedColor = 'purple';
+        if (this.colorPicker) {
+            this.colorPicker.querySelectorAll('.color-dot').forEach(function (d) {
+                d.classList.toggle('active', d.getAttribute('data-color') === 'purple');
+            });
+        }
+
+        if (this.habitModal) this.habitModal.classList.add('active');
+    };
+
+    HabitApp.prototype._openEditHabitModal = function (habitId) {
+        var habit = this.habits.find(function (h) { return h.id === habitId; });
+        if (!habit) return;
+
+        this.editingHabitId = habitId;
+        if (this.habitModalTitle) this.habitModalTitle.textContent = t('editHabit');
+        if (this.habitNameInput) this.habitNameInput.value = habit.title;
+        if (this.targetInput) this.targetInput.value = habit.target || 1;
+        if (this.unitInput) this.unitInput.value = habit.unit || '';
+
+        this.selectedType = habit.type || 'checkbox';
+        if (this.typePillCheckbox) this.typePillCheckbox.classList.toggle('active', this.selectedType === 'checkbox');
+        if (this.typePillNumeric) this.typePillNumeric.classList.toggle('active', this.selectedType === 'numeric');
+        if (this.numericRow) this.numericRow.style.display = this.selectedType === 'numeric' ? 'flex' : 'none';
+
+        this.selectedIcon = habit.icon || '💧';
+        if (this.iconPicker) {
+            this.iconPicker.querySelectorAll('.icon-preset-btn').forEach(function (b) {
+                b.classList.toggle('active', b.getAttribute('data-icon') === habit.icon);
+            });
+        }
+
+        this.selectedColor = habit.color || 'purple';
+        if (this.colorPicker) {
+            this.colorPicker.querySelectorAll('.color-dot').forEach(function (d) {
+                d.classList.toggle('active', d.getAttribute('data-color') === habit.color);
+            });
+        }
+
+        if (this.manageModal) this.manageModal.classList.remove('active');
+        if (this.habitModal) this.habitModal.classList.add('active');
+    };
+
+    HabitApp.prototype._closeHabitModal = function () {
+        if (this.habitModal) this.habitModal.classList.remove('active');
+        this.editingHabitId = null;
+    };
+
+    HabitApp.prototype._saveHabitModal = function () {
+        var title = (this.habitNameInput.value || '').trim();
+        if (!title) {
+            alert(currentLang === 'vi' ? 'Vui lòng nhập tên thói quen!' : 'Please enter habit name!');
+            return;
+        }
+
+        var target = 1;
+        var unit = '';
+        if (this.selectedType === 'numeric') {
+            target = parseFloat(this.targetInput.value) || 1;
+            unit = (this.unitInput.value || '').trim();
+        }
+
+        if (this.editingHabitId) {
+            var habit = this.habits.find(function (h) { return h.id === this.editingHabitId; }.bind(this));
+            if (habit) {
+                habit.title = title;
+                habit.type = this.selectedType;
+                habit.target = target;
+                habit.unit = unit;
+                habit.icon = this.selectedIcon;
+                habit.color = this.selectedColor;
+                this._saveHabitToDb(habit);
+            }
+        } else {
+            var newHabit = {
+                id: 'temp_' + generateId(),
+                title: title,
+                type: this.selectedType,
+                target: target,
+                unit: unit,
+                icon: this.selectedIcon,
+                color: this.selectedColor,
+                active: true,
+                order: this.habits.length + 1,
+                createdAt: Date.now()
+            };
+            this.habits.push(newHabit);
+            this._saveHabitToDb(newHabit);
+        }
+
+        this._closeHabitModal();
+        this._render();
+        PwaManager.showToast(currentLang === 'vi' ? 'Đã lưu thói quen thành công!' : 'Habit saved successfully!', '✨');
+    };
+
+    // --- Manage Modal ---
+    HabitApp.prototype._openManageModal = function () {
+        this._renderManageList();
+        if (this.manageModal) this.manageModal.classList.add('active');
+    };
+
+    HabitApp.prototype._renderManageList = function () {
+        var self = this;
+        if (!this.manageList) return;
+        if (this.habits.length === 0) {
+            this.manageList.innerHTML = '<p style="text-align: center; color: var(--text-muted);">' + t('emptyHabitTitle') + '</p>';
+            return;
+        }
+
+        var html = '';
+        this.habits.forEach(function (h) {
+            var metaText = h.type === 'numeric' ? (h.target + ' ' + (h.unit || '')) : (currentLang === 'vi' ? 'Dạng Checkbox' : 'Checkbox');
+            html += '<div class="habit-manage-item">';
+            html += '  <div class="habit-manage-info">';
+            html += '    <span class="habit-manage-icon">' + (h.icon || '🎯') + '</span>';
+            html += '    <div>';
+            html += '      <div class="habit-manage-name">' + escapeHtml(h.title) + '</div>';
+            html += '      <div class="habit-manage-meta">' + metaText + '</div>';
+            html += '    </div>';
+            html += '  </div>';
+            html += '  <div class="habit-manage-actions">';
+            html += '    <button type="button" class="manage-btn-icon edit" data-id="' + h.id + '" title="Sửa">✏️</button>';
+            html += '    <button type="button" class="manage-btn-icon delete" data-id="' + h.id + '" title="Xóa">🗑</button>';
+            html += '  </div>';
+            html += '</div>';
+        });
+        this.manageList.innerHTML = html;
+
+        this.manageList.querySelectorAll('.manage-btn-icon.edit').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var id = btn.getAttribute('data-id');
+                self._openEditHabitModal(id);
+            });
+        });
+
+        this.manageList.querySelectorAll('.manage-btn-icon.delete').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var id = btn.getAttribute('data-id');
+                showConfirmModal({
+                    title: t('confirmModalTitle'),
+                    message: t('confirmDeleteHabit'),
+                    confirmText: t('confirmDelete'),
+                    onConfirm: function () {
+                        self._deleteHabitFromDb(id);
+                        self._renderManageList();
+                    }
+                });
+            });
+        });
+    };
+
+    // --- Sync Month Table ---
+    HabitApp.prototype._syncMonthTable = function () {
+        var mKey = this._getMonthKey();
+        if (!this.habitLogs[mKey]) this.habitLogs[mKey] = { month: mKey, days: {} };
+        var totalDays = new Date(this.viewYear, this.viewMonth, 0).getDate();
+
+        for (var d = 1; d <= totalDays; d++) {
+            var dPad = String(d).padStart(2, '0');
+            var mPad = String(this.viewMonth).padStart(2, '0');
+            var dateStr = this.viewYear + '-' + mPad + '-' + dPad;
+            if (!this.habitLogs[mKey].days[dateStr]) {
+                this.habitLogs[mKey].days[dateStr] = {};
+            }
+        }
+
+        this._saveMonthLogs();
+        this._calculateStreaks();
+        this._renderMatrix();
+        PwaManager.showToast(currentLang === 'vi' ? 'Đã đồng bộ hóa bảng theo dõi tháng thành công!' : 'Synced month table successfully!', '📋');
+    };
+
+    // --- Gamification, XP & Streaks ---
+    HabitApp.prototype.awardXP = function (amount, reason, e) {
+        this.habitProfile.xp = (this.habitProfile.xp || 0) + amount;
+        this._saveProfile();
+        this._renderStats();
+
+        if (e && e.clientX && e.clientY) {
+            this._spawnXpFloat(e.clientX, e.clientY, '+' + amount + ' XP');
+        }
+
+        // Check milestones
+        if (this.habitProfile.xp >= 500 && !this.habitProfile.badges.includes('xp_500')) {
+            this.habitProfile.badges.push('xp_500');
+            PwaManager.showToast('🏆 Mở khóa danh hiệu: Tia Chớp Năng Lượng (+500 XP)!', '⚡');
+        }
+        if (this.habitProfile.xp >= 1000 && !this.habitProfile.badges.includes('xp_1000')) {
+            this.habitProfile.badges.push('xp_1000');
+            PwaManager.showToast('👑 Mở khóa danh hiệu: Đại Sư Kỷ Luật (+1000 XP)!', '👑');
+        }
+    };
+
+    HabitApp.prototype._calculateStreaks = function () {
+        var activeHabits = this.habits.filter(function (h) { return h.active !== false; });
+        if (activeHabits.length === 0) return;
+
+        var mKey = this._getMonthKey();
+        var logs = (this.habitLogs[mKey] && this.habitLogs[mKey].days) || {};
+
+        var streak = 0;
+        var today = new Date();
+        var currentDayNum = today.getDate();
+        if (this.viewYear !== today.getFullYear() || this.viewMonth !== (today.getMonth() + 1)) {
+            // Viewing another month, just calculate from logs
+            currentDayNum = new Date(this.viewYear, this.viewMonth, 0).getDate();
+        }
+
+        // Count streak backwards from today
+        for (var d = currentDayNum; d >= 1; d--) {
+            var dPad = String(d).padStart(2, '0');
+            var mPad = String(this.viewMonth).padStart(2, '0');
+            var dateStr = this.viewYear + '-' + mPad + '-' + dPad;
+
+            var dayEntry = logs[dateStr];
+            if (!dayEntry) break;
+
+            var doneCount = 0;
+            activeHabits.forEach(function (h) {
+                var entry = dayEntry[h.id];
+                if (entry && (h.type === 'numeric' ? entry.value >= h.target : entry.completed)) {
+                    doneCount++;
+                }
+            });
+
+            // Count streak if at least 1 habit was completed
+            if (doneCount > 0) {
+                streak++;
+            } else if (d < currentDayNum) {
+                // broken streak in the past
+                break;
+            }
+        }
+
+        this.habitProfile.currentStreak = streak;
+        this.habitProfile.longestStreak = Math.max(this.habitProfile.longestStreak || 0, streak);
+
+        // Check badge unlocks
+        if (streak >= 3 && !this.habitProfile.badges.includes('streak_3')) {
+            this.habitProfile.badges.push('streak_3');
+            PwaManager.showToast('🌱 Mở khóa danh hiệu: Mầm Xanh Kỷ Luật (Chuỗi 3 ngày)!', '🌱');
+        }
+        if (streak >= 7 && !this.habitProfile.badges.includes('streak_7')) {
+            this.habitProfile.badges.push('streak_7');
+            this.awardXP(100, 'Chuỗi 7 ngày');
+            PwaManager.showToast('🥉 Mở khóa danh hiệu: Đà Tiến Tới (Chuỗi 7 ngày)! +100 XP', '🥉');
+        }
+        if (streak >= 21 && !this.habitProfile.badges.includes('streak_21')) {
+            this.habitProfile.badges.push('streak_21');
+            this.awardXP(300, 'Chuỗi 21 ngày');
+            PwaManager.showToast('🥈 Mở khóa danh hiệu: Kỷ Luật Thép (Chuỗi 21 ngày)! +300 XP', '🥈');
+        }
+        if (streak >= 30 && !this.habitProfile.badges.includes('streak_30')) {
+            this.habitProfile.badges.push('streak_30');
+            this.awardXP(500, 'Chuỗi 30 ngày');
+            PwaManager.showToast('🥇 Mở khóa danh hiệu: Bậc Thầy Thói Quen (Chuỗi 30 ngày)! +500 XP', '🥇');
+        }
+
+        this._saveProfile();
+    };
+
+    HabitApp.prototype._spawnXpFloat = function (x, y, text) {
+        var el = document.createElement('div');
+        el.className = 'xp-float-indicator';
+        el.textContent = text;
+        el.style.left = x + 'px';
+        el.style.top = (y - 20) + 'px';
+        document.body.appendChild(el);
+        setTimeout(function () {
+            if (el.parentNode) el.parentNode.removeChild(el);
+        }, 1200);
+    };
+
+    // --- Reward Shop Modal ---
+    HabitApp.prototype._openShopModal = function () {
+        this._renderShop();
+        if (this.shopModal) this.shopModal.classList.add('active');
+    };
+
+    HabitApp.prototype._renderShop = function () {
+        var self = this;
+        var xp = this.habitProfile.xp || 0;
+        if (this.shopXpBalance) this.shopXpBalance.textContent = xp;
+
+        if (!this.shopItemsList) return;
+        var rewards = this.habitProfile.rewards || [];
+
+        if (rewards.length === 0) {
+            this.shopItemsList.innerHTML = '<p style="text-align: center; color: var(--text-muted);">' + (currentLang === 'vi' ? 'Chưa có phần thưởng nào.' : 'No rewards yet.') + '</p>';
+            return;
+        }
+
+        var html = '';
+        rewards.forEach(function (rw) {
+            var canAfford = xp >= rw.cost;
+            html += '<div class="shop-item-card">';
+            html += '  <div class="shop-item-info">';
+            html += '    <span class="shop-item-icon">' + (rw.icon || '🎁') + '</span>';
+            html += '    <div>';
+            html += '      <div class="shop-item-title">' + escapeHtml(rw.title) + '</div>';
+            html += '      <div class="shop-item-cost">' + rw.cost + ' XP</div>';
+            html += '    </div>';
+            html += '  </div>';
+            html += '  <button type="button" class="shop-redeem-btn" data-id="' + rw.id + '" ' + (canAfford ? '' : 'disabled') + '>';
+            html += currentLang === 'vi' ? 'Đổi quà' : 'Redeem';
+            html += '  </button>';
+            html += '</div>';
+        });
+        this.shopItemsList.innerHTML = html;
+
+        this.shopItemsList.querySelectorAll('.shop-redeem-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var rwId = btn.getAttribute('data-id');
+                var rw = rewards.find(function (r) { return r.id === rwId; });
+                if (!rw) return;
+                if ((self.habitProfile.xp || 0) < rw.cost) {
+                    alert(t('notEnoughXp'));
+                    return;
+                }
+                self.habitProfile.xp -= rw.cost;
+                playChime();
+                self._saveProfile();
+                self._renderShop();
+                PwaManager.showToast(t('redeemSuccess').replace('{title}', rw.title).replace('{xp}', rw.cost), rw.icon || '🎁');
+            });
+        });
+    };
+
+    // --- Badges Modal ---
+    HabitApp.prototype._openBadgesModal = function () {
+        this._renderBadges();
+        if (this.badgesModal) this.badgesModal.classList.add('active');
+    };
+
+    HabitApp.prototype._renderBadges = function () {
+        if (!this.badgesGrid) return;
+        var unlocked = this.habitProfile.badges || [];
+        var html = '';
+
+        ALL_HABIT_BADGES.forEach(function (b) {
+            var isUnlocked = unlocked.includes(b.id);
+            var name = currentLang === 'vi' ? b.nameVi : b.nameEn;
+            var desc = currentLang === 'vi' ? b.descVi : b.descEn;
+
+            html += '<div class="badge-item-card ' + (isUnlocked ? 'unlocked' : 'locked') + '">';
+            html += '  <span class="badge-icon">' + b.icon + '</span>';
+            html += '  <div class="badge-info">';
+            html += '    <div class="badge-name">' + name + (isUnlocked ? ' ✓' : '') + '</div>';
+            html += '    <div class="badge-desc">' + desc + '</div>';
+            html += '  </div>';
+            html += '</div>';
+        });
+
+        this.badgesGrid.innerHTML = html;
+    };
+
+    // --- Discipline Fund Modal ---
+    HabitApp.prototype._openDisciplineModal = function () {
+        this._renderDiscipline();
+        if (this.disciplineModal) this.disciplineModal.classList.add('active');
+    };
+
+    HabitApp.prototype._renderDiscipline = function () {
+        if (this.disciplinePledgeInput) {
+            this.disciplinePledgeInput.value = this.habitProfile.pledge || '10.000 VNĐ vào heo đất';
+        }
+        if (!this.disciplineLogsList) return;
+        var penalties = this.habitProfile.penalties || [];
+
+        if (penalties.length === 0) {
+            this.disciplineLogsList.innerHTML = '<p style="text-align: center; color: var(--text-muted); font-size: 0.85rem;">' + (currentLang === 'vi' ? 'Chưa ghi nhận vi phạm nào. Bạn đang giữ kỷ luật rất tốt! 🔥' : 'No penalties logged. You are keeping discipline great! 🔥') + '</p>';
+            return;
+        }
+
+        var html = '';
+        penalties.forEach(function (p) {
+            html += '<div class="penalty-log-item">';
+            html += '  <span class="penalty-log-date">' + p.date + '</span>';
+            html += '  <span class="penalty-log-note">' + escapeHtml(p.note || 'Bỏ lỡ thói quen') + '</span>';
+            html += '</div>';
+        });
+        this.disciplineLogsList.innerHTML = html;
+    };
+
+    // =========================================================
     //  PWA INSTALLATION MANAGER
     // =========================================================
     var PwaManager = (function () {
@@ -2393,6 +3722,7 @@
             }
             if (window.__todoApp) window.__todoApp._render();
             if (window.__noteApp) window.__noteApp._render();
+            if (window.__habitApp) window.__habitApp._render();
         });
 
         // App Reload (F5) button
@@ -2411,5 +3741,6 @@
         window.__todoApp = new TodoList();
         window.__noteApp = new NoteApp();
         window.__priceApp = new PriceApp();
+        window.__habitApp = new HabitApp();
     });
 })();

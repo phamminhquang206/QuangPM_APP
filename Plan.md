@@ -142,3 +142,54 @@ Tài liệu đặc tả yêu cầu và các tính năng hiện có của dự á
   * Hiệu ứng chuyển tab mượt mà không tải lại trang.
 * **GEN 4 - Tương thích mọi thiết bị (Responsive Design)**:
   * Tối ưu hoàn hảo giao diện từ màn hình điện thoại nhỏ (360px - 480px), máy tính bảng đến màn hình máy tính lớn.
+
+---
+
+## 8. Habit Tracker (Theo dõi & Xây dựng thói quen)
+
+* **REQ 8.1 - Quản lý danh sách thói quen (Habit Management)**:
+  * Nút "+ Thêm thói quen" mở modal thiết lập linh hoạt:
+    * **Tên thói quen**: Tiêu đề rõ ràng (ví dụ: *Đọc sách 30p, Uống 2 lít nước, Tập gym, Dậy trước 6h*).
+    * **Kiểu theo dõi (Tracker Type)**:
+      * *Dạng Checkbox (Có / Không)*: Đánh dấu hoàn thành đơn giản (✓ / ✗) cho các thói quen nhị phân.
+      * *Dạng Số lượng (Numeric Target)*: Nhập chỉ tiêu số lượng và đơn vị đo lường (ví dụ: *2000 ml*, *50 cái hít đất*, *30 trang sách*, *10 từ vựng*). Hỗ trợ nút tăng/giảm nhanh (+/-) và hiển thị thanh tiến độ phần trăm (`current / target`).
+    * **Cá nhân hóa giao diện**: Lựa chọn Biểu tượng (Icon/Emoji đại diện) và Màu sắc nhận diện (Tag Color) để dễ dàng phân loại trực quan.
+  * Danh sách quản lý thói quen: Xem danh sách các thói quen đang duy trì, hỗ trợ Chỉnh sửa thông tin hoặc Xóa thói quen (kèm modal xác nhận an toàn).
+
+* **REQ 8.2 - Bảng theo dõi trực quan theo tháng (Monthly Grid & Daily Logs)**:
+  * **Bộ điều hướng & Chuyển đổi Thời gian**:
+    * Cho phép chọn và điều hướng linh hoạt giữa các Tháng/Năm (Tháng trước, Tháng sau, Nút "Về tháng này").
+    * Nút "📋 Tạo bảng theo dõi tháng" (khởi tạo danh sách ngày theo dõi cho tháng đã chọn) và tự động đồng bộ hóa toàn bộ các ngày trong tháng (từ ngày 01 đến 28/29/30/31).
+  * **Ma trận hiển thị chi tiết theo ngày (Daily Rows View)**:
+    * Mỗi ngày trong tháng là 1 dòng độc lập (Dòng 01 đến dòng 30/31), hiển thị rõ: Số ngày, Thứ trong tuần (T2, T3, ..., CN).
+    * Tự động làm nổi bật dòng của **Hôm nay (Today)** bằng viền phát sáng neon giúp người dùng định vị tức thì.
+    * Các cột tương ứng với từng thói quen:
+      * Ô Checkbox: Chạm/Click để đánh dấu hoàn thành (đổi màu tím/xanh nổi bật kèm âm thanh phản hồi).
+      * Ô Số lượng: Click để nhập nhanh hoặc nút +/- số lượng đã thực hiện trong ngày, hiển thị tiến độ (ví dụ: `1500 / 2000 ml`).
+    * Cột **Tiến độ tổng thể trong ngày (% Complete)**: Thanh progress bar và tỷ lệ hoàn thành (ví dụ: `4/5 (80%)`).
+  * **Tối ưu hiển thị đa thiết bị (Responsive Matrix)**:
+    * Chế độ bảng ngang cuộn mượt (Scrollable Table) trên Desktop.
+    * Chế độ thẻ ngày (Daily Card View) hoặc cuộn ngang sticky header trên Mobile để thao tác 1 chạm tiện lợi.
+
+* **REQ 8.3 - Cơ chế Thưởng & Phạt (Gamification: Rewards & Penalties)**:
+  * **Hệ thống Chuỗi liên tục (Streak System)**:
+    * Tự động tính toán chuỗi ngày hoàn thành liên tiếp (🔥 Current Streak & Longest Streak).
+    * Cảnh báo nguy cơ đứt chuỗi nếu chưa hoàn thành các thói quen cốt lõi trong ngày.
+  * **Hệ thống Điểm tích lũy (XP / Habit Points)**:
+    * *Cơ chế Thưởng (Rewards)*:
+      * Hoàn thành 1 thói quen: Nhận điểm thưởng (+10 XP).
+      * Hoàn thành trọn vẹn 100% thói quen trong ngày: Nhận thưởng "Ngày hoàn hảo" (+50 XP Bonus).
+      * Duy trì các mốc Streak quan trọng (7 ngày, 21 ngày, 30 ngày): Nhận huy hiệu thành tựu (Badges) và lượng điểm lớn.
+    * *Cơ chế Phạt (Penalties / Discipline)*:
+      * Bỏ lỡ thói quen trong ngày: Bị trừ điểm kỷ luật (-5 XP) hoặc ghi nhận "Vé phạt kỷ luật".
+      * Đứt chuỗi kỷ luật: Reset chuỗi ngày hoặc tiêu tốn "Khiên bảo vệ chuỗi" (Streak Freeze) đổi bằng điểm.
+      * Tùy chọn Quỹ phạt cá nhân (Custom Penalty Box): Người dùng có thể tự cam kết số tiền/hình phạt cá nhân nếu không đạt chỉ tiêu tuần/tháng (ví dụ: bỏ tập phạt 50k vào quỹ tiết kiệm).
+  * **Cửa hàng Tự Thưởng (Reward Shop)**:
+    * Cho phép người dùng quy đổi điểm XP đã tích lũy lấy các phần thưởng tinh thần tự định nghĩa (ví dụ: *100 XP = 1 cốc trà sữa, 200 XP = Xem 1 tập phim, 500 XP = 1 buổi shopping cuối tuần*).
+
+* **REQ 8.4 - Lưu trữ Real-time Firestore & Hoạt động Offline**:
+  * Lưu trữ cấu trúc dữ liệu khoa học theo từng `userId`:
+    * Danh mục thói quen: `users/{uid}/habits/{habitId}`.
+    * Nhật ký theo dõi từng tháng: `users/{uid}/habit_logs/{year_month}` (ghi nhận dữ liệu theo từng ngày và từng habitId).
+    * Hồ sơ thành tích: `users/{uid}/habit_profile/stats` (XP, level, chuỗi streak, huy hiệu).
+  * Hỗ trợ lưu đệm offline (Offline Persistence) và tự động đồng bộ ngay khi có mạng trở lại.
