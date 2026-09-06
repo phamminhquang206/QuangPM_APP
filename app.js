@@ -2255,7 +2255,7 @@
         if (!html) return '';
         var div = document.createElement('div');
         div.innerHTML = html;
-        div.querySelectorAll('script, style, iframe, object, embed, form, button:not(.notion-todo-checkbox)').forEach(function (el) {
+        div.querySelectorAll('script, style, iframe, object, embed, form').forEach(function (el) {
             el.remove();
         });
         var allEls = div.querySelectorAll('*');
@@ -2271,61 +2271,34 @@
         return div.innerHTML;
     }
 
-    function htmlToMarkdownText(html) {
-        if (!html) return '';
-        var div = document.createElement('div');
-        div.innerHTML = html;
-
-        // Convert <br> to newline
-        div.querySelectorAll('br').forEach(function (br) {
-            br.replaceWith('\n');
-        });
-
-        // Convert block elements to newlines
-        div.querySelectorAll('p, div, h1, h2, h3, h4, h5, h6, blockquote, pre, hr').forEach(function (el) {
-            el.before('\n');
-            el.after('\n');
-        });
-
-        div.querySelectorAll('li').forEach(function (li) {
-            li.before('\n');
-        });
-
-        var text = div.textContent || div.innerText || '';
-        return text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-    }
-
-    function containsMarkdownSyntax(str) {
-        if (!str) return false;
-        // Fenced code blocks ```
-        if (/```/.test(str)) return true;
-        // Inline code `...`
-        if (/`[^`\n]+`/.test(str)) return true;
-        // Headings: # Title, ## Title
-        if (/(?:^|\n)\s*#{1,6}\s+\S/m.test(str)) return true;
-        // Blockquotes: > Quote
-        if (/(?:^|\n)\s*>\s+\S/m.test(str)) return true;
-        // Bullet lists: - item, * item, + item
-        if (/(?:^|\n)\s*[-*+]\s+\S/m.test(str)) return true;
-        // Numbered lists: 1. item
-        if (/(?:^|\n)\s*\d+\.\s+\S/m.test(str)) return true;
-        // Bold or italic: **bold**, *italic*, __bold__, _italic_
-        if (/\*\*[^*\n]+\*\*|__[^_\n]+__|\*[^*\n]+\*|_[^_\n]+_/.test(str)) return true;
-        // Strikethrough: ~~strike~~
-        if (/~~[^~\n]+~~/.test(str)) return true;
-        // Horizontal rules: --- or ***
-        if (/(?:^|\n)\s*(?:---|___|\*\*\*)\s*(?:$|\n)/m.test(str)) return true;
-        // Task lists: [ ] or [x]
-        if (/\[[ xX]\]/.test(str)) return true;
-        return false;
-    }
-
     function formatInlineMarkdown(text) {
         if (!text) return '';
         var res = escapeHtml(text);
+
+        // LaTeX arrows & mathematical arrows
+        res = res
+            .replace(/&dollar;\\rightarrow&dollar;/gi, '→')
+            .replace(/\$\\rightarrow\$/gi, '→')
+            .replace(/\\rightarrow/gi, '→')
+            .replace(/&dollar;\\leftarrow&dollar;/gi, '←')
+            .replace(/\$\\leftarrow\$/gi, '←')
+            .replace(/\\leftarrow/gi, '←')
+            .replace(/&dollar;\\leftrightarrow&dollar;/gi, '↔')
+            .replace(/\$\\leftrightarrow\$/gi, '↔')
+            .replace(/\\leftrightarrow/gi, '↔')
+            .replace(/&dollar;\\Rightarrow&dollar;/gi, '⇒')
+            .replace(/\$\\Rightarrow\$/gi, '⇒')
+            .replace(/\\Rightarrow/gi, '⇒')
+            .replace(/\s-&gt;\s/g, ' → ')
+            .replace(/\s&lt;-\s/g, ' ← ');
+
+        // Timestamps [MM:SS] or [HH:MM:SS]
+        res = res.replace(/\[(\d{1,2}:\d{2}(?::\d{2})?)\]/g, '<span class="notion-timestamp">[$1]</span>');
+
         // Inline code `code`
-        res = res.replace(/`([^`]+)`/g, '<code>$1</code>');
+        res = res.replace(/`([^`\n]+)`/g, '<code>$1</code>');
         // Bold **text** or __text__
+        res = res.replace(/\*\*\*([^*]+)\*\*\*/g, '<strong><em>$1</em></strong>');
         res = res.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
         res = res.replace(/__([^_]+)__/g, '<strong>$1</strong>');
         // Italic *text* or _text_
@@ -2333,7 +2306,235 @@
         res = res.replace(/_([^_]+)_/g, '<em>$1</em>');
         // Strikethrough ~~text~~
         res = res.replace(/~~([^~]+)~~/g, '<s>$1</s>');
+
         return res;
+    }
+
+    function childrenToMarkdown(el) {
+        if (!el || !el.childNodes) return '';
+        var out = '';
+        for (var i = 0; i < el.childNodes.length; i++) {
+            out += nodeToMarkdown(el.childNodes[i]);
+        }
+        return out;
+    }
+
+    function nodeToMarkdown(node) {
+        if (!node) return '';
+        if (node.nodeType === Node.TEXT_NODE) {
+            return node.textContent.replace(/\u00A0/g, ' ');
+        }
+        if (node.nodeType !== Node.ELEMENT_NODE) {
+            return '';
+        }
+
+        var tag = node.tagName.toLowerCase();
+
+        // Skip toolbar or helper buttons
+        if (node.classList.contains('notion-copy-code-btn') ||
+            node.classList.contains('notion-code-header') ||
+            node.classList.contains('callout-header')) {
+            return '';
+        }
+
+        // Notion Callout block
+        if (node.classList.contains('notion-callout')) {
+            var type = 'NOTE';
+            if (node.classList.contains('tip')) type = 'TIP';
+            else if (node.classList.contains('important')) type = 'IMPORTANT';
+            else if (node.classList.contains('warning')) type = 'WARNING';
+            else if (node.classList.contains('info')) type = 'INFO';
+
+            var bodyEl = node.querySelector('.notion-callout-body') || node.querySelector('.callout-content') || node;
+            var bodyMd = childrenToMarkdown(bodyEl).trim();
+            var calloutLines = bodyMd.split('\n').map(function (l) { return '> ' + l; }).join('\n');
+            return '\n\n> [!' + type + ']\n' + calloutLines + '\n\n';
+        }
+
+        // Notion Code block wrapper
+        if (node.classList.contains('notion-code-wrapper')) {
+            var langEl = node.querySelector('.notion-code-lang');
+            var lang = langEl ? langEl.textContent.trim() : '';
+            var codeEl = node.querySelector('code');
+            var codeText = codeEl ? codeEl.textContent : '';
+            return '\n\n```' + lang + '\n' + codeText.replace(/\r\n/g, '\n').trim() + '\n```\n\n';
+        }
+
+        // Table container or table element
+        if (node.classList.contains('notion-table-container')) {
+            var tbl = node.querySelector('table');
+            return tbl ? nodeToMarkdown(tbl) : '';
+        }
+
+        if (tag === 'table') {
+            var trs = Array.from(node.querySelectorAll('tr'));
+            if (trs.length === 0) return '';
+            var mdRows = [];
+            var maxCols = 0;
+
+            trs.forEach(function (tr, rIdx) {
+                var ths = tr.querySelectorAll('th');
+                var tds = tr.querySelectorAll('td');
+                var cells = ths.length > 0 ? ths : tds;
+                var isHead = ths.length > 0 || rIdx === 0;
+                if (cells.length === 0) return;
+
+                if (cells.length > maxCols) maxCols = cells.length;
+
+                var rowCells = Array.from(cells).map(function (c) {
+                    var cellText = childrenToMarkdown(c).trim();
+                    return cellText.replace(/\|/g, '\\|').replace(/\r?\n+/g, ' ');
+                });
+                mdRows.push('| ' + rowCells.join(' | ') + ' |');
+
+                if (isHead && mdRows.length === 1) {
+                    var seps = [];
+                    for (var s = 0; s < rowCells.length; s++) seps.push(':---');
+                    mdRows.push('| ' + seps.join(' | ') + ' |');
+                }
+            });
+
+            return '\n\n' + mdRows.join('\n') + '\n\n';
+        }
+
+        // Todo rows
+        if (node.classList.contains('notion-todo-row')) {
+            var chk = node.querySelector('.notion-todo-checkbox');
+            var isChecked = chk ? chk.checked : node.classList.contains('done');
+            var txtEl = node.querySelector('.notion-todo-text') || node;
+            var tText = childrenToMarkdown(txtEl).trim();
+            return (isChecked ? '- [x] ' : '- [ ] ') + tText + '\n';
+        }
+
+        // Headings
+        if (/^h[1-6]$/.test(tag)) {
+            var hLevel = parseInt(tag.charAt(1), 10);
+            var hPrefix = '#'.repeat(hLevel);
+            return '\n\n' + hPrefix + ' ' + childrenToMarkdown(node).trim() + '\n\n';
+        }
+
+        // Unordered lists
+        if (tag === 'ul') {
+            var ulItems = [];
+            for (var u = 0; u < node.children.length; u++) {
+                ulItems.push(nodeToMarkdown(node.children[u]));
+            }
+            return '\n' + ulItems.join('') + '\n';
+        }
+
+        // Ordered lists
+        if (tag === 'ol') {
+            var startNum = parseInt(node.getAttribute('start') || '1', 10);
+            var olItems = [];
+            var currNum = startNum;
+            for (var o = 0; o < node.children.length; o++) {
+                var child = node.children[o];
+                if (child.tagName.toLowerCase() === 'li') {
+                    olItems.push(currNum + '. ' + childrenToMarkdown(child).trim() + '\n');
+                    currNum++;
+                } else {
+                    olItems.push(nodeToMarkdown(child));
+                }
+            }
+            return '\n' + olItems.join('') + '\n';
+        }
+
+        // List item
+        if (tag === 'li') {
+            var parts = [];
+            for (var k = 0; k < node.childNodes.length; k++) {
+                var cn = node.childNodes[k];
+                if (cn.tagName && (cn.tagName.toLowerCase() === 'ul' || cn.tagName.toLowerCase() === 'ol')) {
+                    var sub = nodeToMarkdown(cn).trim().split('\n').map(function (sl) {
+                        return '   ' + sl;
+                    }).join('\n');
+                    parts.push('\n' + sub);
+                } else {
+                    parts.push(nodeToMarkdown(cn));
+                }
+            }
+            return '- ' + parts.join('').trim() + '\n';
+        }
+
+        // Pre / Code
+        if (tag === 'pre') {
+            var codeEl = node.querySelector('code');
+            var langMatch = codeEl ? (codeEl.className || '').match(/language-([a-zA-Z0-9_-]+)/) : null;
+            var lang = langMatch ? langMatch[1] : '';
+            var cText = codeEl ? codeEl.textContent : node.textContent;
+            return '\n\n```' + lang + '\n' + cText.replace(/\r\n/g, '\n').trim() + '\n```\n\n';
+        }
+
+        // Block elements
+        if (tag === 'p') {
+            var pContent = childrenToMarkdown(node).trim();
+            return pContent ? ('\n\n' + pContent + '\n\n') : '\n\n';
+        }
+
+        if (tag === 'blockquote') {
+            var bqLines = childrenToMarkdown(node).trim().split('\n');
+            return '\n\n' + bqLines.map(function (bl) { return '> ' + bl; }).join('\n') + '\n\n';
+        }
+
+        if (tag === 'hr') {
+            return '\n\n---\n\n';
+        }
+
+        // Inline elements
+        if (tag === 'strong' || tag === 'b') {
+            return '**' + childrenToMarkdown(node) + '**';
+        }
+        if (tag === 'em' || tag === 'i') {
+            return '*' + childrenToMarkdown(node) + '*';
+        }
+        if (tag === 'del' || tag === 's') {
+            return '~~' + childrenToMarkdown(node) + '~~';
+        }
+        if (tag === 'code') {
+            return '`' + node.textContent + '`';
+        }
+        if (tag === 'a') {
+            var href = node.getAttribute('href') || '';
+            return '[' + childrenToMarkdown(node) + '](' + href + ')';
+        }
+        if (tag === 'br') {
+            return '\n';
+        }
+
+        return childrenToMarkdown(node);
+    }
+
+    function notionHtmlToMarkdown(contentOrEl) {
+        if (!contentOrEl) return '';
+        if (typeof contentOrEl === 'string') {
+            if (!/<[a-z][\s\S]*>/i.test(contentOrEl)) {
+                return contentOrEl;
+            }
+            var tempDiv = document.createElement('div');
+            tempDiv.innerHTML = contentOrEl;
+            return nodeToMarkdown(tempDiv).trim().replace(/\n{3,}/g, '\n\n');
+        }
+        if (contentOrEl.nodeType) {
+            return nodeToMarkdown(contentOrEl).trim().replace(/\n{3,}/g, '\n\n');
+        }
+        return '';
+    }
+
+    function containsMarkdownSyntax(str) {
+        if (!str) return false;
+        if (/```/.test(str)) return true;
+        if (/`[^`\n]+`/.test(str)) return true;
+        if (/(?:^|\n)\s*#{1,6}\s+\S/m.test(str)) return true;
+        if (/(?:^|\n)\s*>\s+\S/m.test(str)) return true;
+        if (/(?:^|\n)\s*[-*+]\s+\S/m.test(str)) return true;
+        if (/(?:^|\n)\s*\d+\.\s+\S/m.test(str)) return true;
+        if (/\*\*[^*\n]+\*\*|__[^_\n]+__|\*[^*\n]+\*|_[^_\n]+_/.test(str)) return true;
+        if (/~~[^~\n]+~~/.test(str)) return true;
+        if (/(?:^|\n)\s*(?:---|___|\*\*\*)\s*(?:$|\n)/m.test(str)) return true;
+        if (/\[[ xX]\]/.test(str)) return true;
+        if (/\|[^\n]+\|/.test(str)) return true;
+        if (/\$\\rightarrow\$/i.test(str) || /\\rightarrow/i.test(str)) return true;
+        return false;
     }
 
     function postProcessNotionHtml(html) {
@@ -2436,11 +2637,15 @@
                 html += '<div class="notion-todo-row"><input type="checkbox" class="notion-todo-checkbox"><div class="notion-todo-text">' + formatInlineMarkdown(todoText) + '</div></div>';
             } else if (trimmed.startsWith('- [x] ') || trimmed.startsWith('[x] ') || trimmed.startsWith('- [X] ') || trimmed.startsWith('[X] ')) {
                 if (inList) { html += '</ul>'; inList = false; }
-                var todoText = trimmed.replace(/^(- \[[xX]\] |\[[xX]\] )/, '');
-                html += '<div class="notion-todo-row done"><input type="checkbox" class="notion-todo-checkbox" checked><div class="notion-todo-text">' + formatInlineMarkdown(todoText) + '</div></div>';
+                var todoTextDone = trimmed.replace(/^(- \[[xX]\] |\[[xX]\] )/, '');
+                html += '<div class="notion-todo-row done"><input type="checkbox" class="notion-todo-checkbox" checked><div class="notion-todo-text">' + formatInlineMarkdown(todoTextDone) + '</div></div>';
             } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ') || trimmed.startsWith('+ ')) {
                 if (!inList) { html += '<ul>'; inList = true; }
                 html += '<li>' + formatInlineMarkdown(trimmed.substring(2)) + '</li>';
+            } else if (/^\d+\.\s/.test(trimmed)) {
+                if (inList) { html += '</ul>'; inList = false; }
+                var numMatch = trimmed.match(/^(\d+)\.\s(.*)$/);
+                html += '<ol><li value="' + numMatch[1] + '">' + formatInlineMarkdown(numMatch[2]) + '</li></ol>';
             } else if (trimmed.startsWith('> ')) {
                 if (inList) { html += '</ul>'; inList = false; }
                 html += '<blockquote><p>' + formatInlineMarkdown(trimmed.substring(2)) + '</p></blockquote>';
@@ -2463,46 +2668,174 @@
         return html;
     }
 
-    function parseMarkdownToHtml(markdown) {
+    function renderNotionMarkdown(markdown) {
         if (!markdown) return '';
-        var normalized = markdown
+
+        var text = String(markdown);
+
+        // Preprocess math arrows (LaTeX & symbols)
+        text = text
+            .replace(/\$\s*\\rightarrow\s*\$/gi, '→')
+            .replace(/\\rightarrow/gi, '→')
+            .replace(/\$\s*\\leftarrow\s*\$/gi, '←')
+            .replace(/\\leftarrow/gi, '←')
+            .replace(/\$\s*\\leftrightarrow\s*\$/gi, '↔')
+            .replace(/\\leftrightarrow/gi, '↔')
+            .replace(/\$\s*\\Rightarrow\s*\$/gi, '⇒')
+            .replace(/\\Rightarrow/gi, '⇒');
+
+        // Preprocess callouts > [!TIP], > [!NOTE], > [!IMPORTANT], > [!WARNING], > [!INFO]
+        var callouts = [];
+        text = text.replace(/(?:^>[^\n]*(?:\r?\n>[^\n]*)*)/gm, function (blockMatch) {
+            var lines = blockMatch.split(/\r?\n/);
+            var firstLine = lines[0];
+            var calloutMatch = firstLine.match(/^>\s*\[!(NOTE|TIP|IMPORTANT|WARNING|INFO)\]\s*(.*)$/i);
+
+            if (calloutMatch) {
+                var type = calloutMatch[1].toLowerCase();
+                var titleMap = {
+                    note: { icon: 'ℹ️', title: 'Ghi chú' },
+                    tip: { icon: '💡', title: 'Mẹo hay' },
+                    important: { icon: '⚠️', title: 'Quan trọng' },
+                    warning: { icon: '⚠️', title: 'Cảnh báo' },
+                    info: { icon: 'ℹ️', title: 'Thông tin' }
+                };
+                var meta = titleMap[type] || { icon: '📌', title: type.toUpperCase() };
+
+                var remainingLines = lines.slice(1).map(function (l) { return l.replace(/^>\s?/, ''); });
+                if (calloutMatch[2] && calloutMatch[2].trim()) {
+                    remainingLines.unshift(calloutMatch[2].trim());
+                }
+                var innerContent = remainingLines.map(function (l) { return formatInlineMarkdown(l); }).join('<br/>');
+                var id = '__CALLOUT_BLOCK_' + callouts.length + '__';
+                var calloutHtml = '<div class="notion-callout ' + type + '">' +
+                    '<div class="callout-header"><span class="callout-icon">' + meta.icon + '</span><span class="callout-title">' + meta.title + '</span></div>' +
+                    '<div class="callout-content">' + innerContent + '</div>' +
+                    '</div>';
+                callouts.push(calloutHtml);
+                return id;
+            }
+
+            return blockMatch;
+        });
+
+        // Preprocess GFM Tables: (?:\|[^\r\n]+\|(?:\r?\n|$))+
+        var tables = [];
+        text = text.replace(/(?:\|[^\r\n]+\|(?:\r?\n|$))+/g, function (tableMatch) {
+            var lines = tableMatch.trim().split(/\r?\n/);
+            if (lines.length < 2) return tableMatch;
+
+            var html = '<div class="notion-table-container"><table class="notion-table">';
+            var isHeader = true;
+
+            lines.forEach(function (line, index) {
+                // Skip separator line |---|---|
+                if (line.match(/^\|[\s-:]+\|$/) || line.replace(/\|/g, '').trim().match(/^[-:\s]+$/)) {
+                    isHeader = false;
+                    return;
+                }
+
+                var cells = line.split('|').filter(function (_, i, arr) { return i > 0 && i < arr.length - 1; });
+                if (cells.length === 0) return;
+
+                if (index === 0 && isHeader) {
+                    html += '<thead><tr>';
+                    cells.forEach(function (cell) {
+                        html += '<th>' + formatInlineMarkdown(cell.trim()) + '</th>';
+                    });
+                    html += '</tr></thead><tbody>';
+                } else {
+                    html += '<tr>';
+                    cells.forEach(function (cell) {
+                        html += '<td>' + formatInlineMarkdown(cell.trim()) + '</td>';
+                    });
+                    html += '</tr>';
+                }
+            });
+
+            html += '</tbody></table></div>';
+            var id = '__NOTION_TABLE_' + tables.length + '__';
+            tables.push(html);
+            return '\n\n' + id + '\n\n';
+        });
+
+        // Preprocess Code Blocks
+        var codeBlocks = [];
+        text = text.replace(/```([a-zA-Z0-9_-]*)\n([\s\S]*?)```/g, function (match, lang, code) {
+            var cleanLang = lang.trim() || 'text';
+            var escapedCode = escapeHtml(code.trim());
+            var id = '__NOTION_CODE_' + codeBlocks.length + '__';
+            var codeBlockHtml = '<div class="notion-code-wrapper">' +
+                '<div class="notion-code-header">' +
+                '<span class="notion-code-lang">' + escapeHtml(cleanLang) + '</span>' +
+                '<button class="notion-copy-code-btn" type="button" data-code="' + encodeURIComponent(code.trim()) + '">' +
+                '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>' +
+                '<span>Sao chép</span>' +
+                '</button>' +
+                '</div>' +
+                '<pre class="notion-pre"><code class="language-' + escapeHtml(cleanLang) + '">' + escapedCode + '</code></pre>' +
+                '</div>';
+            codeBlocks.push(codeBlockHtml);
+            return '\n\n' + id + '\n\n';
+        });
+
+        // Normalize Todo items
+        text = text
             .replace(/(^|\n)\s*\[ \]\s*/g, '$1- [ ] ')
             .replace(/(^|\n)\s*\[[xX]\]\s*/g, '$1- [x] ');
 
+        // Parse remaining blocks using marked (if available) or robust fallback
         var parsed = '';
         var markedLib = (typeof marked !== 'undefined') ? (marked.parse || marked) : (window.marked && (window.marked.parse || window.marked));
         if (typeof markedLib === 'function') {
             try {
-                parsed = markedLib(normalized, { gfm: true, breaks: true });
+                parsed = markedLib(text, { gfm: true, breaks: true });
             } catch (err) {
                 console.warn('Marked parse error, fallback to built-in parser:', err);
-                parsed = fallbackMarkdownParser(normalized);
+                parsed = fallbackMarkdownParser(text);
             }
         } else {
-            parsed = fallbackMarkdownParser(normalized);
+            parsed = fallbackMarkdownParser(text);
         }
 
+        // Restore Tables
+        tables.forEach(function (tableHtml, index) {
+            var placeholder = '__NOTION_TABLE_' + index + '__';
+            parsed = parsed.replace(new RegExp('<p>\\s*' + placeholder + '\\s*<\\/p>|' + placeholder, 'g'), tableHtml);
+        });
+
+        // Restore Callouts
+        callouts.forEach(function (calloutHtml, index) {
+            var placeholder = '__CALLOUT_BLOCK_' + index + '__';
+            parsed = parsed.replace(new RegExp('<p>\\s*' + placeholder + '\\s*<\\/p>|' + placeholder, 'g'), calloutHtml);
+        });
+
+        // Restore Code Blocks
+        codeBlocks.forEach(function (codeHtml, index) {
+            var placeholder = '__NOTION_CODE_' + index + '__';
+            parsed = parsed.replace(new RegExp('<p>\\s*' + placeholder + '\\s*<\\/p>|' + placeholder, 'g'), codeHtml);
+        });
+
+        // Post-process HTML (todos, links, etc.)
         return postProcessNotionHtml(parsed);
     }
 
     function legacyToNotionHtml(text) {
         if (!text) return '';
 
-        var markdownSource = text;
-        // Check if text has HTML tags (e.g. from previous contenteditable save)
-        if (/<[a-z][\s\S]*>/i.test(text)) {
-            var extracted = htmlToMarkdownText(text);
-            if (containsMarkdownSyntax(extracted)) {
-                // HTML contains unparsed raw markdown inside -> parse extracted markdown!
-                markdownSource = extracted;
-            } else {
-                // Already pure rich HTML without unparsed markdown
-                return sanitizeNoteHtml(text);
-            }
+        // If text is already rich HTML containing notion table or callout or code block:
+        if (text.indexOf('notion-table-container') !== -1 || text.indexOf('notion-callout') !== -1 || text.indexOf('notion-code-wrapper') !== -1) {
+            return sanitizeNoteHtml(text);
         }
 
-        var parsed = parseMarkdownToHtml(markdownSource);
-        return sanitizeNoteHtml(parsed);
+        // If text has HTML tags, convert to markdown first so it is canonical
+        if (/<[a-z][\s\S]*>/i.test(text)) {
+            var md = notionHtmlToMarkdown(text);
+            return renderNotionMarkdown(md);
+        }
+
+        // Pure markdown string
+        return renderNotionMarkdown(text);
     }
 
     function NoteApp() {
@@ -2729,6 +3062,32 @@
                     if (!self.isEditing && self.editingNoteId) {
                         self._saveFromModal(true);
                     }
+                }
+            });
+
+            // Copy code block button
+            this.contentEditor.addEventListener('click', function (e) {
+                var copyBtn = e.target.closest('.notion-copy-code-btn');
+                if (!copyBtn) return;
+                e.preventDefault();
+                e.stopPropagation();
+                var code = decodeURIComponent(copyBtn.getAttribute('data-code') || '');
+                if (!code) {
+                    var wrapper = copyBtn.closest('.notion-code-wrapper');
+                    var codeEl = wrapper ? wrapper.querySelector('code') : null;
+                    code = codeEl ? codeEl.textContent : '';
+                }
+                if (code && navigator.clipboard) {
+                    navigator.clipboard.writeText(code).then(function () {
+                        var span = copyBtn.querySelector('span');
+                        if (span) {
+                            var old = span.textContent;
+                            span.textContent = 'Đã chép!';
+                            setTimeout(function () { span.textContent = old; }, 2000);
+                        }
+                    }).catch(function (err) {
+                        console.warn('Clipboard write failed:', err);
+                    });
                 }
             });
         }
@@ -3010,15 +3369,21 @@
     };
 
     NoteApp.prototype._toggleNoteModalMode = function () {
+        var self = this;
         if (this.isEditing) {
             // User clicked "✓ Xong" -> Save content and return to safe View Mode!
             this._saveFromModal(true);
             this._setNoteModalMode(false);
+            if (this.editingNoteId) {
+                var currentNote = this.notes.find(function (n) { return n.id === self.editingNoteId; });
+                if (currentNote && this.contentEditor) {
+                    this.contentEditor.innerHTML = legacyToNotionHtml(currentNote.content || '');
+                }
+            }
             if (document.activeElement) document.activeElement.blur();
         } else {
             // User clicked "✏️ Chỉnh sửa" -> Enter Edit Mode & Focus
             this._setNoteModalMode(true);
-            var self = this;
             setTimeout(function () {
                 self.contentEditor.focus();
             }, 100);
@@ -3084,9 +3449,10 @@
 
     NoteApp.prototype._saveFromModal = function (keepOpen) {
         var title = this.titleInput.value.trim();
-        var content = sanitizeNoteHtml(this.contentEditor.innerHTML.trim());
+        // Convert editor DOM back to clean Markdown
+        var markdownContent = notionHtmlToMarkdown(this.contentEditor).trim();
         var plainText = this.contentEditor.textContent.trim();
-        if (!title && !plainText && !content) return;
+        if (!title && !plainText && !markdownContent) return;
 
         var selectedFolderId = this.folderSelect ? this.folderSelect.value : null;
 
@@ -3094,7 +3460,7 @@
             var note = this.notes.find(function (n) { return n.id === this.editingNoteId; }.bind(this));
             if (note) {
                 note.title = title;
-                note.content = content;
+                note.content = markdownContent;
                 note.color = this.currentColor;
                 note.folderId = selectedFolderId || null;
                 note.updatedAt = new Date().toISOString();
@@ -3103,7 +3469,7 @@
             var newNote = {
                 id: generateId(),
                 title: title,
-                content: content,
+                content: markdownContent,
                 color: this.currentColor,
                 folderId: selectedFolderId || null,
                 createdAt: new Date().toISOString(),

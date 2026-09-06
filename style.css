@@ -2697,55 +2697,256 @@ body {
     margin: 16px 0;
 }
 
-.notion-editor table,
-.note-body table {
+/* Notion-Style Modern Glassmorphic Table */
+.notion-table-container {
+    width: 100%;
+    overflow-x: auto;
+    margin: 16px 0;
+    border-radius: var(--radius-sm, 8px);
+    border: 1px solid var(--glass-border);
+    background: rgba(18, 18, 26, 0.6);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    -webkit-overflow-scrolling: touch;
+}
+
+.notion-table {
     width: 100%;
     border-collapse: collapse;
-    margin: 14px 0;
-    font-size: 0.9rem;
-    overflow-x: auto;
-    display: block;
-}
-
-.notion-editor th, .notion-editor td,
-.note-body th, .note-body td {
-    padding: 8px 12px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    font-size: 0.88rem;
     text-align: left;
+    line-height: 1.55;
 }
 
-.notion-editor th, .note-body th {
-    background: rgba(255, 255, 255, 0.08);
+.notion-table thead {
+    background: rgba(124, 58, 237, 0.18);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.notion-table th {
+    padding: 10px 14px;
     font-weight: 700;
-    color: #fff;
+    color: #c4b5fd;
+    white-space: nowrap;
+    font-size: 0.85rem;
+    letter-spacing: 0.3px;
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.notion-editor td, .note-body td {
-    background: rgba(255, 255, 255, 0.02);
+.notion-table th:last-child {
+    border-right: none;
 }
 
-.note-body h1, .note-body h2, .note-body h3, .note-body h4 {
-    font-size: 0.95rem;
+.notion-table td {
+    padding: 9px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-right: 1px solid rgba(255, 255, 255, 0.03);
+    color: var(--text-primary);
+    vertical-align: top;
+    font-size: 0.88rem;
+}
+
+.notion-table td:last-child {
+    border-right: none;
+}
+
+.notion-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.notion-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+/* Notion-Style Callouts */
+.notion-callout {
+    padding: 12px 16px;
+    border-radius: var(--radius-sm, 8px);
+    margin: 14px 0;
+    background: rgba(255, 255, 255, 0.04);
+    border-left: 4px solid var(--accent-purple);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.notion-callout .callout-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     font-weight: 700;
-    margin: 6px 0 2px;
+    font-size: 0.82rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.notion-callout .callout-content {
+    font-size: 0.92rem;
+    line-height: 1.6;
     color: var(--text-primary);
 }
 
-.note-body ul, .note-body ol {
-    padding-left: 18px;
-    margin: 3px 0 5px;
+.notion-callout.tip {
+    border-left-color: #10b981;
+    background: rgba(16, 185, 129, 0.08);
+}
+.notion-callout.tip .callout-header {
+    color: #6ee7b7;
 }
 
-.note-body li {
-    margin: 2px 0;
+.notion-callout.note, .notion-callout.info {
+    border-left-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.08);
+}
+.notion-callout.note .callout-header, .notion-callout.info .callout-header {
+    color: #93c5fd;
+}
+
+.notion-callout.important, .notion-callout.warning {
+    border-left-color: #ef4444;
+    background: rgba(239, 68, 68, 0.08);
+}
+.notion-callout.important .callout-header, .notion-callout.warning .callout-header {
+    color: #fca5a5;
+}
+
+/* Notion-Style Code Block Wrapper */
+.notion-code-wrapper {
+    margin: 14px 0;
+    border-radius: var(--radius-sm, 8px);
+    background: #090a0f;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+}
+
+.notion-code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.notion-code-lang {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-weight: 700;
+    font-family: monospace;
+}
+
+.notion-copy-code-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    padding: 3px 8px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.notion-copy-code-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+.notion-pre {
+    margin: 0;
+    padding: 12px 16px;
+    overflow-x: auto;
+    font-family: "Fira Code", Consolas, Monaco, monospace;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: #e5e7eb;
+}
+
+/* Timestamp Badges */
+.notion-timestamp {
+    display: inline-block;
+    padding: 1px 6px;
+    margin: 0 2px;
+    background: rgba(139, 92, 246, 0.15);
+    border: 1px solid rgba(139, 92, 246, 0.35);
+    color: #c4b5fd;
+    border-radius: 4px;
+    font-size: 0.82em;
+    font-family: monospace;
+    font-weight: 600;
+    vertical-align: baseline;
+}
+
+/* Multi-level Lists & Markers */
+.notion-editor ul, .note-body ul {
+    list-style-type: disc;
+    padding-left: 22px;
+    margin: 6px 0;
+}
+
+.notion-editor ul ul, .note-body ul ul,
+.notion-editor ol ul, .note-body ol ul {
+    list-style-type: circle;
+    padding-left: 20px;
+    margin: 3px 0;
+}
+
+.notion-editor ul ul ul, .note-body ul ul ul,
+.notion-editor ol ul ul, .note-body ol ul ul {
+    list-style-type: square;
+    padding-left: 20px;
+    margin: 3px 0;
+}
+
+.notion-editor ol, .note-body ol {
+    list-style-type: decimal;
+    padding-left: 22px;
+    margin: 6px 0;
+}
+
+.notion-editor li, .note-body li {
+    margin: 4px 0;
+    line-height: 1.6;
+}
+
+/* Note Card Headings */
+.note-body h1 {
+    font-size: 1.15rem;
+    font-weight: 800;
+    margin: 8px 0 4px;
+    color: #ffffff;
+}
+
+.note-body h2 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 7px 0 3px;
+    color: #e0e7ff;
+}
+
+.note-body h3 {
+    font-size: 0.98rem;
+    font-weight: 700;
+    margin: 6px 0 3px;
+    color: #c4b5fd;
+}
+
+.note-body h4 {
+    font-size: 0.92rem;
+    font-weight: 600;
+    margin: 5px 0 2px;
+    color: #a78bfa;
 }
 
 .note-body blockquote {
-    border-left: 2px solid var(--accent-purple);
-    padding: 4px 8px;
-    margin: 6px 0;
+    border-left: 3px solid var(--accent-purple);
+    padding: 6px 12px;
+    margin: 8px 0;
     background: rgba(124, 58, 237, 0.08);
-    border-radius: 0 4px 4px 0;
+    border-radius: 0 6px 6px 0;
     font-style: italic;
     color: var(--text-secondary);
 }
