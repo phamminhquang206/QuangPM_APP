@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=1.6">
+    <link rel="stylesheet" href="style.css?v=1.7">
     
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="manifest.json">
@@ -226,9 +226,23 @@
         <!-- ===== NOTES SECTION ===== -->
         <section id="notes-section" class="section" role="tabpanel">
             <div class="notes-toolbar">
-                <button class="note-delete-selected" id="note-delete-selected" data-i18n="deleteSelected">🗑 Xóa đã chọn</button>
+                <div class="notes-batch-actions">
+                    <button class="note-delete-selected" id="note-delete-selected" data-i18n="deleteSelected">🗑 Xóa đã chọn</button>
+                    <button class="note-move-selected" id="note-move-selected" data-i18n="moveSelected">📁 Di chuyển</button>
+                </div>
                 <button class="note-add-btn" id="note-add-btn" data-i18n="newNote">+ Ghi chú mới</button>
             </div>
+
+            <!-- Folder Pill Bar -->
+            <div class="notes-folders-container">
+                <div class="notes-folders-bar" id="notes-folders-bar">
+                    <!-- Populated dynamically: All, Uncategorized, User folders -->
+                </div>
+                <button class="folder-new-btn" id="folder-new-btn" title="Thêm thư mục mới" data-i18n="newFolder">
+                    <span>➕</span> <span class="folder-new-text" data-i18n="newFolderText">Thư mục</span>
+                </button>
+            </div>
+
             <div class="notes-grid" id="notes-grid">
                 <div class="notes-empty" id="notes-empty">
                     <span class="empty-icon">📌</span>
@@ -416,18 +430,61 @@
         </section>
     </div>
 
-    <!-- ===== NOTE MODAL OVERLAY ===== -->
+    <!-- ===== NOTE MODAL OVERLAY (NOTION-STYLE) ===== -->
     <div class="modal-overlay" id="note-modal-overlay">
-        <div class="modal-container">
-            <div class="modal-header">
-                <h3 class="modal-title" id="note-modal-title" data-i18n="newNote">Ghi chú mới</h3>
-                <button class="modal-close" id="note-modal-close">✕</button>
+        <div class="modal-container notion-modal-container">
+            <div class="modal-header notion-modal-header">
+                <div class="notion-header-left">
+                    <div class="note-folder-picker-wrap">
+                        <span class="folder-icon-label">📁</span>
+                        <select id="note-folder-select" class="note-folder-select" title="Chọn thư mục">
+                            <option value="" data-i18n="uncategorized">Chưa phân loại</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="notion-header-right">
+                    <button type="button" class="note-mode-btn" id="note-mode-toggle-btn" title="Chuyển chế độ">
+                        <span class="mode-icon">✏️</span> <span class="mode-text" id="note-mode-btn-text" data-i18n="editNoteBtn">Chỉnh sửa</span>
+                    </button>
+                    <button class="modal-close" id="note-modal-close" title="Đóng">✕</button>
+                </div>
             </div>
-            <div class="modal-body">
-                <input type="text" class="note-title-input" id="note-title-input" data-i18n-placeholder="noteTitlePlaceholder" placeholder="Tiêu đề..." autocomplete="off" />
-                <textarea class="note-content-input" id="note-content-input" data-i18n-placeholder="noteContentPlaceholder" placeholder="Nội dung ghi chú..." rows="8"></textarea>
+
+            <!-- Notion-style formatting toolbar -->
+            <div class="notion-toolbar" id="notion-toolbar">
+                <div class="notion-toolbar-group">
+                    <button type="button" class="notion-tool-btn" data-command="h1" title="Tiêu đề 1 (# )">H1</button>
+                    <button type="button" class="notion-tool-btn" data-command="h2" title="Tiêu đề 2 (## )">H2</button>
+                    <button type="button" class="notion-tool-btn" data-command="h3" title="Tiêu đề 3 (### )">H3</button>
+                </div>
+                <span class="notion-tool-divider"></span>
+                <div class="notion-toolbar-group">
+                    <button type="button" class="notion-tool-btn" data-command="bold" title="In đậm (Ctrl+B)"><b>B</b></button>
+                    <button type="button" class="notion-tool-btn" data-command="italic" title="In nghiêng (Ctrl+I)"><i>I</i></button>
+                    <button type="button" class="notion-tool-btn" data-command="strike" title="Gạch ngang"><s>S</s></button>
+                </div>
+                <span class="notion-tool-divider"></span>
+                <div class="notion-toolbar-group">
+                    <button type="button" class="notion-tool-btn" data-command="bullet" title="Danh sách (- )">• List</button>
+                    <button type="button" class="notion-tool-btn" data-command="number" title="Danh sách số (1. )">1. List</button>
+                    <button type="button" class="notion-tool-btn" data-command="todo" title="Việc cần làm ([] )">☑ To-do</button>
+                </div>
+                <span class="notion-tool-divider"></span>
+                <div class="notion-toolbar-group">
+                    <button type="button" class="notion-tool-btn" data-command="quote" title="Trích dẫn (> )">“ Quote</button>
+                    <button type="button" class="notion-tool-btn" data-command="code" title="Khối mã (```)">‹/› Code</button>
+                    <button type="button" class="notion-tool-btn" data-command="divider" title="Đường kẻ (---)">— Line</button>
+                </div>
+            </div>
+
+            <div class="modal-body notion-modal-body">
+                <input type="text" class="note-title-input notion-title-input" id="note-title-input" data-i18n-placeholder="noteTitlePlaceholder" placeholder="Tiêu đề ghi chú..." autocomplete="off" />
+                
+                <!-- Notion WYSIWYG Content Area -->
+                <div class="notion-editor" id="note-content-editor" contenteditable="true" data-placeholder="Gõ nội dung hoặc dùng phím tắt #, -, [], > ..."></div>
+
                 <div class="note-color-picker">
-                    <span class="color-label" data-i18n="noteColor">Màu:</span>
+                    <span class="color-label" data-i18n="noteColor">Màu thẻ:</span>
                     <button class="color-dot active" data-color="default" style="background: rgba(255,255,255,0.06)"></button>
                     <button class="color-dot" data-color="purple" style="background: rgba(124,58,237,0.25)"></button>
                     <button class="color-dot" data-color="blue" style="background: rgba(59,130,246,0.25)"></button>
@@ -436,9 +493,49 @@
                     <button class="color-dot" data-color="red" style="background: rgba(239,68,68,0.25)"></button>
                 </div>
             </div>
+            <div class="modal-footer notion-modal-footer">
+                <span class="notion-tip" id="notion-modal-tip" data-i18n="notionShortcutsTip">💡 Phím tắt: # Tiêu đề, - Danh sách, [] To-do, > Trích dẫn</span>
+                <div class="notion-footer-btns">
+                    <button class="modal-btn secondary" id="note-modal-cancel" data-i18n="cancel">Hủy</button>
+                    <button class="modal-btn primary" id="note-modal-save" data-i18n="saveNote">Lưu</button>
+                    <button class="modal-btn secondary" id="note-modal-close-view" data-i18n="close" style="display: none;">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== FOLDER CREATE / EDIT MODAL ===== -->
+    <div class="modal-overlay" id="folder-modal-overlay">
+        <div class="modal-container folder-modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title" id="folder-modal-title" data-i18n="newFolder">Tạo thư mục mới</h3>
+                <button class="modal-close" id="folder-modal-close">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" data-i18n="folderName">Tên thư mục</label>
+                    <input type="text" class="modal-input" id="folder-name-input" data-i18n-placeholder="folderNamePlaceholder" placeholder="Ví dụ: Công việc, Dự án, Cá nhân..." autocomplete="off" maxlength="40" />
+                </div>
+            </div>
             <div class="modal-footer">
-                <button class="modal-btn secondary" id="note-modal-cancel" data-i18n="cancel">Hủy</button>
-                <button class="modal-btn primary" id="note-modal-save" data-i18n="saveNote">Lưu</button>
+                <button class="modal-btn secondary" id="folder-modal-cancel" data-i18n="cancel">Hủy</button>
+                <button class="modal-btn primary" id="folder-modal-save" data-i18n="save">Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== BATCH MOVE NOTES MODAL ===== -->
+    <div class="modal-overlay" id="note-move-modal-overlay">
+        <div class="modal-container note-move-modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title" id="note-move-modal-title" data-i18n="moveToFolder">Di chuyển ghi chú</h3>
+                <button class="modal-close" id="note-move-modal-close">✕</button>
+            </div>
+            <div class="modal-body">
+                <p class="move-modal-desc" id="note-move-modal-desc" data-i18n="selectTargetFolder">Chọn thư mục đích cho các ghi chú đã chọn:</p>
+                <div class="folder-select-list" id="note-move-folder-list">
+                    <!-- Populated dynamically -->
+                </div>
             </div>
         </div>
     </div>
@@ -896,7 +993,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <script src="firebase-config.js"></script>
-    <script src="app.js?v=1.6"></script>
+    <script src="app.js?v=1.7"></script>
 
     <!-- Register Service Worker for PWA -->
     <script>

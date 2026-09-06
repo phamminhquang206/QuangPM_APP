@@ -43,6 +43,26 @@
             deleteSelected: '🗑 Xóa đã chọn', emptyNotes: 'Chưa có ghi chú nào',
             noteTitlePlaceholder: 'Tiêu đề...', noteContentPlaceholder: 'Nội dung ghi chú...',
             noteColor: 'Màu:', cancel: 'Hủy', saveNote: 'Lưu',
+            allNotes: 'Tất cả', uncategorized: 'Chưa phân loại',
+            newFolder: 'Thư mục mới', newFolderText: 'Thư mục',
+            editFolder: 'Sửa tên', deleteFolder: 'Xóa thư mục',
+            folderName: 'Tên thư mục', folderNamePlaceholder: 'Ví dụ: Công việc, Học tập, Dự án...',
+            moveSelected: '📁 Di chuyển', moveToFolder: 'Di chuyển ghi chú',
+            selectTargetFolder: 'Chọn thư mục đích cho các ghi chú đã chọn:',
+            confirmDeleteFolderMsg: 'Bạn có chắc muốn xóa thư mục này? Các ghi chú bên trong sẽ được chuyển về "Chưa phân loại".',
+            notionShortcutsTip: '💡 Phím tắt: # Tiêu đề, - Danh sách, [] To-do, > Trích dẫn',
+            notionEditorPlaceholder: 'Gõ nội dung hoặc dùng phím tắt #, -, [], > ...',
+            emptyFolderNotes: 'Thư mục này chưa có ghi chú nào',
+            addNoteToFolder: '+ Tạo ghi chú vào thư mục này',
+            folderCreatedToast: 'Đã tạo thư mục mới! 📁',
+            folderUpdatedToast: 'Đã đổi tên thư mục! 📁',
+            folderDeletedToast: 'Đã xóa thư mục! 🗑',
+            notesMovedToast: 'Đã di chuyển ghi chú thành công! 📁',
+            removeFromFolder: 'Bỏ khỏi thư mục (Chưa phân loại)',
+            editNoteBtn: 'Chỉnh sửa',
+            doneBtn: 'Xong',
+            tapToEditTip: '💡 Đang ở chế độ xem an toàn. Bấm ✏️ để chỉnh sửa',
+            close: 'Đóng',
             loginSubtitle: 'Đăng nhập để bắt đầu',
             loginGoogle: 'Đăng nhập bằng Google', loginGithub: 'Đăng nhập bằng GitHub',
             logout: 'Đăng xuất', logoutConfirm: 'Bạn có chắc chắn muốn đăng xuất?',
@@ -191,6 +211,26 @@
             deleteSelected: '🗑 Delete Selected', emptyNotes: 'No notes yet',
             noteTitlePlaceholder: 'Title...', noteContentPlaceholder: 'Note content...',
             noteColor: 'Color:', cancel: 'Cancel', saveNote: 'Save',
+            allNotes: 'All Notes', uncategorized: 'Uncategorized',
+            newFolder: 'New Folder', newFolderText: 'Folder',
+            editFolder: 'Rename', deleteFolder: 'Delete Folder',
+            folderName: 'Folder Name', folderNamePlaceholder: 'e.g. Work, Study, Projects...',
+            moveSelected: '📁 Move', moveToFolder: 'Move Notes',
+            selectTargetFolder: 'Select destination folder for selected notes:',
+            confirmDeleteFolderMsg: 'Are you sure you want to delete this folder? Notes inside will be moved to "Uncategorized".',
+            notionShortcutsTip: '💡 Shortcuts: # Heading, - List, [] To-do, > Quote',
+            notionEditorPlaceholder: 'Type content or use shortcuts #, -, [], > ...',
+            emptyFolderNotes: 'No notes in this folder',
+            addNoteToFolder: '+ Create note in this folder',
+            folderCreatedToast: 'Folder created! 📁',
+            folderUpdatedToast: 'Folder renamed! 📁',
+            folderDeletedToast: 'Folder deleted! 🗑',
+            notesMovedToast: 'Notes moved successfully! 📁',
+            removeFromFolder: 'Remove from folder (Uncategorized)',
+            editNoteBtn: 'Edit',
+            doneBtn: 'Done',
+            tapToEditTip: '💡 Safe view mode. Tap ✏️ to edit',
+            close: 'Close',
             loginSubtitle: 'Sign in to get started',
             loginGoogle: 'Sign in with Google', loginGithub: 'Sign in with GitHub',
             logout: 'Sign out', logoutConfirm: 'Are you sure you want to sign out?',
@@ -2209,33 +2249,214 @@
     };
 
     // =========================================================
-    //  QUICK NOTES
+    //  QUICK NOTES (NOTION-STYLE & FOLDER SYSTEM)
     // =========================================================
-    function NoteApp() {
-        this.notes = []; this.selectedIds = new Set();
-        this.editingNoteId = null; this.currentColor = 'default';
-        this._cacheElements(); this._bindEvents(); this._loadNotes();
+    function sanitizeNoteHtml(html) {
+        if (!html) return '';
+        var div = document.createElement('div');
+        div.innerHTML = html;
+        div.querySelectorAll('script, style, iframe, object, embed, form, button:not(.notion-todo-checkbox)').forEach(function (el) {
+            el.remove();
+        });
+        var allEls = div.querySelectorAll('*');
+        for (var i = 0; i < allEls.length; i++) {
+            var el = allEls[i];
+            for (var j = el.attributes.length - 1; j >= 0; j--) {
+                var attr = el.attributes[j];
+                if (attr.name.startsWith('on') || attr.name === 'formaction' || (attr.name === 'href' && attr.value.toLowerCase().startsWith('javascript:'))) {
+                    el.removeAttribute(attr.name);
+                }
+            }
+        }
+        return div.innerHTML;
     }
+
+    function legacyToNotionHtml(text) {
+        if (!text) return '';
+        if (/<\s*(p|h1|h2|h3|ul|ol|li|blockquote|pre|div|table)\b/i.test(text)) {
+            return sanitizeNoteHtml(text);
+        }
+        var lines = text.split('\n');
+        var html = '';
+        var inList = false;
+        for (var i = 0; i < lines.length; i++) {
+            var line = lines[i];
+            var trimmed = line.trim();
+            if (trimmed.startsWith('# ')) {
+                if (inList) { html += '</ul>'; inList = false; }
+                html += '<h1>' + escapeHtml(trimmed.substring(2)) + '</h1>';
+            } else if (trimmed.startsWith('## ')) {
+                if (inList) { html += '</ul>'; inList = false; }
+                html += '<h2>' + escapeHtml(trimmed.substring(3)) + '</h2>';
+            } else if (trimmed.startsWith('### ')) {
+                if (inList) { html += '</ul>'; inList = false; }
+                html += '<h3>' + escapeHtml(trimmed.substring(4)) + '</h3>';
+            } else if (trimmed.startsWith('- [ ] ') || trimmed.startsWith('[] ')) {
+                if (inList) { html += '</ul>'; inList = false; }
+                var todoText = trimmed.replace(/^(- \[ \] |\[\] )/, '');
+                html += '<div class="notion-todo-row"><input type="checkbox" class="notion-todo-checkbox"><div class="notion-todo-text">' + escapeHtml(todoText) + '</div></div>';
+            } else if (trimmed.startsWith('- [x] ') || trimmed.startsWith('[x] ')) {
+                if (inList) { html += '</ul>'; inList = false; }
+                var todoText = trimmed.replace(/^(- \[x\] |\[x\] )/, '');
+                html += '<div class="notion-todo-row done"><input type="checkbox" class="notion-todo-checkbox" checked><div class="notion-todo-text">' + escapeHtml(todoText) + '</div></div>';
+            } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+                if (!inList) { html += '<ul>'; inList = true; }
+                html += '<li>' + escapeHtml(trimmed.substring(2)) + '</li>';
+            } else if (trimmed.startsWith('> ')) {
+                if (inList) { html += '</ul>'; inList = false; }
+                html += '<blockquote>' + escapeHtml(trimmed.substring(2)) + '</blockquote>';
+            } else if (trimmed === '---') {
+                if (inList) { html += '</ul>'; inList = false; }
+                html += '<hr>';
+            } else if (trimmed === '') {
+                if (inList) { html += '</ul>'; inList = false; }
+                html += '<p><br></p>';
+            } else {
+                if (inList) { html += '</ul>'; inList = false; }
+                html += '<p>' + escapeHtml(line) + '</p>';
+            }
+        }
+        if (inList) html += '</ul>';
+        return html;
+    }
+
+    function NoteApp() {
+        this.notes = [];
+        this.folders = [];
+        this.selectedIds = new Set();
+        this.activeFolderId = 'all'; // 'all' | 'uncategorized' | folderId
+        this.editingNoteId = null;
+        this.currentColor = 'default';
+        this.editingFolderId = null;
+        this.activeDropdownFolderId = null;
+        this.isEditing = false;
+
+        this._cacheElements();
+        this._bindEvents();
+        this._loadNotes();
+    }
+
     NoteApp.prototype._cacheElements = function () {
         this.gridEl = document.getElementById('notes-grid');
         this.deleteBtn = document.getElementById('note-delete-selected');
+        this.moveBtn = document.getElementById('note-move-selected');
+        this.foldersBar = document.getElementById('notes-folders-bar');
+        this.newFolderBtn = document.getElementById('folder-new-btn');
+
+        // Note Modal
         this.overlay = document.getElementById('note-modal-overlay');
+        this.modalContainer = this.overlay ? this.overlay.querySelector('.notion-modal-container') : null;
         this.modalTitle = document.getElementById('note-modal-title');
         this.titleInput = document.getElementById('note-title-input');
-        this.contentInput = document.getElementById('note-content-input');
-        this.colorDots = document.querySelectorAll('.color-dot');
+        this.contentEditor = document.getElementById('note-content-editor');
+        this.folderSelect = document.getElementById('note-folder-select');
+        this.colorDots = document.querySelectorAll('#note-modal-overlay .color-dot');
+        this.toolbar = document.getElementById('notion-toolbar');
+        this.modeToggleBtn = document.getElementById('note-mode-toggle-btn');
+        this.modeBtnText = document.getElementById('note-mode-btn-text');
+        this.modalTip = document.getElementById('notion-modal-tip');
+        this.closeViewBtn = document.getElementById('note-modal-close-view');
+
+        // Folder Modal
+        this.folderOverlay = document.getElementById('folder-modal-overlay');
+        this.folderTitle = document.getElementById('folder-modal-title');
+        this.folderNameInput = document.getElementById('folder-name-input');
+        this.folderSaveBtn = document.getElementById('folder-modal-save');
+        this.folderCancelBtn = document.getElementById('folder-modal-cancel');
+        this.folderCloseBtn = document.getElementById('folder-modal-close');
+
+        // Move Modal
+        this.moveOverlay = document.getElementById('note-move-modal-overlay');
+        this.moveList = document.getElementById('note-move-folder-list');
+        this.moveCloseBtn = document.getElementById('note-move-modal-close');
     };
+
     NoteApp.prototype._bindEvents = function () {
         var self = this;
+
+        // Add note & batch actions
         document.getElementById('note-add-btn').addEventListener('click', function () { self._openModal(null); });
-        this.deleteBtn.addEventListener('click', function () { self._deleteSelected(); });
+        if (this.deleteBtn) this.deleteBtn.addEventListener('click', function () { self._deleteSelected(); });
+        if (this.moveBtn) this.moveBtn.addEventListener('click', function () { self._openMoveModal(); });
+
+        // Folder Bar click & New Folder
+        if (this.newFolderBtn) {
+            this.newFolderBtn.addEventListener('click', function () {
+                self._openFolderModal(null);
+            });
+        }
+
+        if (this.foldersBar) {
+            this.foldersBar.addEventListener('click', function (e) {
+                var menuTrigger = e.target.closest('.folder-menu-trigger');
+                if (menuTrigger) {
+                    e.stopPropagation();
+                    var fid = menuTrigger.getAttribute('data-folder-id');
+                    self.activeDropdownFolderId = (self.activeDropdownFolderId === fid) ? null : fid;
+                    self._renderFolders();
+                    return;
+                }
+
+                var editBtn = e.target.closest('.folder-dropdown-edit');
+                if (editBtn) {
+                    e.stopPropagation();
+                    var editFid = editBtn.getAttribute('data-folder-id');
+                    self.activeDropdownFolderId = null;
+                    self._openFolderModal(editFid);
+                    return;
+                }
+
+                var delBtn = e.target.closest('.folder-dropdown-delete');
+                if (delBtn) {
+                    e.stopPropagation();
+                    var delFid = delBtn.getAttribute('data-folder-id');
+                    self.activeDropdownFolderId = null;
+                    self._confirmDeleteFolder(delFid);
+                    return;
+                }
+
+                var pill = e.target.closest('.folder-pill');
+                if (pill) {
+                    var folderId = pill.getAttribute('data-folder-id');
+                    self.activeFolderId = folderId;
+                    self.activeDropdownFolderId = null;
+                    self._renderFolders();
+                    self._render();
+                }
+            });
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function (e) {
+            if (self.activeDropdownFolderId && !e.target.closest('.folder-pill')) {
+                self.activeDropdownFolderId = null;
+                self._renderFolders();
+            }
+        });
+
+        // Note Modal events
         document.getElementById('note-modal-close').addEventListener('click', function () { self._closeModal(); });
         document.getElementById('note-modal-cancel').addEventListener('click', function () { self._closeModal(); });
         this.overlay.addEventListener('click', function (e) { if (e.target === self.overlay) self._closeModal(); });
         document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape' && self.overlay.classList.contains('active')) self._closeModal();
+            if (e.key === 'Escape') {
+                if (self.overlay.classList.contains('active')) self._closeModal();
+                if (self.folderOverlay && self.folderOverlay.classList.contains('active')) self._closeFolderModal();
+                if (self.moveOverlay && self.moveOverlay.classList.contains('active')) self._closeMoveModal();
+            }
         });
         document.getElementById('note-modal-save').addEventListener('click', function () { self._saveFromModal(); });
+        if (this.modeToggleBtn) {
+            this.modeToggleBtn.addEventListener('click', function () {
+                self._toggleNoteModalMode();
+            });
+        }
+        if (this.closeViewBtn) {
+            this.closeViewBtn.addEventListener('click', function () {
+                self._closeModal();
+            });
+        }
+
         this.colorDots.forEach(function (dot) {
             dot.addEventListener('click', function () {
                 self.colorDots.forEach(function (d) { d.classList.remove('active'); });
@@ -2244,11 +2465,67 @@
             });
         });
 
+        // Notion Toolbar events
+        if (this.toolbar) {
+            this.toolbar.addEventListener('click', function (e) {
+                var btn = e.target.closest('.notion-tool-btn');
+                if (!btn) return;
+                var cmd = btn.getAttribute('data-command');
+                self._handleToolbarCommand(cmd);
+            });
+        }
+
+        // Notion Editor keydown & auto-markdown conversion
+        if (this.contentEditor) {
+            this.contentEditor.addEventListener('keydown', function (e) {
+                self._handleEditorKeydown(e);
+            });
+
+            // Interactive checkboxes inside editor
+            this.contentEditor.addEventListener('change', function (e) {
+                if (e.target.classList.contains('notion-todo-checkbox')) {
+                    var row = e.target.closest('.notion-todo-row');
+                    if (row) {
+                        row.classList[e.target.checked ? 'add' : 'remove']('done');
+                    }
+                    // If in view mode, auto-save the checkbox state silently to Firestore!
+                    if (!self.isEditing && self.editingNoteId) {
+                        self._saveFromModal(true);
+                    }
+                }
+            });
+        }
+
+        // Folder Modal events
+        if (this.folderCloseBtn) this.folderCloseBtn.addEventListener('click', function () { self._closeFolderModal(); });
+        if (this.folderCancelBtn) this.folderCancelBtn.addEventListener('click', function () { self._closeFolderModal(); });
+        if (this.folderOverlay) {
+            this.folderOverlay.addEventListener('click', function (e) {
+                if (e.target === self.folderOverlay) self._closeFolderModal();
+            });
+        }
+        if (this.folderSaveBtn) this.folderSaveBtn.addEventListener('click', function () { self._saveFolderFromModal(); });
+        if (this.folderNameInput) {
+            this.folderNameInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') self._saveFolderFromModal();
+            });
+        }
+
+        // Move Modal events
+        if (this.moveCloseBtn) this.moveCloseBtn.addEventListener('click', function () { self._closeMoveModal(); });
+        if (this.moveOverlay) {
+            this.moveOverlay.addEventListener('click', function (e) {
+                if (e.target === self.moveOverlay) self._closeMoveModal();
+            });
+        }
+
+        // Grid selection events
         this.gridEl.addEventListener('change', function (e) {
             if (e.target.classList.contains('note-select')) {
                 var nid = e.target.getAttribute('data-note-id');
                 if (e.target.checked) self.selectedIds.add(nid); else self.selectedIds.delete(nid);
-                self._updateDeleteBtn(); self._updateCardSelection();
+                self._updateDeleteBtn();
+                self._updateCardSelection();
             }
         });
 
@@ -2258,7 +2535,7 @@
         var startX = 0, startY = 0;
 
         var startPress = function (e) {
-            if (e.target.classList.contains('note-select')) return;
+            if (e.target.classList.contains('note-select') || e.target.closest('.note-card-folder')) return;
             var card = e.target.closest('.note-card');
             if (!card) return;
 
@@ -2316,59 +2593,491 @@
                 e.preventDefault();
                 return;
             }
+
+            // Click folder badge on note card -> filter by that folder
+            var folderBadge = e.target.closest('.note-card-folder');
+            if (folderBadge) {
+                e.stopPropagation();
+                var fid = folderBadge.getAttribute('data-folder-id');
+                if (fid) {
+                    self.activeFolderId = fid;
+                    self._renderFolders();
+                    self._render();
+                }
+                return;
+            }
+
+            // Click add note button in empty state
+            var emptyAddBtn = e.target.closest('#empty-folder-add-btn');
+            if (emptyAddBtn) {
+                self._openModal(null);
+                return;
+            }
+
             if (e.target.classList.contains('note-select')) return;
             var card = e.target.closest('.note-card');
             if (card) self._openModal(card.getAttribute('data-id'));
         });
     };
 
+    // =========================================================
+    //  NOTION TOOLBAR & KEYBOARD SHORTCUTS
+    // =========================================================
+    NoteApp.prototype._handleToolbarCommand = function (cmd) {
+        this.contentEditor.focus();
+        switch (cmd) {
+            case 'h1':
+                document.execCommand('formatBlock', false, '<h1>');
+                break;
+            case 'h2':
+                document.execCommand('formatBlock', false, '<h2>');
+                break;
+            case 'h3':
+                document.execCommand('formatBlock', false, '<h3>');
+                break;
+            case 'bold':
+                document.execCommand('bold', false, null);
+                break;
+            case 'italic':
+                document.execCommand('italic', false, null);
+                break;
+            case 'strike':
+                document.execCommand('strikeThrough', false, null);
+                break;
+            case 'bullet':
+                document.execCommand('insertUnorderedList', false, null);
+                break;
+            case 'number':
+                document.execCommand('insertOrderedList', false, null);
+                break;
+            case 'todo':
+                this._insertTodoRow();
+                break;
+            case 'quote':
+                document.execCommand('formatBlock', false, '<blockquote>');
+                break;
+            case 'code':
+                this._insertCodeBlock();
+                break;
+            case 'divider':
+                document.execCommand('insertHorizontalRule', false, null);
+                break;
+        }
+    };
+
+    NoteApp.prototype._insertTodoRow = function () {
+        this.contentEditor.focus();
+        var row = '<div class="notion-todo-row"><input type="checkbox" class="notion-todo-checkbox"><div class="notion-todo-text" contenteditable="true"></div></div><p><br></p>';
+        document.execCommand('insertHTML', false, row);
+    };
+
+    NoteApp.prototype._insertCodeBlock = function () {
+        this.contentEditor.focus();
+        var code = '<pre><code>Code...</code></pre><p><br></p>';
+        document.execCommand('insertHTML', false, code);
+    };
+
+    NoteApp.prototype._handleEditorKeydown = function (e) {
+        if (e.key === ' ' || e.key === 'Spacebar') {
+            var sel = window.getSelection();
+            if (!sel || !sel.rangeCount) return;
+            var range = sel.getRangeAt(0);
+            var node = range.startContainer;
+            if (node && node.nodeType === Node.TEXT_NODE) {
+                var text = node.textContent;
+                var offset = range.startOffset;
+                var before = text.substring(0, offset);
+
+                if (before === '#') {
+                    e.preventDefault();
+                    node.textContent = text.substring(offset);
+                    document.execCommand('formatBlock', false, '<h1>');
+                } else if (before === '##') {
+                    e.preventDefault();
+                    node.textContent = text.substring(offset);
+                    document.execCommand('formatBlock', false, '<h2>');
+                } else if (before === '###') {
+                    e.preventDefault();
+                    node.textContent = text.substring(offset);
+                    document.execCommand('formatBlock', false, '<h3>');
+                } else if (before === '-' || before === '*') {
+                    e.preventDefault();
+                    node.textContent = text.substring(offset);
+                    document.execCommand('insertUnorderedList', false, null);
+                } else if (before === '1.') {
+                    e.preventDefault();
+                    node.textContent = text.substring(offset);
+                    document.execCommand('insertOrderedList', false, null);
+                } else if (before === '[]' || before === '[ ]') {
+                    e.preventDefault();
+                    node.textContent = text.substring(offset);
+                    this._insertTodoRow();
+                } else if (before === '>') {
+                    e.preventDefault();
+                    node.textContent = text.substring(offset);
+                    document.execCommand('formatBlock', false, '<blockquote>');
+                } else if (before === '```') {
+                    e.preventDefault();
+                    node.textContent = text.substring(offset);
+                    this._insertCodeBlock();
+                }
+            }
+        } else if (e.key === 'Enter') {
+            var sel = window.getSelection();
+            if (sel && sel.rangeCount) {
+                var node = sel.anchorNode;
+                var todoRow = node ? (node.closest ? node.closest('.notion-todo-row') : (node.parentElement ? node.parentElement.closest('.notion-todo-row') : null)) : null;
+                if (todoRow && !e.shiftKey) {
+                    var textEl = todoRow.querySelector('.notion-todo-text');
+                    if (textEl && textEl.textContent.trim() === '') {
+                        e.preventDefault();
+                        var p = document.createElement('p');
+                        p.innerHTML = '<br>';
+                        todoRow.parentNode.insertBefore(p, todoRow.nextSibling);
+                        todoRow.remove();
+                        var r = document.createRange();
+                        r.setStart(p, 0);
+                        r.collapse(true);
+                        sel.removeAllRanges();
+                        sel.addRange(r);
+                    }
+                }
+            }
+        }
+    };
+
+    // =========================================================
+    //  NOTE MODAL (NOTION-STYLE VIEW / EDIT MODE)
+    // =========================================================
+    NoteApp.prototype._setNoteModalMode = function (isEditing) {
+        this.isEditing = isEditing;
+        if (this.modalContainer) {
+            this.modalContainer.classList[isEditing ? 'add' : 'remove']('edit-mode');
+            this.modalContainer.classList[isEditing ? 'remove' : 'add']('view-mode');
+        }
+        if (this.modeToggleBtn) {
+            this.modeToggleBtn.classList[isEditing ? 'add' : 'remove']('editing');
+            var icon = this.modeToggleBtn.querySelector('.mode-icon');
+            if (icon) icon.textContent = isEditing ? '✓' : '✏️';
+            if (this.modeBtnText) this.modeBtnText.textContent = isEditing ? t('doneBtn') : t('editNoteBtn');
+        }
+        if (this.contentEditor) {
+            this.contentEditor.setAttribute('contenteditable', isEditing ? 'true' : 'false');
+        }
+        if (this.titleInput) {
+            this.titleInput.readOnly = !isEditing;
+        }
+        if (this.modalTip) {
+            this.modalTip.textContent = isEditing ? t('notionShortcutsTip') : t('tapToEditTip');
+        }
+    };
+
+    NoteApp.prototype._toggleNoteModalMode = function () {
+        if (this.isEditing) {
+            // User clicked "✓ Xong" -> Save content and return to safe View Mode!
+            this._saveFromModal(true);
+            this._setNoteModalMode(false);
+            if (document.activeElement) document.activeElement.blur();
+        } else {
+            // User clicked "✏️ Chỉnh sửa" -> Enter Edit Mode & Focus
+            this._setNoteModalMode(true);
+            var self = this;
+            setTimeout(function () {
+                self.contentEditor.focus();
+            }, 100);
+        }
+    };
+
     NoteApp.prototype._openModal = function (noteId) {
         this.editingNoteId = noteId;
         this.colorDots.forEach(function (d) { d.classList.remove('active'); });
+        this._updateFolderSelectDropdown();
+
+        var self = this;
         if (noteId) {
             var note = this.notes.find(function (n) { return n.id === noteId; });
             if (!note) return;
-            this.modalTitle.textContent = t('editNote');
-            this.titleInput.value = note.title; this.contentInput.value = note.content;
+            this.modalTitle.textContent = '';
+            this.titleInput.value = note.title || '';
+            this.contentEditor.innerHTML = legacyToNotionHtml(note.content || '');
             this.currentColor = note.color || 'default';
+            if (this.folderSelect) this.folderSelect.value = note.folderId || '';
+
+            // Open existing note in SAFE VIEW MODE!
+            // Do not focus, so mobile on-screen keyboard DOES NOT pop up!
+            this._setNoteModalMode(false);
         } else {
-            this.modalTitle.textContent = t('newNote');
-            this.titleInput.value = ''; this.contentInput.value = '';
+            this.modalTitle.textContent = '';
+            this.titleInput.value = '';
+            this.contentEditor.innerHTML = '';
             this.currentColor = 'default';
+            if (this.folderSelect) {
+                if (this.activeFolderId !== 'all' && this.activeFolderId !== 'uncategorized') {
+                    this.folderSelect.value = this.activeFolderId;
+                } else {
+                    this.folderSelect.value = '';
+                }
+            }
+
+            // Open new note in EDIT MODE directly!
+            this._setNoteModalMode(true);
+            setTimeout(function () {
+                self.titleInput.focus();
+            }, 200);
         }
-        var self = this;
+
         this.colorDots.forEach(function (d) {
             if (d.getAttribute('data-color') === self.currentColor) d.classList.add('active');
         });
+
         this.overlay.classList.add('active');
-        setTimeout(function () { self.titleInput.focus(); }, 300);
     };
 
     NoteApp.prototype._closeModal = function () {
-        this.overlay.classList.remove('active'); this.editingNoteId = null;
+        this.overlay.classList.remove('active');
+        this.editingNoteId = null;
+        this.isEditing = false;
     };
 
-    NoteApp.prototype._saveFromModal = function () {
+    NoteApp.prototype._saveFromModal = function (keepOpen) {
         var title = this.titleInput.value.trim();
-        var content = this.contentInput.value.trim();
-        if (!title && !content) return;
+        var content = sanitizeNoteHtml(this.contentEditor.innerHTML.trim());
+        var plainText = this.contentEditor.textContent.trim();
+        if (!title && !plainText && !content) return;
+
+        var selectedFolderId = this.folderSelect ? this.folderSelect.value : null;
 
         if (this.editingNoteId) {
             var note = this.notes.find(function (n) { return n.id === this.editingNoteId; }.bind(this));
             if (note) {
-                note.title = title; note.content = content;
-                note.color = this.currentColor; note.updatedAt = new Date().toISOString();
+                note.title = title;
+                note.content = content;
+                note.color = this.currentColor;
+                note.folderId = selectedFolderId || null;
+                note.updatedAt = new Date().toISOString();
             }
         } else {
-            this.notes.unshift({
-                id: generateId(), title: title, content: content,
+            var newNote = {
+                id: generateId(),
+                title: title,
+                content: content,
                 color: this.currentColor,
-                createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
-            });
+                folderId: selectedFolderId || null,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+            this.notes.unshift(newNote);
+            this.editingNoteId = newNote.id;
         }
+
         this._saveNotes();
+        this._renderFolders();
         this._render();
-        this._closeModal();
+        if (!keepOpen) {
+            this._closeModal();
+        }
+    };
+
+    // =========================================================
+    //  FOLDER SYSTEM MANAGEMENT
+    // =========================================================
+    NoteApp.prototype._updateFolderSelectDropdown = function () {
+        if (!this.folderSelect) return;
+        var html = '<option value="">📄 ' + t('uncategorized') + '</option>';
+        this.folders.forEach(function (f) {
+            html += '<option value="' + f.id + '">📁 ' + escapeHtml(f.name) + '</option>';
+        });
+        this.folderSelect.innerHTML = html;
+    };
+
+    NoteApp.prototype._renderFolders = function () {
+        if (!this.foldersBar) return;
+
+        // Calculate counts
+        var totalCount = this.notes.length;
+        var uncategorizedCount = 0;
+        var folderCounts = {};
+        this.folders.forEach(function (f) { folderCounts[f.id] = 0; });
+
+        this.notes.forEach(function (n) {
+            if (!n.folderId) {
+                uncategorizedCount++;
+            } else if (folderCounts[n.folderId] !== undefined) {
+                folderCounts[n.folderId]++;
+            } else {
+                uncategorizedCount++;
+            }
+        });
+
+        var html = '';
+
+        // 1. All Notes
+        var allActive = (this.activeFolderId === 'all') ? ' active' : '';
+        html += '<button class="folder-pill' + allActive + '" data-folder-id="all">' +
+            '<span>📑 ' + t('allNotes') + '</span>' +
+            '<span class="folder-count">' + totalCount + '</span>' +
+            '</button>';
+
+        // 2. Uncategorized
+        var uncatActive = (this.activeFolderId === 'uncategorized') ? ' active' : '';
+        html += '<button class="folder-pill' + uncatActive + '" data-folder-id="uncategorized">' +
+            '<span>📄 ' + t('uncategorized') + '</span>' +
+            '<span class="folder-count">' + uncategorizedCount + '</span>' +
+            '</button>';
+
+        // 3. User Folders
+        var self = this;
+        this.folders.forEach(function (f) {
+            var isActive = (self.activeFolderId === f.id) ? ' active' : '';
+            var count = folderCounts[f.id] || 0;
+            var isDropdownOpen = (self.activeDropdownFolderId === f.id);
+
+            html += '<div class="folder-pill' + isActive + '" data-folder-id="' + f.id + '">' +
+                '<span>📁 ' + escapeHtml(f.name) + '</span>' +
+                '<span class="folder-count">' + count + '</span>' +
+                '<span class="folder-pill-actions">' +
+                '<button type="button" class="folder-menu-trigger" data-folder-id="' + f.id + '" title="Tùy chọn">⋮</button>' +
+                '</span>';
+
+            if (isDropdownOpen) {
+                html += '<div class="folder-dropdown-menu">' +
+                    '<button type="button" class="folder-dropdown-item folder-dropdown-edit" data-folder-id="' + f.id + '">✏ ' + t('editFolder') + '</button>' +
+                    '<button type="button" class="folder-dropdown-item danger folder-dropdown-delete" data-folder-id="' + f.id + '">🗑 ' + t('deleteFolder') + '</button>' +
+                    '</div>';
+            }
+
+            html += '</div>';
+        });
+
+        this.foldersBar.innerHTML = html;
+    };
+
+    NoteApp.prototype._openFolderModal = function (folderId) {
+        this.editingFolderId = folderId;
+        if (folderId) {
+            var folder = this.folders.find(function (f) { return f.id === folderId; });
+            if (!folder) return;
+            this.folderTitle.textContent = t('editFolder');
+            this.folderNameInput.value = folder.name;
+        } else {
+            this.folderTitle.textContent = t('newFolder');
+            this.folderNameInput.value = '';
+        }
+        this.folderOverlay.classList.add('active');
+        var self = this;
+        setTimeout(function () { self.folderNameInput.focus(); }, 200);
+    };
+
+    NoteApp.prototype._closeFolderModal = function () {
+        if (this.folderOverlay) this.folderOverlay.classList.remove('active');
+        this.editingFolderId = null;
+    };
+
+    NoteApp.prototype._saveFolderFromModal = function () {
+        var name = this.folderNameInput.value.trim();
+        if (!name) return;
+
+        if (this.editingFolderId) {
+            var folder = this.folders.find(function (f) { return f.id === this.editingFolderId; }.bind(this));
+            if (folder) {
+                folder.name = name;
+            }
+        } else {
+            var newFolder = {
+                id: generateId(),
+                name: name,
+                createdAt: new Date().toISOString()
+            };
+            this.folders.push(newFolder);
+            this.activeFolderId = newFolder.id;
+        }
+
+        this._saveNotes();
+        this._renderFolders();
+        this._render();
+        this._closeFolderModal();
+    };
+
+    NoteApp.prototype._confirmDeleteFolder = function (folderId) {
+        var folder = this.folders.find(function (f) { return f.id === folderId; });
+        if (!folder) return;
+        var self = this;
+
+        showConfirmModal({
+            title: t('deleteFolder'),
+            message: t('confirmDeleteFolderMsg'),
+            confirmText: t('confirmDelete'),
+            onConfirm: function () {
+                // Move notes in this folder to uncategorized
+                self.notes.forEach(function (n) {
+                    if (n.folderId === folderId) {
+                        n.folderId = null;
+                    }
+                });
+
+                // Remove folder
+                self.folders = self.folders.filter(function (f) { return f.id !== folderId; });
+
+                if (self.activeFolderId === folderId) {
+                    self.activeFolderId = 'all';
+                }
+
+                self._saveNotes();
+                self._renderFolders();
+                self._render();
+            }
+        });
+    };
+
+    // =========================================================
+    //  BATCH MOVE & DELETE
+    // =========================================================
+    NoteApp.prototype._openMoveModal = function () {
+        if (this.selectedIds.size === 0) return;
+        var self = this;
+
+        var html = '<div class="folder-select-item" data-folder-id="">' +
+            '<span>📄 ' + t('removeFromFolder') + '</span>' +
+            '</div>';
+
+        this.folders.forEach(function (f) {
+            html += '<div class="folder-select-item" data-folder-id="' + f.id + '">' +
+                '<span>📁 ' + escapeHtml(f.name) + '</span>' +
+                '</div>';
+        });
+
+        this.moveList.innerHTML = html;
+
+        // Bind click on items
+        this.moveList.querySelectorAll('.folder-select-item').forEach(function (item) {
+            item.addEventListener('click', function () {
+                var targetFid = item.getAttribute('data-folder-id') || null;
+                self._moveSelectedToFolder(targetFid);
+            });
+        });
+
+        this.moveOverlay.classList.add('active');
+    };
+
+    NoteApp.prototype._closeMoveModal = function () {
+        if (this.moveOverlay) this.moveOverlay.classList.remove('active');
+    };
+
+    NoteApp.prototype._moveSelectedToFolder = function (targetFolderId) {
+        var sel = this.selectedIds;
+        this.notes.forEach(function (n) {
+            if (sel.has(n.id)) {
+                n.folderId = targetFolderId;
+                n.updatedAt = new Date().toISOString();
+            }
+        });
+
+        this.selectedIds.clear();
+        this._updateDeleteBtn();
+        this._closeMoveModal();
+        this._saveNotes();
+        this._renderFolders();
+        this._render();
     };
 
     NoteApp.prototype._deleteSelected = function () {
@@ -2384,13 +3093,26 @@
                 self.selectedIds.clear();
                 self._updateDeleteBtn();
                 self._saveNotes();
+                self._renderFolders();
                 self._render();
             }
         });
     };
 
     NoteApp.prototype._updateDeleteBtn = function () {
-        this.deleteBtn.classList[this.selectedIds.size > 0 ? 'add' : 'remove']('visible');
+        var hasSelection = this.selectedIds.size > 0;
+        if (this.deleteBtn) {
+            this.deleteBtn.classList[hasSelection ? 'add' : 'remove']('visible');
+            if (hasSelection) {
+                this.deleteBtn.textContent = '🗑 ' + t('confirmDelete') + ' (' + this.selectedIds.size + ')';
+            }
+        }
+        if (this.moveBtn) {
+            this.moveBtn.classList[hasSelection ? 'add' : 'remove']('visible');
+            if (hasSelection) {
+                this.moveBtn.textContent = '📁 ' + t('moveSelected') + ' (' + this.selectedIds.size + ')';
+            }
+        }
     };
 
     NoteApp.prototype._updateCardSelection = function () {
@@ -2400,38 +3122,97 @@
         });
     };
 
+    // =========================================================
+    //  RENDER (FILTER BY FOLDER & NOTION RICH CARDS)
+    // =========================================================
     NoteApp.prototype._render = function () {
-        if (this.notes.length === 0) {
-            this.gridEl.innerHTML = '<div class="notes-empty"><span class="empty-icon">📌</span><p>' + t('emptyNotes') + '</p></div>';
+        // Filter notes by activeFolderId
+        var self = this;
+        var filtered = this.notes.filter(function (n) {
+            if (self.activeFolderId === 'all') return true;
+            if (self.activeFolderId === 'uncategorized') return !n.folderId;
+            return n.folderId === self.activeFolderId;
+        });
+
+        if (filtered.length === 0) {
+            if (this.activeFolderId !== 'all') {
+                this.gridEl.innerHTML = '<div class="notes-empty">' +
+                    '<span class="empty-icon">📁</span>' +
+                    '<p>' + t('emptyFolderNotes') + '</p>' +
+                    '<button type="button" class="note-add-btn" id="empty-folder-add-btn" style="margin-top:14px; display:inline-block;">' + t('addNoteToFolder') + '</button>' +
+                    '</div>';
+            } else {
+                this.gridEl.innerHTML = '<div class="notes-empty"><span class="empty-icon">📌</span><p>' + t('emptyNotes') + '</p></div>';
+            }
             return;
         }
+
         var html = '', locale = currentLang === 'vi' ? 'vi-VN' : 'en-US', sel = this.selectedIds;
 
-        this.notes.forEach(function (note) {
-            var checked = sel.has(note.id), colorAttr = note.color && note.color !== 'default' ? ' data-color="' + note.color + '"' : '';
+        // Lookup map for folder names
+        var folderMap = {};
+        this.folders.forEach(function (f) { folderMap[f.id] = f.name; });
+
+        filtered.forEach(function (note) {
+            var checked = sel.has(note.id);
+            var colorAttr = note.color && note.color !== 'default' ? ' data-color="' + note.color + '"' : '';
             var dateObj = new Date(note.updatedAt || note.createdAt);
             var dateStr = dateObj.toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' +
                 dateObj.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
 
+            var folderBadge = '';
+            if (note.folderId && folderMap[note.folderId]) {
+                folderBadge = '<div class="note-card-folder" data-folder-id="' + note.folderId + '" title="' + escapeHtml(folderMap[note.folderId]) + '">📁 ' + escapeHtml(folderMap[note.folderId]) + '</div>';
+            }
+
+            var bodyHtml = legacyToNotionHtml(note.content || '');
+
             html += '<div class="note-card' + (checked ? ' selected' : '') + '" data-id="' + note.id + '"' + colorAttr + '>' +
                 '<input type="checkbox" class="note-select" data-note-id="' + note.id + '"' + (checked ? ' checked' : '') + ' />' +
+                folderBadge +
                 (note.title ? '<div class="note-title">' + escapeHtml(note.title) + '</div>' : '') +
-                (note.content ? '<div class="note-body">' + escapeHtml(note.content) + '</div>' : '') +
+                (bodyHtml ? '<div class="note-body">' + bodyHtml + '</div>' : '') +
                 '<div class="note-date">' + dateStr + '</div></div>';
         });
+
         this.gridEl.innerHTML = html;
     };
 
-    // Firestore persistence
+    // =========================================================
+    //  FIRESTORE PERSISTENCE
+    // =========================================================
     NoteApp.prototype._saveNotes = function () {
         if (!currentUser) return;
-        userDocRef('data').doc('notes').set({ items: this.notes });
+        userDocRef('data').doc('notes').set({
+            items: this.notes,
+            folders: this.folders
+        });
     };
+
     NoteApp.prototype._loadNotes = function () {
-        if (!currentUser) { this.notes = []; this._render(); return; }
+        if (!currentUser) {
+            this.notes = [];
+            this.folders = [];
+            this._renderFolders();
+            this._render();
+            return;
+        }
         var self = this;
         userDocRef('data').doc('notes').get().then(function (doc) {
-            self.notes = (doc.exists && doc.data().items) ? doc.data().items : [];
+            if (doc.exists && doc.data()) {
+                self.notes = doc.data().items || [];
+                self.folders = doc.data().folders || [];
+            } else {
+                self.notes = [];
+                self.folders = [];
+            }
+            self._renderFolders();
+            self._render();
+        }).catch(function (err) {
+            console.error('Error loading notes:', err);
+            self.notes = [];
+            self.folders = [];
+            self._renderFolders();
             self._render();
         });
     };
@@ -4095,7 +4876,10 @@
                 }
             }
             if (window.__todoApp) window.__todoApp._render();
-            if (window.__noteApp) window.__noteApp._render();
+            if (window.__noteApp) {
+                window.__noteApp._renderFolders();
+                window.__noteApp._render();
+            }
             if (window.__habitApp) window.__habitApp._render();
         });
 
