@@ -1,9 +1,10 @@
-const CACHE_NAME = 'quangpm-app-v20';
+const CACHE_NAME = 'quangpm-app-v21';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './style.css',
   './app.js',
+  './markdown.js',
   './marked.min.js',
   './firebase-config.js',
   './icon.svg',

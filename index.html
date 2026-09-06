@@ -473,6 +473,7 @@
                 <span class="notion-tool-divider"></span>
                 <div class="notion-toolbar-group">
                     <button type="button" class="notion-tool-btn" data-command="quote" title="Trích dẫn (> )">“ Quote</button>
+                    <button type="button" class="notion-tool-btn" data-command="table" title="Chèn bảng (Table)">📊 Bảng</button>
                     <button type="button" class="notion-tool-btn" data-command="code" title="Khối mã (```)">‹/› Code</button>
                     <button type="button" class="notion-tool-btn" data-command="divider" title="Đường kẻ (---)">— Line</button>
                 </div>
@@ -481,8 +482,9 @@
             <div class="modal-body notion-modal-body">
                 <input type="text" class="note-title-input notion-title-input" id="note-title-input" data-i18n-placeholder="noteTitlePlaceholder" placeholder="Tiêu đề ghi chú..." autocomplete="off" />
                 
-                <!-- Notion WYSIWYG Content Area -->
-                <div class="notion-editor" id="note-content-editor" contenteditable="true" data-placeholder="Gõ nội dung hoặc dùng phím tắt #, -, [], > ..."></div>
+                <!-- Notion Dual Mode Editor & Preview -->
+                <textarea class="notion-editor-textarea" id="note-content-editor-raw" placeholder="Gõ nội dung ghi chú (hỗ trợ đầy đủ Markdown, Bảng, Danh sách, Khối code...)..." spellcheck="false"></textarea>
+                <div class="notion-editor notion-editor-preview markdown-body" id="note-content-editor"></div>
 
                 <div class="note-color-picker">
                     <span class="color-label" data-i18n="noteColor">Màu thẻ:</span>
@@ -995,6 +997,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <script src="firebase-config.js"></script>
     <script src="marked.min.js"></script>
+    <script src="markdown.js?v=2.0"></script>
     <script src="app.js?v=2.0"></script>
 
     <!-- Register Service Worker for PWA -->

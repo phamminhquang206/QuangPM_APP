@@ -2823,6 +2823,10 @@
     function legacyToNotionHtml(text) {
         if (!text) return '';
 
+        if (window.MarkdownRenderer && typeof window.MarkdownRenderer.render === 'function') {
+            return window.MarkdownRenderer.render(text);
+        }
+
         // If text is already rich HTML containing notion table or callout or code block:
         if (text.indexOf('notion-table-container') !== -1 || text.indexOf('notion-callout') !== -1 || text.indexOf('notion-code-wrapper') !== -1) {
             return sanitizeNoteHtml(text);
@@ -2866,6 +2870,7 @@
         this.modalContainer = this.overlay ? (this.overlay.querySelector('.notion-modal-container') || this.overlay.querySelector('.modal-container')) : null;
         this.modalTitle = document.getElementById('note-modal-title');
         this.titleInput = document.getElementById('note-title-input');
+        this.rawTextarea = document.getElementById('note-content-editor-raw');
         this.contentEditor = document.getElementById('note-content-editor');
         this.folderSelect = document.getElementById('note-folder-select');
         this.colorDots = document.querySelectorAll('#note-modal-overlay .color-dot');
@@ -3054,16 +3059,46 @@
             // Interactive checkboxes inside editor
             this.contentEditor.addEventListener('change', function (e) {
                 if (e.target.classList.contains('notion-todo-checkbox')) {
+                    var allCheckboxes = Array.from(self.contentEditor.querySelectorAll('.notion-todo-checkbox'));
+                    var index = allCheckboxes.indexOf(e.target);
+                    var isChecked = e.target.checked;
                     var row = e.target.closest('.notion-todo-row');
                     if (row) {
-                        row.classList[e.target.checked ? 'add' : 'remove']('done');
+                        row.classList[isChecked ? 'add' : 'remove']('done');
                     }
-                    // If in view mode, auto-save the checkbox state silently to Firestore!
-                    if (!self.isEditing && self.editingNoteId) {
-                        self._saveFromModal(true);
+                    if (index !== -1 && self.editingNoteId) {
+                        var note = self.notes.find(function (n) { return n.id === self.editingNoteId; });
+                        if (note && note.content) {
+                            var count = 0;
+                            note.content = note.content.replace(/(^|\n)(\s*-\s*\[)([ xX])(\]\s+)/g, function (match, p1, p2, p3, p4) {
+                                if (count === index) {
+                                    count++;
+                                    return p1 + p2 + (isChecked ? 'x' : ' ') + p4;
+                                }
+                                count++;
+                                return match;
+                            });
+                            if (self.rawTextarea) self.rawTextarea.value = note.content;
+                            note.updatedAt = new Date().toISOString();
+                            self._saveNotes();
+                            self._render();
+                        }
                     }
                 }
             });
+
+        if (this.rawTextarea) {
+            this.rawTextarea.addEventListener('keydown', function (e) {
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    var start = this.selectionStart;
+                    var end = this.selectionEnd;
+                    var val = this.value;
+                    this.value = val.substring(0, start) + '  ' + val.substring(end);
+                    this.selectionStart = this.selectionEnd = start + 2;
+                }
+            });
+        }
 
             // Copy code block button
             this.contentEditor.addEventListener('click', function (e) {
@@ -3219,127 +3254,66 @@
     // =========================================================
     //  NOTION TOOLBAR & KEYBOARD SHORTCUTS
     // =========================================================
+    // =========================================================
+    //  NOTION TOOLBAR & EDITING ACTIONS
+    // =========================================================
     NoteApp.prototype._handleToolbarCommand = function (cmd) {
-        this.contentEditor.focus();
+        if (!this.isEditing) {
+            this._setNoteModalMode(true);
+        }
+        var ta = this.rawTextarea;
+        if (!ta) return;
+        ta.focus();
+
+        var start = ta.selectionStart;
+        var end = ta.selectionEnd;
+        var val = ta.value;
+        var selected = val.substring(start, end);
+
+        function wrap(before, after, defaultText) {
+            var textToWrap = selected || defaultText || '';
+            var replacement = before + textToWrap + after;
+            ta.value = val.substring(0, start) + replacement + val.substring(end);
+            var cursorStart = start + before.length;
+            var cursorEnd = cursorStart + textToWrap.length;
+            ta.focus();
+            ta.setSelectionRange(cursorStart, cursorEnd);
+            ta.dispatchEvent(new Event('input'));
+        }
+
+        function prefixLine(pref) {
+            var lineStart = val.lastIndexOf('\n', start - 1) + 1;
+            ta.value = val.substring(0, lineStart) + pref + val.substring(lineStart);
+            ta.focus();
+            ta.setSelectionRange(start + pref.length, start + pref.length);
+            ta.dispatchEvent(new Event('input'));
+        }
+
         switch (cmd) {
-            case 'h1':
-                document.execCommand('formatBlock', false, '<h1>');
-                break;
-            case 'h2':
-                document.execCommand('formatBlock', false, '<h2>');
-                break;
-            case 'h3':
-                document.execCommand('formatBlock', false, '<h3>');
-                break;
-            case 'bold':
-                document.execCommand('bold', false, null);
-                break;
-            case 'italic':
-                document.execCommand('italic', false, null);
-                break;
-            case 'strike':
-                document.execCommand('strikeThrough', false, null);
-                break;
-            case 'bullet':
-                document.execCommand('insertUnorderedList', false, null);
-                break;
-            case 'number':
-                document.execCommand('insertOrderedList', false, null);
-                break;
-            case 'todo':
-                this._insertTodoRow();
-                break;
-            case 'quote':
-                document.execCommand('formatBlock', false, '<blockquote>');
+            case 'h1': prefixLine('# '); break;
+            case 'h2': prefixLine('## '); break;
+            case 'h3': prefixLine('### '); break;
+            case 'bold': wrap('**', '**', 'chữ đậm'); break;
+            case 'italic': wrap('*', '*', 'chữ nghiêng'); break;
+            case 'strike': wrap('~~', '~~', 'chữ gạch'); break;
+            case 'bullet': prefixLine('- '); break;
+            case 'number': prefixLine('1. '); break;
+            case 'todo': prefixLine('- [ ] '); break;
+            case 'quote': prefixLine('> '); break;
+            case 'table':
+                wrap('\n| Tiêu đề 1 | Tiêu đề 2 | Tiêu đề 3 |\n| :--- | :--- | :--- |\n| Mục 1 | Mục 2 | Mục 3 |\n| Mục 4 | Mục 5 | Mục 6 |\n\n', '', '');
                 break;
             case 'code':
-                this._insertCodeBlock();
+                wrap('```javascript\n', '\n```\n', '// code...');
                 break;
             case 'divider':
-                document.execCommand('insertHorizontalRule', false, null);
+                wrap('\n---\n', '', '');
                 break;
         }
-    };
-
-    NoteApp.prototype._insertTodoRow = function () {
-        this.contentEditor.focus();
-        var row = '<div class="notion-todo-row"><input type="checkbox" class="notion-todo-checkbox"><div class="notion-todo-text" contenteditable="true"></div></div><p><br></p>';
-        document.execCommand('insertHTML', false, row);
-    };
-
-    NoteApp.prototype._insertCodeBlock = function () {
-        this.contentEditor.focus();
-        var code = '<pre><code>Code...</code></pre><p><br></p>';
-        document.execCommand('insertHTML', false, code);
     };
 
     NoteApp.prototype._handleEditorKeydown = function (e) {
-        if (e.key === ' ' || e.key === 'Spacebar') {
-            var sel = window.getSelection();
-            if (!sel || !sel.rangeCount) return;
-            var range = sel.getRangeAt(0);
-            var node = range.startContainer;
-            if (node && node.nodeType === Node.TEXT_NODE) {
-                var text = node.textContent;
-                var offset = range.startOffset;
-                var before = text.substring(0, offset);
-
-                if (before === '#') {
-                    e.preventDefault();
-                    node.textContent = text.substring(offset);
-                    document.execCommand('formatBlock', false, '<h1>');
-                } else if (before === '##') {
-                    e.preventDefault();
-                    node.textContent = text.substring(offset);
-                    document.execCommand('formatBlock', false, '<h2>');
-                } else if (before === '###') {
-                    e.preventDefault();
-                    node.textContent = text.substring(offset);
-                    document.execCommand('formatBlock', false, '<h3>');
-                } else if (before === '-' || before === '*') {
-                    e.preventDefault();
-                    node.textContent = text.substring(offset);
-                    document.execCommand('insertUnorderedList', false, null);
-                } else if (before === '1.') {
-                    e.preventDefault();
-                    node.textContent = text.substring(offset);
-                    document.execCommand('insertOrderedList', false, null);
-                } else if (before === '[]' || before === '[ ]') {
-                    e.preventDefault();
-                    node.textContent = text.substring(offset);
-                    this._insertTodoRow();
-                } else if (before === '>') {
-                    e.preventDefault();
-                    node.textContent = text.substring(offset);
-                    document.execCommand('formatBlock', false, '<blockquote>');
-                } else if (before === '```') {
-                    e.preventDefault();
-                    node.textContent = text.substring(offset);
-                    this._insertCodeBlock();
-                }
-            }
-        } else if (e.key === 'Enter') {
-            var sel = window.getSelection();
-            if (sel && sel.rangeCount) {
-                var node = sel.anchorNode;
-                var todoRow = node ? (node.closest ? node.closest('.notion-todo-row') : (node.parentElement ? node.parentElement.closest('.notion-todo-row') : null)) : null;
-                if (todoRow && !e.shiftKey) {
-                    var textEl = todoRow.querySelector('.notion-todo-text');
-                    if (textEl && textEl.textContent.trim() === '') {
-                        e.preventDefault();
-                        var p = document.createElement('p');
-                        p.innerHTML = '<br>';
-                        todoRow.parentNode.insertBefore(p, todoRow.nextSibling);
-                        todoRow.remove();
-                        var r = document.createRange();
-                        r.setStart(p, 0);
-                        r.collapse(true);
-                        sel.removeAllRanges();
-                        sel.addRange(r);
-                    }
-                }
-            }
-        }
+        // Reserved for future textarea keyboard enhancements
     };
 
     // =========================================================
@@ -3357,9 +3331,6 @@
             if (icon) icon.textContent = isEditing ? '✓' : '✏️';
             if (this.modeBtnText) this.modeBtnText.textContent = isEditing ? t('doneBtn') : t('editNoteBtn');
         }
-        if (this.contentEditor) {
-            this.contentEditor.setAttribute('contenteditable', isEditing ? 'true' : 'false');
-        }
         if (this.titleInput) {
             this.titleInput.readOnly = !isEditing;
         }
@@ -3374,18 +3345,20 @@
             // User clicked "✓ Xong" -> Save content and return to safe View Mode!
             this._saveFromModal(true);
             this._setNoteModalMode(false);
-            if (this.editingNoteId) {
-                var currentNote = this.notes.find(function (n) { return n.id === self.editingNoteId; });
-                if (currentNote && this.contentEditor) {
-                    this.contentEditor.innerHTML = legacyToNotionHtml(currentNote.content || '');
-                }
+            if (this.rawTextarea && this.contentEditor) {
+                var contentVal = this.rawTextarea.value;
+                this.contentEditor.innerHTML = (window.MarkdownRenderer && typeof window.MarkdownRenderer.render === 'function')
+                    ? window.MarkdownRenderer.render(contentVal)
+                    : legacyToNotionHtml(contentVal);
             }
             if (document.activeElement) document.activeElement.blur();
         } else {
-            // User clicked "✏️ Chỉnh sửa" -> Enter Edit Mode & Focus
+            // User clicked "✏️ Chỉnh sửa" -> Enter Edit Mode & Focus textarea
             this._setNoteModalMode(true);
             setTimeout(function () {
-                self.contentEditor.focus();
+                if (self.rawTextarea) {
+                    self.rawTextarea.focus();
+                }
             }, 100);
         }
     };
@@ -3403,7 +3376,13 @@
             if (!note) return;
             if (this.modalTitle) this.modalTitle.textContent = '';
             if (this.titleInput) this.titleInput.value = note.title || '';
-            if (this.contentEditor) this.contentEditor.innerHTML = legacyToNotionHtml(note.content || '');
+            var contentVal = note.content || '';
+            if (this.rawTextarea) this.rawTextarea.value = contentVal;
+            if (this.contentEditor) {
+                this.contentEditor.innerHTML = (window.MarkdownRenderer && typeof window.MarkdownRenderer.render === 'function')
+                    ? window.MarkdownRenderer.render(contentVal)
+                    : legacyToNotionHtml(contentVal);
+            }
             this.currentColor = note.color || 'default';
             if (this.folderSelect) this.folderSelect.value = note.folderId || '';
 
@@ -3413,6 +3392,7 @@
         } else {
             if (this.modalTitle) this.modalTitle.textContent = '';
             if (this.titleInput) this.titleInput.value = '';
+            if (this.rawTextarea) this.rawTextarea.value = '';
             if (this.contentEditor) this.contentEditor.innerHTML = '';
             this.currentColor = 'default';
             if (this.folderSelect) {
@@ -3449,10 +3429,8 @@
 
     NoteApp.prototype._saveFromModal = function (keepOpen) {
         var title = this.titleInput.value.trim();
-        // Convert editor DOM back to clean Markdown
-        var markdownContent = notionHtmlToMarkdown(this.contentEditor).trim();
-        var plainText = this.contentEditor.textContent.trim();
-        if (!title && !plainText && !markdownContent) return;
+        var markdownContent = this.rawTextarea ? this.rawTextarea.value.trim() : '';
+        if (!title && !markdownContent) return;
 
         var selectedFolderId = this.folderSelect ? this.folderSelect.value : null;
 
@@ -3477,6 +3455,12 @@
             };
             this.notes.unshift(newNote);
             this.editingNoteId = newNote.id;
+        }
+
+        if (keepOpen && this.contentEditor) {
+            this.contentEditor.innerHTML = (window.MarkdownRenderer && typeof window.MarkdownRenderer.render === 'function')
+                ? window.MarkdownRenderer.render(markdownContent)
+                : legacyToNotionHtml(markdownContent);
         }
 
         this._saveNotes();
@@ -3774,7 +3758,9 @@
                 folderBadge = '<div class="note-card-folder" data-folder-id="' + note.folderId + '" title="' + escapeHtml(folderMap[note.folderId]) + '">📁 ' + escapeHtml(folderMap[note.folderId]) + '</div>';
             }
 
-            var bodyHtml = legacyToNotionHtml(note.content || '');
+            var bodyHtml = (window.MarkdownRenderer && typeof window.MarkdownRenderer.render === 'function')
+                ? window.MarkdownRenderer.render(note.content || '')
+                : legacyToNotionHtml(note.content || '');
 
             html += '<div class="note-card' + (checked ? ' selected' : '') + '" data-id="' + note.id + '"' + colorAttr + '>' +
                 '<input type="checkbox" class="note-select" data-note-id="' + note.id + '"' + (checked ? ' checked' : '') + ' />' +

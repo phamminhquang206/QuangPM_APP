@@ -2709,8 +2709,15 @@ body {
     -webkit-overflow-scrolling: touch;
 }
 
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+}
+
 .notion-table {
     width: 100%;
+    min-width: 500px;
     border-collapse: collapse;
     font-size: 0.88rem;
     text-align: left;
@@ -2981,9 +2988,44 @@ body {
     gap: 8px;
 }
 
+/* Raw Markdown Textarea for Edit Mode */
+.notion-editor-textarea {
+    width: 100%;
+    min-height: 320px;
+    max-height: 75vh;
+    flex: 1;
+    background: rgba(10, 10, 18, 0.65);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm, 8px);
+    color: var(--text-primary);
+    font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
+    font-size: 0.94rem;
+    line-height: 1.7;
+    padding: 14px 16px;
+    outline: none;
+    resize: vertical;
+    box-sizing: border-box;
+    tab-size: 2;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    display: none;
+}
+
+.notion-editor-textarea:focus {
+    border-color: rgba(124, 58, 237, 0.6);
+    box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.25);
+}
+
 /* Notion Modal: View Mode vs Edit Mode */
 .notion-modal-container.view-mode .notion-toolbar {
     display: none !important;
+}
+
+.notion-modal-container.view-mode .notion-editor-textarea {
+    display: none !important;
+}
+
+.notion-modal-container.view-mode .notion-editor-preview {
+    display: block !important;
 }
 
 .notion-modal-container.view-mode .note-color-picker {
@@ -3030,6 +3072,14 @@ body {
 
 .notion-modal-container.edit-mode .notion-toolbar {
     display: flex;
+}
+
+.notion-modal-container.edit-mode .notion-editor-textarea {
+    display: block !important;
+}
+
+.notion-modal-container.edit-mode .notion-editor-preview {
+    display: none !important;
 }
 
 .notion-modal-container.edit-mode .note-color-picker {
