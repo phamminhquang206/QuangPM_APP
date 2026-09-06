@@ -1691,7 +1691,7 @@ body {
     }
 
     .notes-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .modal-container {
@@ -1959,7 +1959,7 @@ body {
 /* Notes Grid */
 .notes-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
 }
 
@@ -1997,6 +1997,10 @@ body {
     user-select: none;
     -webkit-user-select: none;
     -webkit-touch-callout: none;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
 }
 
 .note-card:hover {
@@ -2091,6 +2095,33 @@ body {
     -webkit-line-clamp: 6;
     -webkit-box-orient: vertical;
     word-break: break-word;
+    min-width: 0;
+    max-width: 100%;
+}
+
+/* Compact Table Preview inside Note Cards */
+.note-body .notion-table-container {
+    margin: 6px 0 !important;
+    border-radius: 6px !important;
+    max-height: 100px !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+    max-width: 100% !important;
+}
+
+.note-body .notion-table {
+    min-width: unset !important;
+    width: 100% !important;
+    font-size: 0.72rem !important;
+    table-layout: fixed !important;
+}
+
+.note-body .notion-table th,
+.note-body .notion-table td {
+    padding: 2px 5px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
 }
 
 /* Rich Card Styling for Notion Format */
@@ -2326,26 +2357,33 @@ body {
     flex-direction: column;
     max-height: 96vh;
     border-radius: var(--radius-xl);
+    min-width: 0;
+    overflow: hidden;
 }
 
 .notion-modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px 22px 10px;
+    padding: 14px 20px 10px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    gap: 8px;
 }
 
 .notion-header-left {
     display: flex;
     align-items: center;
     gap: 8px;
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
 }
 
 .notion-header-right {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+    flex-shrink: 0;
 }
 
 .note-mode-btn {
@@ -2393,6 +2431,7 @@ body {
     border: 1px solid var(--glass-border);
     border-radius: 16px;
     padding: 4px 10px;
+    max-width: 180px;
     transition: var(--transition);
 }
 
@@ -2414,6 +2453,10 @@ body {
     font-weight: 500;
     outline: none;
     cursor: pointer;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .note-folder-select option {
@@ -2474,12 +2517,14 @@ body {
 }
 
 .notion-modal-body {
-    padding: 20px 24px;
+    padding: 16px 20px;
     flex: 1;
     overflow-y: auto;
+    overflow-x: hidden;
     display: flex;
     flex-direction: column;
     gap: 12px;
+    min-width: 0;
 }
 
 .notion-title-input {
@@ -2505,16 +2550,17 @@ body {
 }
 
 .notion-editor {
-    min-height: 300px;
-    max-height: 78vh;
+    min-height: 280px;
     flex: 1;
     outline: none;
     font-size: 0.98rem;
     line-height: 1.75;
     color: var(--text-primary);
-    overflow-y: auto;
+    overflow-x: hidden;
     padding: 10px 0;
     word-break: break-word;
+    min-width: 0;
+    max-width: 100%;
 }
 
 .notion-editor[contenteditable="true"]:empty:before {
@@ -2700,28 +2746,31 @@ body {
 /* Notion-Style Modern Glassmorphic Table */
 .notion-table-container {
     width: 100%;
+    max-width: 100%;
     overflow-x: auto;
-    margin: 16px 0;
+    margin: 14px 0;
     border-radius: var(--radius-sm, 8px);
     border: 1px solid var(--glass-border);
     background: rgba(18, 18, 26, 0.6);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
     -webkit-overflow-scrolling: touch;
+    box-sizing: border-box;
 }
 
 .table-responsive {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     width: 100%;
+    max-width: 100%;
 }
 
 .notion-table {
     width: 100%;
-    min-width: 500px;
+    min-width: 440px;
     border-collapse: collapse;
-    font-size: 0.88rem;
+    font-size: 0.86rem;
     text-align: left;
-    line-height: 1.55;
+    line-height: 1.5;
 }
 
 .notion-table thead {
@@ -2730,14 +2779,16 @@ body {
 }
 
 .notion-table th {
-    padding: 10px 14px;
+    padding: 10px 12px;
     font-weight: 700;
     color: #c4b5fd;
-    white-space: nowrap;
-    font-size: 0.85rem;
-    letter-spacing: 0.3px;
+    white-space: normal;
+    word-break: normal;
+    font-size: 0.84rem;
+    letter-spacing: 0.2px;
     border-right: 1px solid rgba(255, 255, 255, 0.06);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    min-width: 80px;
 }
 
 .notion-table th:last-child {
@@ -2745,12 +2796,13 @@ body {
 }
 
 .notion-table td {
-    padding: 9px 14px;
+    padding: 8px 12px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     border-right: 1px solid rgba(255, 255, 255, 0.03);
     color: var(--text-primary);
     vertical-align: top;
-    font-size: 0.88rem;
+    font-size: 0.86rem;
+    word-break: break-word;
 }
 
 .notion-table td:last-child {
@@ -4207,6 +4259,148 @@ body {
     }
     .todo-dates-picker-row .todo-date-clear-btn {
         align-self: flex-end;
+    }
+
+    /* Mobile Portrait Note Modal */
+    #note-modal-overlay .modal-container,
+    #note-modal-overlay .notion-modal-container {
+        width: calc(100vw - 16px) !important;
+        max-width: calc(100vw - 16px) !important;
+        margin: 8px auto !important;
+        max-height: calc(100vh - 16px) !important;
+        border-radius: var(--radius-lg, 16px) !important;
+        overflow: hidden !important;
+    }
+
+    .notion-modal-header {
+        padding: 10px 12px 8px !important;
+        gap: 6px !important;
+    }
+
+    .notion-header-left {
+        min-width: 0 !important;
+        flex: 1 !important;
+        overflow: hidden !important;
+    }
+
+    .note-folder-picker-wrap {
+        max-width: 140px !important;
+        padding: 3px 8px !important;
+    }
+
+    .note-folder-select {
+        max-width: 100px !important;
+        font-size: 0.78rem !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    .notion-header-right {
+        flex-shrink: 0 !important;
+        gap: 6px !important;
+    }
+
+    .note-mode-btn {
+        padding: 5px 10px !important;
+        font-size: 0.76rem !important;
+    }
+
+    .notion-toolbar {
+        padding: 6px 10px !important;
+        gap: 2px !important;
+    }
+
+    .notion-tool-btn {
+        padding: 4px 7px !important;
+        font-size: 0.75rem !important;
+    }
+
+    .notion-modal-body {
+        padding: 12px 14px 16px !important;
+        gap: 8px !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        min-width: 0 !important;
+    }
+
+    .notion-title-input {
+        font-size: 1.2rem !important;
+        padding: 2px 0 6px !important;
+    }
+
+    .notion-editor {
+        min-height: 240px !important;
+        max-height: none !important;
+        overflow-y: visible !important;
+        overflow-x: hidden !important;
+        min-width: 0 !important;
+        font-size: 0.92rem !important;
+        padding: 6px 0 !important;
+    }
+
+    .notion-editor-textarea {
+        min-height: 260px !important;
+        max-height: calc(100vh - 220px) !important;
+        font-size: 0.88rem !important;
+        padding: 10px 12px !important;
+    }
+
+    .notion-modal-footer {
+        padding: 8px 14px 10px !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+    }
+
+    .notion-tip {
+        font-size: 0.7rem !important;
+    }
+
+    .notion-footer-btns {
+        width: 100% !important;
+        justify-content: flex-end !important;
+    }
+
+    .notion-footer-btns .modal-btn {
+        flex: 1 !important;
+        padding: 9px 12px !important;
+        font-size: 0.85rem !important;
+    }
+
+    /* Table Mobile Portrait Optimization */
+    .notion-table-container {
+        margin: 10px 0 !important;
+        border-radius: 6px !important;
+    }
+
+    .notion-table-container::before {
+        content: '↔ Cuộn ngang để xem đầy đủ bảng';
+        display: block;
+        font-size: 0.7rem;
+        color: #a78bfa;
+        padding: 4px 8px;
+        background: rgba(124, 58, 237, 0.12);
+        border-bottom: 1px solid rgba(124, 58, 237, 0.2);
+        text-align: right;
+        font-weight: 500;
+        letter-spacing: 0.2px;
+    }
+
+    .notion-table {
+        min-width: 400px !important;
+        font-size: 0.8rem !important;
+    }
+
+    .notion-table th {
+        padding: 7px 9px !important;
+        font-size: 0.76rem !important;
+        min-width: 70px !important;
+    }
+
+    .notion-table td {
+        padding: 6px 9px !important;
+        font-size: 0.78rem !important;
     }
 }
 

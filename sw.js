@@ -1,4 +1,4 @@
-const CACHE_NAME = 'quangpm-app-v21';
+const CACHE_NAME = 'quangpm-app-v22';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
