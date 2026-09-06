@@ -2345,7 +2345,7 @@
 
         // Note Modal
         this.overlay = document.getElementById('note-modal-overlay');
-        this.modalContainer = this.overlay ? this.overlay.querySelector('.notion-modal-container') : null;
+        this.modalContainer = this.overlay ? (this.overlay.querySelector('.notion-modal-container') || this.overlay.querySelector('.modal-container')) : null;
         this.modalTitle = document.getElementById('note-modal-title');
         this.titleInput = document.getElementById('note-title-input');
         this.contentEditor = document.getElementById('note-content-editor');
@@ -2375,7 +2375,10 @@
         var self = this;
 
         // Add note & batch actions
-        document.getElementById('note-add-btn').addEventListener('click', function () { self._openModal(null); });
+        var addBtn = document.getElementById('note-add-btn');
+        if (addBtn) {
+            addBtn.addEventListener('click', function () { self._openModal(null); });
+        }
         if (this.deleteBtn) this.deleteBtn.addEventListener('click', function () { self._deleteSelected(); });
         if (this.moveBtn) this.moveBtn.addEventListener('click', function () { self._openMoveModal(); });
 
@@ -2435,17 +2438,28 @@
         });
 
         // Note Modal events
-        document.getElementById('note-modal-close').addEventListener('click', function () { self._closeModal(); });
-        document.getElementById('note-modal-cancel').addEventListener('click', function () { self._closeModal(); });
-        this.overlay.addEventListener('click', function (e) { if (e.target === self.overlay) self._closeModal(); });
+        var modalClose = document.getElementById('note-modal-close');
+        if (modalClose) {
+            modalClose.addEventListener('click', function () { self._closeModal(); });
+        }
+        var modalCancel = document.getElementById('note-modal-cancel');
+        if (modalCancel) {
+            modalCancel.addEventListener('click', function () { self._closeModal(); });
+        }
+        if (this.overlay) {
+            this.overlay.addEventListener('click', function (e) { if (e.target === self.overlay) self._closeModal(); });
+        }
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') {
-                if (self.overlay.classList.contains('active')) self._closeModal();
+                if (self.overlay && self.overlay.classList.contains('active')) self._closeModal();
                 if (self.folderOverlay && self.folderOverlay.classList.contains('active')) self._closeFolderModal();
                 if (self.moveOverlay && self.moveOverlay.classList.contains('active')) self._closeMoveModal();
             }
         });
-        document.getElementById('note-modal-save').addEventListener('click', function () { self._saveFromModal(); });
+        var modalSave = document.getElementById('note-modal-save');
+        if (modalSave) {
+            modalSave.addEventListener('click', function () { self._saveFromModal(); });
+        }
         if (this.modeToggleBtn) {
             this.modeToggleBtn.addEventListener('click', function () {
                 self._toggleNoteModalMode();
@@ -2457,13 +2471,15 @@
             });
         }
 
-        this.colorDots.forEach(function (dot) {
-            dot.addEventListener('click', function () {
-                self.colorDots.forEach(function (d) { d.classList.remove('active'); });
-                dot.classList.add('active');
-                self.currentColor = dot.getAttribute('data-color');
+        if (this.colorDots) {
+            this.colorDots.forEach(function (dot) {
+                dot.addEventListener('click', function () {
+                    self.colorDots.forEach(function (d) { d.classList.remove('active'); });
+                    dot.classList.add('active');
+                    self.currentColor = dot.getAttribute('data-color');
+                });
             });
-        });
+        }
 
         // Notion Toolbar events
         if (this.toolbar) {
@@ -2790,16 +2806,18 @@
 
     NoteApp.prototype._openModal = function (noteId) {
         this.editingNoteId = noteId;
-        this.colorDots.forEach(function (d) { d.classList.remove('active'); });
+        if (this.colorDots) {
+            this.colorDots.forEach(function (d) { d.classList.remove('active'); });
+        }
         this._updateFolderSelectDropdown();
 
         var self = this;
         if (noteId) {
             var note = this.notes.find(function (n) { return n.id === noteId; });
             if (!note) return;
-            this.modalTitle.textContent = '';
-            this.titleInput.value = note.title || '';
-            this.contentEditor.innerHTML = legacyToNotionHtml(note.content || '');
+            if (this.modalTitle) this.modalTitle.textContent = '';
+            if (this.titleInput) this.titleInput.value = note.title || '';
+            if (this.contentEditor) this.contentEditor.innerHTML = legacyToNotionHtml(note.content || '');
             this.currentColor = note.color || 'default';
             if (this.folderSelect) this.folderSelect.value = note.folderId || '';
 
@@ -2807,9 +2825,9 @@
             // Do not focus, so mobile on-screen keyboard DOES NOT pop up!
             this._setNoteModalMode(false);
         } else {
-            this.modalTitle.textContent = '';
-            this.titleInput.value = '';
-            this.contentEditor.innerHTML = '';
+            if (this.modalTitle) this.modalTitle.textContent = '';
+            if (this.titleInput) this.titleInput.value = '';
+            if (this.contentEditor) this.contentEditor.innerHTML = '';
             this.currentColor = 'default';
             if (this.folderSelect) {
                 if (this.activeFolderId !== 'all' && this.activeFolderId !== 'uncategorized') {
@@ -2822,19 +2840,23 @@
             // Open new note in EDIT MODE directly!
             this._setNoteModalMode(true);
             setTimeout(function () {
-                self.titleInput.focus();
+                if (self.titleInput) self.titleInput.focus();
             }, 200);
         }
 
-        this.colorDots.forEach(function (d) {
-            if (d.getAttribute('data-color') === self.currentColor) d.classList.add('active');
-        });
+        if (this.colorDots) {
+            this.colorDots.forEach(function (d) {
+                if (d.getAttribute('data-color') === self.currentColor) d.classList.add('active');
+            });
+        }
 
-        this.overlay.classList.add('active');
+        if (this.overlay) {
+            this.overlay.classList.add('active');
+        }
     };
 
     NoteApp.prototype._closeModal = function () {
-        this.overlay.classList.remove('active');
+        if (this.overlay) this.overlay.classList.remove('active');
         this.editingNoteId = null;
         this.isEditing = false;
     };

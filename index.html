@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=1.7">
+    <link rel="stylesheet" href="style.css?v=1.8">
     
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="manifest.json">
@@ -435,6 +435,7 @@
         <div class="modal-container notion-modal-container">
             <div class="modal-header notion-modal-header">
                 <div class="notion-header-left">
+                    <h3 class="modal-title" id="note-modal-title" style="display:none;"></h3>
                     <div class="note-folder-picker-wrap">
                         <span class="folder-icon-label">📁</span>
                         <select id="note-folder-select" class="note-folder-select" title="Chọn thư mục">
@@ -993,7 +994,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <script src="firebase-config.js"></script>
-    <script src="app.js?v=1.7"></script>
+    <script src="app.js?v=1.8"></script>
 
     <!-- Register Service Worker for PWA -->
     <script>
