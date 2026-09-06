@@ -2271,41 +2271,180 @@
         return div.innerHTML;
     }
 
-    function legacyToNotionHtml(text) {
+    function htmlToMarkdownText(html) {
+        if (!html) return '';
+        var div = document.createElement('div');
+        div.innerHTML = html;
+
+        // Convert <br> to newline
+        div.querySelectorAll('br').forEach(function (br) {
+            br.replaceWith('\n');
+        });
+
+        // Convert block elements to newlines
+        div.querySelectorAll('p, div, h1, h2, h3, h4, h5, h6, blockquote, pre, hr').forEach(function (el) {
+            el.before('\n');
+            el.after('\n');
+        });
+
+        div.querySelectorAll('li').forEach(function (li) {
+            li.before('\n');
+        });
+
+        var text = div.textContent || div.innerText || '';
+        return text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    }
+
+    function containsMarkdownSyntax(str) {
+        if (!str) return false;
+        // Fenced code blocks ```
+        if (/```/.test(str)) return true;
+        // Inline code `...`
+        if (/`[^`\n]+`/.test(str)) return true;
+        // Headings: # Title, ## Title
+        if (/(?:^|\n)\s*#{1,6}\s+\S/m.test(str)) return true;
+        // Blockquotes: > Quote
+        if (/(?:^|\n)\s*>\s+\S/m.test(str)) return true;
+        // Bullet lists: - item, * item, + item
+        if (/(?:^|\n)\s*[-*+]\s+\S/m.test(str)) return true;
+        // Numbered lists: 1. item
+        if (/(?:^|\n)\s*\d+\.\s+\S/m.test(str)) return true;
+        // Bold or italic: **bold**, *italic*, __bold__, _italic_
+        if (/\*\*[^*\n]+\*\*|__[^_\n]+__|\*[^*\n]+\*|_[^_\n]+_/.test(str)) return true;
+        // Strikethrough: ~~strike~~
+        if (/~~[^~\n]+~~/.test(str)) return true;
+        // Horizontal rules: --- or ***
+        if (/(?:^|\n)\s*(?:---|___|\*\*\*)\s*(?:$|\n)/m.test(str)) return true;
+        // Task lists: [ ] or [x]
+        if (/\[[ xX]\]/.test(str)) return true;
+        return false;
+    }
+
+    function formatInlineMarkdown(text) {
         if (!text) return '';
-        if (/<\s*(p|h1|h2|h3|ul|ol|li|blockquote|pre|div|table)\b/i.test(text)) {
-            return sanitizeNoteHtml(text);
-        }
+        var res = escapeHtml(text);
+        // Inline code `code`
+        res = res.replace(/`([^`]+)`/g, '<code>$1</code>');
+        // Bold **text** or __text__
+        res = res.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+        res = res.replace(/__([^_]+)__/g, '<strong>$1</strong>');
+        // Italic *text* or _text_
+        res = res.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+        res = res.replace(/_([^_]+)_/g, '<em>$1</em>');
+        // Strikethrough ~~text~~
+        res = res.replace(/~~([^~]+)~~/g, '<s>$1</s>');
+        return res;
+    }
+
+    function postProcessNotionHtml(html) {
+        if (!html) return '';
+        var div = document.createElement('div');
+        div.innerHTML = html;
+
+        // Convert task-list-item or li with checkbox into .notion-todo-row
+        div.querySelectorAll('li').forEach(function (li) {
+            var checkbox = li.querySelector('input[type="checkbox"]');
+            if (checkbox) {
+                var isChecked = checkbox.checked || checkbox.hasAttribute('checked');
+                checkbox.remove();
+                var text = li.innerHTML.trim();
+
+                var todoRow = document.createElement('div');
+                todoRow.className = 'notion-todo-row' + (isChecked ? ' done' : '');
+                todoRow.innerHTML = '<input type="checkbox" class="notion-todo-checkbox"' + (isChecked ? ' checked' : '') + '>' +
+                    '<div class="notion-todo-text">' + text + '</div>';
+
+                li.replaceWith(todoRow);
+            }
+        });
+
+        // Unwrap todo-rows from parent <ul> if parent only has todo-rows
+        div.querySelectorAll('ul').forEach(function (ul) {
+            var rows = ul.querySelectorAll(':scope > .notion-todo-row');
+            if (rows.length > 0 && ul.children.length === rows.length) {
+                rows.forEach(function (r) { ul.before(r); });
+                ul.remove();
+            }
+        });
+
+        // Ensure links open safely in new tab
+        div.querySelectorAll('a').forEach(function (a) {
+            a.setAttribute('target', '_blank');
+            a.setAttribute('rel', 'noopener noreferrer');
+        });
+
+        return div.innerHTML;
+    }
+
+    function fallbackMarkdownParser(text) {
+        if (!text) return '';
         var lines = text.split('\n');
         var html = '';
         var inList = false;
+        var inCodeBlock = false;
+        var codeBlockContent = [];
+        var codeBlockLang = '';
+
         for (var i = 0; i < lines.length; i++) {
             var line = lines[i];
             var trimmed = line.trim();
-            if (trimmed.startsWith('# ')) {
+
+            // Fenced code block start/end
+            if (trimmed.startsWith('```')) {
+                if (inCodeBlock) {
+                    html += '<pre><code class="language-' + escapeHtml(codeBlockLang) + '">' +
+                        escapeHtml(codeBlockContent.join('\n')) + '</code></pre>';
+                    inCodeBlock = false;
+                    codeBlockContent = [];
+                    codeBlockLang = '';
+                } else {
+                    if (inList) { html += '</ul>'; inList = false; }
+                    inCodeBlock = true;
+                    codeBlockLang = trimmed.substring(3).trim();
+                    codeBlockContent = [];
+                }
+                continue;
+            }
+
+            if (inCodeBlock) {
+                codeBlockContent.push(line);
+                continue;
+            }
+
+            // Headings
+            if (trimmed.startsWith('###### ')) {
                 if (inList) { html += '</ul>'; inList = false; }
-                html += '<h1>' + escapeHtml(trimmed.substring(2)) + '</h1>';
-            } else if (trimmed.startsWith('## ')) {
+                html += '<h6>' + formatInlineMarkdown(trimmed.substring(7)) + '</h6>';
+            } else if (trimmed.startsWith('##### ')) {
                 if (inList) { html += '</ul>'; inList = false; }
-                html += '<h2>' + escapeHtml(trimmed.substring(3)) + '</h2>';
+                html += '<h5>' + formatInlineMarkdown(trimmed.substring(6)) + '</h5>';
+            } else if (trimmed.startsWith('#### ')) {
+                if (inList) { html += '</ul>'; inList = false; }
+                html += '<h4>' + formatInlineMarkdown(trimmed.substring(5)) + '</h4>';
             } else if (trimmed.startsWith('### ')) {
                 if (inList) { html += '</ul>'; inList = false; }
-                html += '<h3>' + escapeHtml(trimmed.substring(4)) + '</h3>';
+                html += '<h3>' + formatInlineMarkdown(trimmed.substring(4)) + '</h3>';
+            } else if (trimmed.startsWith('## ')) {
+                if (inList) { html += '</ul>'; inList = false; }
+                html += '<h2>' + formatInlineMarkdown(trimmed.substring(3)) + '</h2>';
+            } else if (trimmed.startsWith('# ')) {
+                if (inList) { html += '</ul>'; inList = false; }
+                html += '<h1>' + formatInlineMarkdown(trimmed.substring(2)) + '</h1>';
             } else if (trimmed.startsWith('- [ ] ') || trimmed.startsWith('[] ')) {
                 if (inList) { html += '</ul>'; inList = false; }
                 var todoText = trimmed.replace(/^(- \[ \] |\[\] )/, '');
-                html += '<div class="notion-todo-row"><input type="checkbox" class="notion-todo-checkbox"><div class="notion-todo-text">' + escapeHtml(todoText) + '</div></div>';
-            } else if (trimmed.startsWith('- [x] ') || trimmed.startsWith('[x] ')) {
+                html += '<div class="notion-todo-row"><input type="checkbox" class="notion-todo-checkbox"><div class="notion-todo-text">' + formatInlineMarkdown(todoText) + '</div></div>';
+            } else if (trimmed.startsWith('- [x] ') || trimmed.startsWith('[x] ') || trimmed.startsWith('- [X] ') || trimmed.startsWith('[X] ')) {
                 if (inList) { html += '</ul>'; inList = false; }
-                var todoText = trimmed.replace(/^(- \[x\] |\[x\] )/, '');
-                html += '<div class="notion-todo-row done"><input type="checkbox" class="notion-todo-checkbox" checked><div class="notion-todo-text">' + escapeHtml(todoText) + '</div></div>';
-            } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+                var todoText = trimmed.replace(/^(- \[[xX]\] |\[[xX]\] )/, '');
+                html += '<div class="notion-todo-row done"><input type="checkbox" class="notion-todo-checkbox" checked><div class="notion-todo-text">' + formatInlineMarkdown(todoText) + '</div></div>';
+            } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ') || trimmed.startsWith('+ ')) {
                 if (!inList) { html += '<ul>'; inList = true; }
-                html += '<li>' + escapeHtml(trimmed.substring(2)) + '</li>';
+                html += '<li>' + formatInlineMarkdown(trimmed.substring(2)) + '</li>';
             } else if (trimmed.startsWith('> ')) {
                 if (inList) { html += '</ul>'; inList = false; }
-                html += '<blockquote>' + escapeHtml(trimmed.substring(2)) + '</blockquote>';
-            } else if (trimmed === '---') {
+                html += '<blockquote><p>' + formatInlineMarkdown(trimmed.substring(2)) + '</p></blockquote>';
+            } else if (trimmed === '---' || trimmed === '***' || trimmed === '___') {
                 if (inList) { html += '</ul>'; inList = false; }
                 html += '<hr>';
             } else if (trimmed === '') {
@@ -2313,11 +2452,57 @@
                 html += '<p><br></p>';
             } else {
                 if (inList) { html += '</ul>'; inList = false; }
-                html += '<p>' + escapeHtml(line) + '</p>';
+                html += '<p>' + formatInlineMarkdown(line) + '</p>';
             }
+        }
+
+        if (inCodeBlock) {
+            html += '<pre><code>' + escapeHtml(codeBlockContent.join('\n')) + '</code></pre>';
         }
         if (inList) html += '</ul>';
         return html;
+    }
+
+    function parseMarkdownToHtml(markdown) {
+        if (!markdown) return '';
+        var normalized = markdown
+            .replace(/(^|\n)\s*\[ \]\s*/g, '$1- [ ] ')
+            .replace(/(^|\n)\s*\[[xX]\]\s*/g, '$1- [x] ');
+
+        var parsed = '';
+        var markedLib = (typeof marked !== 'undefined') ? (marked.parse || marked) : (window.marked && (window.marked.parse || window.marked));
+        if (typeof markedLib === 'function') {
+            try {
+                parsed = markedLib(normalized, { gfm: true, breaks: true });
+            } catch (err) {
+                console.warn('Marked parse error, fallback to built-in parser:', err);
+                parsed = fallbackMarkdownParser(normalized);
+            }
+        } else {
+            parsed = fallbackMarkdownParser(normalized);
+        }
+
+        return postProcessNotionHtml(parsed);
+    }
+
+    function legacyToNotionHtml(text) {
+        if (!text) return '';
+
+        var markdownSource = text;
+        // Check if text has HTML tags (e.g. from previous contenteditable save)
+        if (/<[a-z][\s\S]*>/i.test(text)) {
+            var extracted = htmlToMarkdownText(text);
+            if (containsMarkdownSyntax(extracted)) {
+                // HTML contains unparsed raw markdown inside -> parse extracted markdown!
+                markdownSource = extracted;
+            } else {
+                // Already pure rich HTML without unparsed markdown
+                return sanitizeNoteHtml(text);
+            }
+        }
+
+        var parsed = parseMarkdownToHtml(markdownSource);
+        return sanitizeNoteHtml(parsed);
     }
 
     function NoteApp() {
@@ -2495,6 +2680,42 @@
         if (this.contentEditor) {
             this.contentEditor.addEventListener('keydown', function (e) {
                 self._handleEditorKeydown(e);
+            });
+
+            // Paste markdown text -> auto-convert to rich Notion HTML!
+            this.contentEditor.addEventListener('paste', function (e) {
+                var clipboardData = e.clipboardData || window.clipboardData;
+                if (!clipboardData) return;
+                var text = clipboardData.getData('text/plain');
+                if (!text) return;
+
+                if (containsMarkdownSyntax(text) || text.indexOf('\n') !== -1) {
+                    e.preventDefault();
+                    var richHtml = legacyToNotionHtml(text);
+                    if (document.queryCommandSupported && document.queryCommandSupported('insertHTML')) {
+                        document.execCommand('insertHTML', false, richHtml);
+                    } else {
+                        var sel = window.getSelection();
+                        if (sel.getRangeAt && sel.rangeCount) {
+                            var range = sel.getRangeAt(0);
+                            range.deleteContents();
+                            var temp = document.createElement('div');
+                            temp.innerHTML = richHtml;
+                            var frag = document.createDocumentFragment(), node, lastNode;
+                            while ((node = temp.firstChild)) {
+                                lastNode = frag.appendChild(node);
+                            }
+                            range.insertNode(frag);
+                            if (lastNode) {
+                                range = range.cloneRange();
+                                range.setStartAfter(lastNode);
+                                range.collapse(true);
+                                sel.removeAllRanges();
+                                sel.addRange(range);
+                            }
+                        }
+                    }
+                }
             });
 
             // Interactive checkboxes inside editor
