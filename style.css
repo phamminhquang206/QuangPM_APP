@@ -1907,22 +1907,22 @@ body {
     transform: translateY(-1px);
 }
 
-/* Folder Context Dropdown Menu */
+/* Folder Context Dropdown Menu (Fixed Global) */
 .folder-dropdown-menu {
-    position: absolute;
-    top: calc(100% + 6px);
-    right: 0;
-    background: #18181b;
-    border: 1px solid var(--glass-border);
+    position: fixed;
+    background: rgba(24, 24, 27, 0.96);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: var(--radius-md);
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6);
-    z-index: 60;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.7), 0 4px 12px rgba(0, 0, 0, 0.5);
+    z-index: 99999;
     padding: 6px;
-    min-width: 140px;
+    min-width: 155px;
     display: flex;
     flex-direction: column;
     gap: 3px;
-    animation: fadeIn 0.15s ease;
+    animation: fadeIn 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .folder-dropdown-item {
@@ -3076,8 +3076,14 @@ body {
     display: none !important;
 }
 
-.notion-modal-container.view-mode .notion-editor-preview {
+.notion-modal-container.view-mode #note-content-editor {
     display: block !important;
+    cursor: default;
+    user-select: text;
+    -webkit-user-select: text;
+    background: transparent;
+    border: 1px solid transparent;
+    padding: 10px 4px;
 }
 
 .notion-modal-container.view-mode .note-color-picker {
@@ -3090,21 +3096,12 @@ body {
     user-select: text;
 }
 
-.notion-modal-container.view-mode .notion-editor {
-    cursor: default;
-    user-select: text;
-    -webkit-user-select: text;
-}
-
 .notion-modal-container.view-mode .notion-editor .notion-todo-checkbox {
     pointer-events: auto !important;
     cursor: pointer !important;
 }
 
-.notion-modal-container.view-mode #note-modal-cancel {
-    display: none !important;
-}
-
+.notion-modal-container.view-mode #note-modal-cancel,
 .notion-modal-container.view-mode #note-modal-save {
     display: none !important;
 }
@@ -3122,16 +3119,46 @@ body {
     border-color: transparent;
 }
 
+/* Edit Mode: Rich WYSIWYG Display Identical to Preview */
 .notion-modal-container.edit-mode .notion-toolbar {
     display: flex;
 }
 
+.notion-modal-container.edit-mode #note-content-editor {
+    display: block !important;
+    cursor: text;
+    user-select: text;
+    -webkit-user-select: text;
+    background: rgba(10, 10, 20, 0.45);
+    border: 1px solid rgba(124, 58, 237, 0.25);
+    border-radius: var(--radius-sm, 8px);
+    padding: 16px 20px;
+    caret-color: #c4b5fd;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.notion-modal-container.edit-mode #note-content-editor:focus {
+    border-color: rgba(124, 58, 237, 0.6);
+    box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.25);
+}
+
 .notion-modal-container.edit-mode .notion-editor-textarea {
+    display: none;
+}
+
+/* When Raw Mode is toggled */
+.notion-modal-container.edit-mode.raw-mode-active #note-content-editor {
+    display: none !important;
+}
+
+.notion-modal-container.edit-mode.raw-mode-active .notion-editor-textarea {
     display: block !important;
 }
 
-.notion-modal-container.edit-mode .notion-editor-preview {
-    display: none !important;
+.notion-modal-container.edit-mode.raw-mode-active #notion-toggle-raw-btn {
+    background: var(--accent-purple);
+    color: #fff;
+    border-color: var(--accent-purple);
 }
 
 .notion-modal-container.edit-mode .note-color-picker {
@@ -3150,10 +3177,37 @@ body {
     display: none !important;
 }
 
+/* Table cell focus in WYSIWYG edit mode */
+.notion-editor[contenteditable="true"] .notion-table th,
+.notion-editor[contenteditable="true"] .notion-table td {
+    outline: none;
+    transition: background 0.15s;
+}
+
+.notion-editor[contenteditable="true"] .notion-table th:focus,
+.notion-editor[contenteditable="true"] .notion-table td:focus {
+    background: rgba(124, 58, 237, 0.22) !important;
+    box-shadow: inset 0 0 0 1.5px rgba(139, 92, 246, 0.7);
+}
+
 /* ===== FOLDER & MOVE MODALS ===== */
 .folder-modal-container,
 .note-move-modal-container {
     max-width: 440px !important;
+}
+
+.folder-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.folder-modal-footer-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
 }
 
 .move-modal-desc {
@@ -4329,21 +4383,16 @@ body {
         padding: 2px 0 6px !important;
     }
 
-    .notion-editor {
-        min-height: 240px !important;
-        max-height: none !important;
-        overflow-y: visible !important;
+    .notion-editor,
+    .notion-editor-textarea {
+        min-height: 280px !important;
+        max-height: calc(100vh - 210px) !important;
+        overflow-y: auto !important;
         overflow-x: hidden !important;
         min-width: 0 !important;
-        font-size: 0.92rem !important;
-        padding: 6px 0 !important;
-    }
-
-    .notion-editor-textarea {
-        min-height: 260px !important;
-        max-height: calc(100vh - 220px) !important;
-        font-size: 0.88rem !important;
+        font-size: 0.94rem !important;
         padding: 10px 12px !important;
+        line-height: 1.7 !important;
     }
 
     .notion-modal-footer {
@@ -4656,8 +4705,9 @@ body {
         padding: 8px 0;
     }
 
-    #note-content-editor {
-        min-height: 360px;
+    #note-content-editor,
+    .notion-editor-textarea {
+        min-height: 380px;
         max-height: 76vh;
         font-size: 1.02rem;
         line-height: 1.75;
@@ -4698,8 +4748,9 @@ body {
         padding: 20px 30px 24px;
     }
 
-    #note-content-editor {
-        min-height: 320px;
+    #note-content-editor,
+    .notion-editor-textarea {
+        min-height: 360px;
         max-height: 78vh;
         font-size: 1.02rem;
         line-height: 1.8;
@@ -4816,8 +4867,9 @@ body {
         font-size: 1.55rem;
     }
 
-    #note-content-editor {
-        min-height: 440px;
+    #note-content-editor,
+    .notion-editor-textarea {
+        min-height: 460px;
         max-height: 78vh;
         font-size: 1.04rem;
         line-height: 1.85;
@@ -4852,8 +4904,9 @@ body {
         max-height: 96vh;
     }
 
-    #note-content-editor {
-        min-height: 520px;
+    #note-content-editor,
+    .notion-editor-textarea {
+        min-height: 540px;
         max-height: 80vh;
         font-size: 1.06rem;
         line-height: 1.85;

@@ -477,14 +477,18 @@
                     <button type="button" class="notion-tool-btn" data-command="code" title="Khối mã (```)">‹/› Code</button>
                     <button type="button" class="notion-tool-btn" data-command="divider" title="Đường kẻ (---)">— Line</button>
                 </div>
+                <span class="notion-tool-divider"></span>
+                <div class="notion-toolbar-group">
+                    <button type="button" class="notion-tool-btn" data-command="toggle-raw" id="notion-toggle-raw-btn" title="Chuyển sang Markdown thô">‹/› Mã thô</button>
+                </div>
             </div>
 
             <div class="modal-body notion-modal-body">
                 <input type="text" class="note-title-input notion-title-input" id="note-title-input" data-i18n-placeholder="noteTitlePlaceholder" placeholder="Tiêu đề ghi chú..." autocomplete="off" />
                 
-                <!-- Notion Dual Mode Editor & Preview -->
-                <textarea class="notion-editor-textarea" id="note-content-editor-raw" placeholder="Gõ nội dung ghi chú (hỗ trợ đầy đủ Markdown, Bảng, Danh sách, Khối code...)..." spellcheck="false"></textarea>
-                <div class="notion-editor notion-editor-preview markdown-body" id="note-content-editor"></div>
+                <!-- Notion Unified Rich WYSIWYG Editor -->
+                <div class="notion-editor markdown-body" id="note-content-editor" data-placeholder="Gõ nội dung ghi chú (hỗ trợ đầy đủ Markdown, Bảng, Danh sách, Khối code...)..."></div>
+                <textarea class="notion-editor-textarea" id="note-content-editor-raw" placeholder="Gõ nội dung ghi chú (hỗ trợ đầy đủ Markdown, Bảng, Danh sách, Khối code...)..." spellcheck="false" style="display: none;"></textarea>
 
                 <div class="note-color-picker">
                     <span class="color-label" data-i18n="noteColor">Màu thẻ:</span>
@@ -520,11 +524,24 @@
                     <input type="text" class="modal-input" id="folder-name-input" data-i18n-placeholder="folderNamePlaceholder" placeholder="Ví dụ: Công việc, Dự án, Cá nhân..." autocomplete="off" maxlength="40" />
                 </div>
             </div>
-            <div class="modal-footer">
-                <button class="modal-btn secondary" id="folder-modal-cancel" data-i18n="cancel">Hủy</button>
-                <button class="modal-btn primary" id="folder-modal-save" data-i18n="save">Lưu</button>
+            <div class="modal-footer folder-modal-footer">
+                <button type="button" class="modal-btn danger" id="folder-modal-delete-btn" style="display: none;" data-i18n="deleteFolder">🗑 Xóa</button>
+                <div class="folder-modal-footer-right">
+                    <button type="button" class="modal-btn secondary" id="folder-modal-cancel" data-i18n="cancel">Hủy</button>
+                    <button type="button" class="modal-btn primary" id="folder-modal-save" data-i18n="save">Lưu</button>
+                </div>
             </div>
         </div>
+    </div>
+
+    <!-- Global Floating Folder Context Menu -->
+    <div class="folder-dropdown-menu" id="folder-dropdown-menu" style="display: none;">
+        <button type="button" class="folder-dropdown-item folder-dropdown-edit" id="folder-dropdown-edit-btn">
+            <span>✏️</span> <span data-i18n="editFolder">Sửa tên</span>
+        </button>
+        <button type="button" class="folder-dropdown-item danger folder-dropdown-delete" id="folder-dropdown-delete-btn">
+            <span>🗑️</span> <span data-i18n="deleteFolder">Xóa thư mục</span>
+        </button>
     </div>
 
     <!-- ===== BATCH MOVE NOTES MODAL ===== -->

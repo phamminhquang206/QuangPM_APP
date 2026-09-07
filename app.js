@@ -2465,43 +2465,52 @@
             return '\n\n```' + lang + '\n' + cText.replace(/\r\n/g, '\n').trim() + '\n```\n\n';
         }
 
-        // Block elements
-        if (tag === 'p') {
-            var pContent = childrenToMarkdown(node).trim();
-            return pContent ? ('\n\n' + pContent + '\n\n') : '\n\n';
-        }
+    if (node.classList && node.classList.contains('notion-timestamp')) {
+        return node.textContent.trim();
+    }
 
-        if (tag === 'blockquote') {
-            var bqLines = childrenToMarkdown(node).trim().split('\n');
-            return '\n\n' + bqLines.map(function (bl) { return '> ' + bl; }).join('\n') + '\n\n';
-        }
+    // Block elements
+    if (tag === 'p') {
+        var pContent = childrenToMarkdown(node).trim();
+        return pContent ? ('\n\n' + pContent + '\n\n') : '\n\n';
+    }
 
-        if (tag === 'hr') {
-            return '\n\n---\n\n';
-        }
+    if (tag === 'div') {
+        var divContent = childrenToMarkdown(node).trim();
+        return divContent ? ('\n' + divContent + '\n') : '\n';
+    }
 
-        // Inline elements
-        if (tag === 'strong' || tag === 'b') {
-            return '**' + childrenToMarkdown(node) + '**';
-        }
-        if (tag === 'em' || tag === 'i') {
-            return '*' + childrenToMarkdown(node) + '*';
-        }
-        if (tag === 'del' || tag === 's') {
-            return '~~' + childrenToMarkdown(node) + '~~';
-        }
-        if (tag === 'code') {
-            return '`' + node.textContent + '`';
-        }
-        if (tag === 'a') {
-            var href = node.getAttribute('href') || '';
-            return '[' + childrenToMarkdown(node) + '](' + href + ')';
-        }
-        if (tag === 'br') {
-            return '\n';
-        }
+    if (tag === 'blockquote') {
+        var bqLines = childrenToMarkdown(node).trim().split('\n');
+        return '\n\n' + bqLines.map(function (bl) { return '> ' + bl; }).join('\n') + '\n\n';
+    }
 
-        return childrenToMarkdown(node);
+    if (tag === 'hr') {
+        return '\n\n---\n\n';
+    }
+
+    // Inline elements
+    if (tag === 'strong' || tag === 'b') {
+        return '**' + childrenToMarkdown(node) + '**';
+    }
+    if (tag === 'em' || tag === 'i') {
+        return '*' + childrenToMarkdown(node) + '*';
+    }
+    if (tag === 'del' || tag === 's') {
+        return '~~' + childrenToMarkdown(node) + '~~';
+    }
+    if (tag === 'code') {
+        return '`' + node.textContent + '`';
+    }
+    if (tag === 'a') {
+        var href = node.getAttribute('href') || '';
+        return '[' + childrenToMarkdown(node) + '](' + href + ')';
+    }
+    if (tag === 'br') {
+        return '\n';
+    }
+
+    return childrenToMarkdown(node);
     }
 
     function notionHtmlToMarkdown(contentOrEl) {
@@ -2879,6 +2888,8 @@
         this.modeBtnText = document.getElementById('note-mode-btn-text');
         this.modalTip = document.getElementById('notion-modal-tip');
         this.closeViewBtn = document.getElementById('note-modal-close-view');
+        this.toggleRawBtn = document.getElementById('notion-toggle-raw-btn');
+        this.isRawMode = false;
 
         // Folder Modal
         this.folderOverlay = document.getElementById('folder-modal-overlay');
@@ -2887,11 +2898,50 @@
         this.folderSaveBtn = document.getElementById('folder-modal-save');
         this.folderCancelBtn = document.getElementById('folder-modal-cancel');
         this.folderCloseBtn = document.getElementById('folder-modal-close');
+        this.folderModalDeleteBtn = document.getElementById('folder-modal-delete-btn');
+
+        // Floating Folder Context Menu
+        this.folderDropdownMenu = document.getElementById('folder-dropdown-menu');
+        this.folderDropdownEditBtn = document.getElementById('folder-dropdown-edit-btn');
+        this.folderDropdownDeleteBtn = document.getElementById('folder-dropdown-delete-btn');
 
         // Move Modal
         this.moveOverlay = document.getElementById('note-move-modal-overlay');
         this.moveList = document.getElementById('note-move-folder-list');
         this.moveCloseBtn = document.getElementById('note-move-modal-close');
+    };
+
+    NoteApp.prototype._showFolderDropdown = function (folderId, x, y) {
+        if (!this.folderDropdownMenu) return;
+        this.activeDropdownFolderId = String(folderId);
+
+        this.folderDropdownMenu.style.display = 'flex';
+        this.folderDropdownMenu.style.visibility = 'hidden';
+
+        var menuWidth = this.folderDropdownMenu.offsetWidth || 160;
+        var menuHeight = this.folderDropdownMenu.offsetHeight || 90;
+
+        var posX = x;
+        var posY = y;
+        if (posX + menuWidth > window.innerWidth - 10) {
+            posX = window.innerWidth - menuWidth - 10;
+        }
+        if (posX < 10) posX = 10;
+        if (posY + menuHeight > window.innerHeight - 10) {
+            posY = posY - menuHeight - 10;
+        }
+        if (posY < 10) posY = 10;
+
+        this.folderDropdownMenu.style.left = posX + 'px';
+        this.folderDropdownMenu.style.top = posY + 'px';
+        this.folderDropdownMenu.style.visibility = 'visible';
+    };
+
+    NoteApp.prototype._hideFolderDropdown = function () {
+        if (this.folderDropdownMenu) {
+            this.folderDropdownMenu.style.display = 'none';
+        }
+        this.activeDropdownFolderId = null;
     };
 
     NoteApp.prototype._bindEvents = function () {
@@ -2908,6 +2958,7 @@
         // Folder Bar click & New Folder
         if (this.newFolderBtn) {
             this.newFolderBtn.addEventListener('click', function () {
+                self._hideFolderDropdown();
                 self._openFolderModal(null);
             });
         }
@@ -2917,27 +2968,14 @@
                 var menuTrigger = e.target.closest('.folder-menu-trigger');
                 if (menuTrigger) {
                     e.stopPropagation();
+                    e.preventDefault();
                     var fid = menuTrigger.getAttribute('data-folder-id');
-                    self.activeDropdownFolderId = (self.activeDropdownFolderId === fid) ? null : fid;
-                    self._renderFolders();
-                    return;
-                }
-
-                var editBtn = e.target.closest('.folder-dropdown-edit');
-                if (editBtn) {
-                    e.stopPropagation();
-                    var editFid = editBtn.getAttribute('data-folder-id');
-                    self.activeDropdownFolderId = null;
-                    self._openFolderModal(editFid);
-                    return;
-                }
-
-                var delBtn = e.target.closest('.folder-dropdown-delete');
-                if (delBtn) {
-                    e.stopPropagation();
-                    var delFid = delBtn.getAttribute('data-folder-id');
-                    self.activeDropdownFolderId = null;
-                    self._confirmDeleteFolder(delFid);
+                    if (self.activeDropdownFolderId === String(fid)) {
+                        self._hideFolderDropdown();
+                    } else {
+                        var rect = menuTrigger.getBoundingClientRect();
+                        self._showFolderDropdown(fid, rect.right - 145, rect.bottom + 6);
+                    }
                     return;
                 }
 
@@ -2945,20 +2983,59 @@
                 if (pill) {
                     var folderId = pill.getAttribute('data-folder-id');
                     self.activeFolderId = folderId;
-                    self.activeDropdownFolderId = null;
+                    self._hideFolderDropdown();
                     self._renderFolders();
                     self._render();
                 }
             });
+
+            // Right-click contextmenu on folder pills
+            this.foldersBar.addEventListener('contextmenu', function (e) {
+                var pill = e.target.closest('.folder-pill');
+                if (pill && pill.hasAttribute('data-folder-id')) {
+                    var fid = pill.getAttribute('data-folder-id');
+                    if (fid && fid !== 'all' && fid !== 'uncategorized') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        self._showFolderDropdown(fid, e.clientX, e.clientY);
+                    }
+                }
+            });
         }
 
-        // Close dropdown when clicking outside
+        // Global dropdown item clicks
+        if (this.folderDropdownEditBtn) {
+            this.folderDropdownEditBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var fid = self.activeDropdownFolderId;
+                self._hideFolderDropdown();
+                if (fid) self._openFolderModal(fid);
+            });
+        }
+
+        if (this.folderDropdownDeleteBtn) {
+            this.folderDropdownDeleteBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var fid = self.activeDropdownFolderId;
+                self._hideFolderDropdown();
+                if (fid) self._confirmDeleteFolder(fid);
+            });
+        }
+
+        // Close dropdown when clicking outside, resizing, or scrolling
         document.addEventListener('click', function (e) {
-            if (self.activeDropdownFolderId && !e.target.closest('.folder-pill')) {
-                self.activeDropdownFolderId = null;
-                self._renderFolders();
+            if (self.activeDropdownFolderId) {
+                if (!e.target.closest('#folder-dropdown-menu') && !e.target.closest('.folder-menu-trigger')) {
+                    self._hideFolderDropdown();
+                }
             }
         });
+        window.addEventListener('resize', function () {
+            self._hideFolderDropdown();
+        });
+        window.addEventListener('scroll', function () {
+            self._hideFolderDropdown();
+        }, true);
 
         // Note Modal events
         var modalClose = document.getElementById('note-modal-close');
@@ -3136,6 +3213,15 @@
             });
         }
         if (this.folderSaveBtn) this.folderSaveBtn.addEventListener('click', function () { self._saveFolderFromModal(); });
+        if (this.folderModalDeleteBtn) {
+            this.folderModalDeleteBtn.addEventListener('click', function () {
+                var fid = self.editingFolderId;
+                if (fid) {
+                    self._closeFolderModal();
+                    self._confirmDeleteFolder(fid);
+                }
+            });
+        }
         if (this.folderNameInput) {
             this.folderNameInput.addEventListener('keydown', function (e) {
                 if (e.key === 'Enter') self._saveFolderFromModal();
@@ -3257,63 +3343,212 @@
     // =========================================================
     //  NOTION TOOLBAR & EDITING ACTIONS
     // =========================================================
+    NoteApp.prototype._insertHtml = function (html) {
+        if (!this.contentEditor) return;
+        this.contentEditor.focus();
+        if (document.queryCommandSupported && document.queryCommandSupported('insertHTML')) {
+            try {
+                var ok = document.execCommand('insertHTML', false, html);
+                if (ok) return;
+            } catch (e) {}
+        }
+        var sel = window.getSelection();
+        if (sel && sel.rangeCount) {
+            var range = sel.getRangeAt(0);
+            range.deleteContents();
+            var temp = document.createElement('div');
+            temp.innerHTML = html;
+            var frag = document.createDocumentFragment(), node, lastNode;
+            while ((node = temp.firstChild)) {
+                lastNode = frag.appendChild(node);
+            }
+            range.insertNode(frag);
+            if (lastNode) {
+                range = range.cloneRange();
+                range.setStartAfter(lastNode);
+                range.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(range);
+            }
+        } else {
+            this.contentEditor.innerHTML += html;
+        }
+    };
+
+    NoteApp.prototype._toggleRawEditor = function () {
+        this.isRawMode = !this.isRawMode;
+        if (this.isRawMode) {
+            // Rich WYSIWYG -> Raw Markdown
+            if (this.modalContainer) this.modalContainer.classList.add('raw-mode-active');
+            if (this.rawTextarea && this.contentEditor) {
+                this.rawTextarea.value = notionHtmlToMarkdown(this.contentEditor);
+                this.rawTextarea.style.display = 'block';
+                this.rawTextarea.focus();
+            }
+            if (this.contentEditor) this.contentEditor.style.display = 'none';
+            if (this.toggleRawBtn) this.toggleRawBtn.textContent = '👁️ Trực quan';
+        } else {
+            // Raw Markdown -> Rich WYSIWYG
+            if (this.modalContainer) this.modalContainer.classList.remove('raw-mode-active');
+            if (this.rawTextarea && this.contentEditor) {
+                var rawVal = this.rawTextarea.value;
+                this.contentEditor.innerHTML = (window.MarkdownRenderer && typeof window.MarkdownRenderer.render === 'function')
+                    ? window.MarkdownRenderer.render(rawVal)
+                    : legacyToNotionHtml(rawVal);
+                this.contentEditor.style.display = 'block';
+                this.contentEditor.focus();
+            }
+            if (this.rawTextarea) this.rawTextarea.style.display = 'none';
+            if (this.toggleRawBtn) this.toggleRawBtn.textContent = '‹/› Mã thô';
+        }
+    };
+
     NoteApp.prototype._handleToolbarCommand = function (cmd) {
         if (!this.isEditing) {
             this._setNoteModalMode(true);
         }
-        var ta = this.rawTextarea;
-        if (!ta) return;
-        ta.focus();
 
-        var start = ta.selectionStart;
-        var end = ta.selectionEnd;
-        var val = ta.value;
-        var selected = val.substring(start, end);
-
-        function wrap(before, after, defaultText) {
-            var textToWrap = selected || defaultText || '';
-            var replacement = before + textToWrap + after;
-            ta.value = val.substring(0, start) + replacement + val.substring(end);
-            var cursorStart = start + before.length;
-            var cursorEnd = cursorStart + textToWrap.length;
-            ta.focus();
-            ta.setSelectionRange(cursorStart, cursorEnd);
-            ta.dispatchEvent(new Event('input'));
+        if (cmd === 'toggle-raw') {
+            this._toggleRawEditor();
+            return;
         }
 
-        function prefixLine(pref) {
-            var lineStart = val.lastIndexOf('\n', start - 1) + 1;
-            ta.value = val.substring(0, lineStart) + pref + val.substring(lineStart);
+        // If in Raw Markdown mode, apply formatting to raw textarea
+        if (this.isRawMode && this.rawTextarea) {
+            var ta = this.rawTextarea;
             ta.focus();
-            ta.setSelectionRange(start + pref.length, start + pref.length);
-            ta.dispatchEvent(new Event('input'));
+            var start = ta.selectionStart;
+            var end = ta.selectionEnd;
+            var val = ta.value;
+            var selected = val.substring(start, end);
+
+            function wrap(before, after, defaultText) {
+                var textToWrap = selected || defaultText || '';
+                var replacement = before + textToWrap + after;
+                ta.value = val.substring(0, start) + replacement + val.substring(end);
+                var cursorStart = start + before.length;
+                var cursorEnd = cursorStart + textToWrap.length;
+                ta.focus();
+                ta.setSelectionRange(cursorStart, cursorEnd);
+                ta.dispatchEvent(new Event('input'));
+            }
+
+            function prefixLine(pref) {
+                var lineStart = val.lastIndexOf('\n', start - 1) + 1;
+                ta.value = val.substring(0, lineStart) + pref + val.substring(lineStart);
+                ta.focus();
+                ta.setSelectionRange(start + pref.length, start + pref.length);
+                ta.dispatchEvent(new Event('input'));
+            }
+
+            switch (cmd) {
+                case 'h1': prefixLine('# '); break;
+                case 'h2': prefixLine('## '); break;
+                case 'h3': prefixLine('### '); break;
+                case 'bold': wrap('**', '**', 'chữ đậm'); break;
+                case 'italic': wrap('*', '*', 'chữ nghiêng'); break;
+                case 'strike': wrap('~~', '~~', 'chữ gạch'); break;
+                case 'bullet': prefixLine('- '); break;
+                case 'number': prefixLine('1. '); break;
+                case 'todo': prefixLine('- [ ] '); break;
+                case 'quote': prefixLine('> '); break;
+                case 'table':
+                    wrap('\n| Tiêu đề 1 | Tiêu đề 2 | Tiêu đề 3 |\n| :--- | :--- | :--- |\n| Mục 1 | Mục 2 | Mục 3 |\n| Mục 4 | Mục 5 | Mục 6 |\n\n', '', '');
+                    break;
+                case 'code':
+                    wrap('```javascript\n', '\n```\n', '// code...');
+                    break;
+                case 'divider':
+                    wrap('\n---\n', '', '');
+                    break;
+            }
+            return;
         }
+
+        // WYSIWYG Mode (Default): Direct rich formatting on this.contentEditor
+        var ed = this.contentEditor;
+        if (!ed) return;
+        ed.focus();
 
         switch (cmd) {
-            case 'h1': prefixLine('# '); break;
-            case 'h2': prefixLine('## '); break;
-            case 'h3': prefixLine('### '); break;
-            case 'bold': wrap('**', '**', 'chữ đậm'); break;
-            case 'italic': wrap('*', '*', 'chữ nghiêng'); break;
-            case 'strike': wrap('~~', '~~', 'chữ gạch'); break;
-            case 'bullet': prefixLine('- '); break;
-            case 'number': prefixLine('1. '); break;
-            case 'todo': prefixLine('- [ ] '); break;
-            case 'quote': prefixLine('> '); break;
-            case 'table':
-                wrap('\n| Tiêu đề 1 | Tiêu đề 2 | Tiêu đề 3 |\n| :--- | :--- | :--- |\n| Mục 1 | Mục 2 | Mục 3 |\n| Mục 4 | Mục 5 | Mục 6 |\n\n', '', '');
+            case 'h1':
+                document.execCommand('formatBlock', false, '<h1>');
                 break;
-            case 'code':
-                wrap('```javascript\n', '\n```\n', '// code...');
+            case 'h2':
+                document.execCommand('formatBlock', false, '<h2>');
+                break;
+            case 'h3':
+                document.execCommand('formatBlock', false, '<h3>');
+                break;
+            case 'bold':
+                document.execCommand('bold', false, null);
+                break;
+            case 'italic':
+                document.execCommand('italic', false, null);
+                break;
+            case 'strike':
+                document.execCommand('strikeThrough', false, null);
+                break;
+            case 'bullet':
+                document.execCommand('insertUnorderedList', false, null);
+                break;
+            case 'number':
+                document.execCommand('insertOrderedList', false, null);
+                break;
+            case 'quote':
+                document.execCommand('formatBlock', false, '<blockquote>');
                 break;
             case 'divider':
-                wrap('\n---\n', '', '');
+                document.execCommand('insertHorizontalRule', false, null);
+                break;
+            case 'todo':
+                this._insertHtml('<div class="notion-todo-row"><input type="checkbox" class="notion-todo-checkbox"><div class="notion-todo-text">Việc cần làm...</div></div><p><br></p>');
+                break;
+            case 'table':
+                this._insertHtml('<div class="notion-table-container table-responsive"><table class="notion-table nihon-table"><thead><tr><th>Tiêu đề 1</th><th>Tiêu đề 2</th><th>Tiêu đề 3</th></tr></thead><tbody><tr><td>Nội dung 1</td><td>Nội dung 2</td><td>Nội dung 3</td></tr><tr><td>Nội dung 4</td><td>Nội dung 5</td><td>Nội dung 6</td></tr></tbody></table></div><p><br></p>');
+                break;
+            case 'code':
+                this._insertHtml('<div class="notion-code-wrapper"><div class="notion-code-header"><span class="notion-code-lang">code</span><button type="button" class="notion-copy-code-btn" data-code=""><span>Sao chép</span></button></div><pre class="notion-pre"><code>// Gõ mã ở đây...</code></pre></div><p><br></p>');
                 break;
         }
     };
 
     NoteApp.prototype._handleEditorKeydown = function (e) {
-        // Reserved for future textarea keyboard enhancements
+        if (e.key === 'Tab') {
+            var sel = window.getSelection();
+            if (sel && sel.anchorNode) {
+                var node = sel.anchorNode.nodeType === 1 ? sel.anchorNode : sel.anchorNode.parentElement;
+                var cell = node ? node.closest('td, th') : null;
+                if (cell) {
+                    e.preventDefault();
+                    var table = cell.closest('table');
+                    var allCells = Array.from(table.querySelectorAll('th, td'));
+                    var idx = allCells.indexOf(cell);
+                    if (e.shiftKey) {
+                        if (idx > 0) {
+                            allCells[idx - 1].focus();
+                        }
+                    } else {
+                        if (idx < allCells.length - 1) {
+                            allCells[idx + 1].focus();
+                        } else {
+                            // Last cell in table! Auto-create new row!
+                            var tbody = table.querySelector('tbody') || table;
+                            var lastRow = table.querySelector('tbody tr:last-child') || table.querySelector('tr:last-child');
+                            var colCount = lastRow ? lastRow.children.length : (table.querySelector('thead tr') ? table.querySelector('thead tr').children.length : 3);
+                            var newTr = document.createElement('tr');
+                            for (var c = 0; c < colCount; c++) {
+                                var newTd = document.createElement('td');
+                                newTd.innerHTML = '<br>';
+                                newTr.appendChild(newTd);
+                            }
+                            tbody.appendChild(newTr);
+                            if (newTr.children[0]) newTr.children[0].focus();
+                        }
+                    }
+                }
+            }
+        }
     };
 
     // =========================================================
@@ -3321,9 +3556,21 @@
     // =========================================================
     NoteApp.prototype._setNoteModalMode = function (isEditing) {
         this.isEditing = isEditing;
+        this.isRawMode = false;
         if (this.modalContainer) {
             this.modalContainer.classList[isEditing ? 'add' : 'remove']('edit-mode');
             this.modalContainer.classList[isEditing ? 'remove' : 'add']('view-mode');
+            this.modalContainer.classList.remove('raw-mode-active');
+        }
+        if (this.contentEditor) {
+            this.contentEditor.setAttribute('contenteditable', isEditing ? 'true' : 'false');
+            this.contentEditor.style.display = 'block';
+        }
+        if (this.rawTextarea) {
+            this.rawTextarea.style.display = 'none';
+        }
+        if (this.toggleRawBtn) {
+            this.toggleRawBtn.textContent = '‹/› Mã thô';
         }
         if (this.modeToggleBtn) {
             this.modeToggleBtn.classList[isEditing ? 'add' : 'remove']('editing');
@@ -3345,19 +3592,13 @@
             // User clicked "✓ Xong" -> Save content and return to safe View Mode!
             this._saveFromModal(true);
             this._setNoteModalMode(false);
-            if (this.rawTextarea && this.contentEditor) {
-                var contentVal = this.rawTextarea.value;
-                this.contentEditor.innerHTML = (window.MarkdownRenderer && typeof window.MarkdownRenderer.render === 'function')
-                    ? window.MarkdownRenderer.render(contentVal)
-                    : legacyToNotionHtml(contentVal);
-            }
             if (document.activeElement) document.activeElement.blur();
         } else {
-            // User clicked "✏️ Chỉnh sửa" -> Enter Edit Mode & Focus textarea
+            // User clicked "✏️ Chỉnh sửa" -> Enter Edit Mode & Focus rich WYSIWYG editor
             this._setNoteModalMode(true);
             setTimeout(function () {
-                if (self.rawTextarea) {
-                    self.rawTextarea.focus();
+                if (self.contentEditor) {
+                    self.contentEditor.focus();
                 }
             }, 100);
         }
@@ -3365,6 +3606,7 @@
 
     NoteApp.prototype._openModal = function (noteId) {
         this.editingNoteId = noteId;
+        this.isRawMode = false;
         if (this.colorDots) {
             this.colorDots.forEach(function (d) { d.classList.remove('active'); });
         }
@@ -3425,12 +3667,25 @@
         if (this.overlay) this.overlay.classList.remove('active');
         this.editingNoteId = null;
         this.isEditing = false;
+        this.isRawMode = false;
     };
 
     NoteApp.prototype._saveFromModal = function (keepOpen) {
-        var title = this.titleInput.value.trim();
-        var markdownContent = this.rawTextarea ? this.rawTextarea.value.trim() : '';
-        if (!title && !markdownContent) return;
+        var title = this.titleInput ? this.titleInput.value.trim() : '';
+        var markdownContent = '';
+
+        if (this.isRawMode && this.rawTextarea) {
+            markdownContent = this.rawTextarea.value.trim();
+        } else if (this.contentEditor) {
+            markdownContent = notionHtmlToMarkdown(this.contentEditor).trim();
+        } else if (this.rawTextarea) {
+            markdownContent = this.rawTextarea.value.trim();
+        }
+
+        if (!title && !markdownContent) {
+            if (!keepOpen) this._closeModal();
+            return;
+        }
 
         var selectedFolderId = this.folderSelect ? this.folderSelect.value : null;
 
@@ -3457,7 +3712,8 @@
             this.editingNoteId = newNote.id;
         }
 
-        if (keepOpen && this.contentEditor) {
+        if (this.rawTextarea) this.rawTextarea.value = markdownContent;
+        if (keepOpen && this.contentEditor && !this.isRawMode) {
             this.contentEditor.innerHTML = (window.MarkdownRenderer && typeof window.MarkdownRenderer.render === 'function')
                 ? window.MarkdownRenderer.render(markdownContent)
                 : legacyToNotionHtml(markdownContent);
@@ -3466,6 +3722,7 @@
         this._saveNotes();
         this._renderFolders();
         this._render();
+
         if (!keepOpen) {
             this._closeModal();
         }
@@ -3521,40 +3778,34 @@
         // 3. User Folders
         var self = this;
         this.folders.forEach(function (f) {
-            var isActive = (self.activeFolderId === f.id) ? ' active' : '';
+            var isActive = (String(self.activeFolderId) === String(f.id)) ? ' active' : '';
             var count = folderCounts[f.id] || 0;
-            var isDropdownOpen = (self.activeDropdownFolderId === f.id);
 
             html += '<div class="folder-pill' + isActive + '" data-folder-id="' + f.id + '">' +
                 '<span>📁 ' + escapeHtml(f.name) + '</span>' +
                 '<span class="folder-count">' + count + '</span>' +
                 '<span class="folder-pill-actions">' +
                 '<button type="button" class="folder-menu-trigger" data-folder-id="' + f.id + '" title="Tùy chọn">⋮</button>' +
-                '</span>';
-
-            if (isDropdownOpen) {
-                html += '<div class="folder-dropdown-menu">' +
-                    '<button type="button" class="folder-dropdown-item folder-dropdown-edit" data-folder-id="' + f.id + '">✏ ' + t('editFolder') + '</button>' +
-                    '<button type="button" class="folder-dropdown-item danger folder-dropdown-delete" data-folder-id="' + f.id + '">🗑 ' + t('deleteFolder') + '</button>' +
-                    '</div>';
-            }
-
-            html += '</div>';
+                '</span>' +
+                '</div>';
         });
 
         this.foldersBar.innerHTML = html;
     };
 
     NoteApp.prototype._openFolderModal = function (folderId) {
-        this.editingFolderId = folderId;
-        if (folderId) {
-            var folder = this.folders.find(function (f) { return f.id === folderId; });
+        this.editingFolderId = folderId ? String(folderId) : null;
+        if (this.editingFolderId) {
+            var editId = this.editingFolderId;
+            var folder = this.folders.find(function (f) { return String(f.id) === String(editId); });
             if (!folder) return;
             this.folderTitle.textContent = t('editFolder');
             this.folderNameInput.value = folder.name;
+            if (this.folderModalDeleteBtn) this.folderModalDeleteBtn.style.display = 'inline-flex';
         } else {
             this.folderTitle.textContent = t('newFolder');
             this.folderNameInput.value = '';
+            if (this.folderModalDeleteBtn) this.folderModalDeleteBtn.style.display = 'none';
         }
         this.folderOverlay.classList.add('active');
         var self = this;
@@ -3571,7 +3822,8 @@
         if (!name) return;
 
         if (this.editingFolderId) {
-            var folder = this.folders.find(function (f) { return f.id === this.editingFolderId; }.bind(this));
+            var editId = this.editingFolderId;
+            var folder = this.folders.find(function (f) { return String(f.id) === String(editId); });
             if (folder) {
                 folder.name = name;
             }
@@ -3592,7 +3844,8 @@
     };
 
     NoteApp.prototype._confirmDeleteFolder = function (folderId) {
-        var folder = this.folders.find(function (f) { return f.id === folderId; });
+        var strFid = String(folderId);
+        var folder = this.folders.find(function (f) { return String(f.id) === strFid; });
         if (!folder) return;
         var self = this;
 
@@ -3603,15 +3856,15 @@
             onConfirm: function () {
                 // Move notes in this folder to uncategorized
                 self.notes.forEach(function (n) {
-                    if (n.folderId === folderId) {
+                    if (String(n.folderId) === strFid) {
                         n.folderId = null;
                     }
                 });
 
                 // Remove folder
-                self.folders = self.folders.filter(function (f) { return f.id !== folderId; });
+                self.folders = self.folders.filter(function (f) { return String(f.id) !== strFid; });
 
-                if (self.activeFolderId === folderId) {
+                if (String(self.activeFolderId) === strFid) {
                     self.activeFolderId = 'all';
                 }
 
@@ -3777,6 +4030,13 @@
     //  FIRESTORE PERSISTENCE
     // =========================================================
     NoteApp.prototype._saveNotes = function () {
+        try {
+            localStorage.setItem('flowhub_notes_backup', JSON.stringify({
+                items: this.notes,
+                folders: this.folders
+            }));
+        } catch (e) {}
+
         if (!currentUser) return;
         userDocRef('data').doc('notes').set({
             items: this.notes,
@@ -3785,9 +4045,22 @@
     };
 
     NoteApp.prototype._loadNotes = function () {
+        try {
+            var cached = localStorage.getItem('flowhub_notes_backup');
+            if (cached) {
+                var data = JSON.parse(cached);
+                if (data) {
+                    if (Array.isArray(data.items)) this.notes = data.items;
+                    if (Array.isArray(data.folders)) this.folders = data.folders;
+                    this._renderFolders();
+                    this._render();
+                }
+            }
+        } catch (e) {}
+
         if (!currentUser) {
-            this.notes = [];
-            this.folders = [];
+            if (!this.notes) this.notes = [];
+            if (!this.folders) this.folders = [];
             this._renderFolders();
             this._render();
             return;
@@ -3797,16 +4070,17 @@
             if (doc.exists && doc.data()) {
                 self.notes = doc.data().items || [];
                 self.folders = doc.data().folders || [];
-            } else {
-                self.notes = [];
-                self.folders = [];
+                try {
+                    localStorage.setItem('flowhub_notes_backup', JSON.stringify({
+                        items: self.notes,
+                        folders: self.folders
+                    }));
+                } catch (e) {}
             }
             self._renderFolders();
             self._render();
         }).catch(function (err) {
             console.error('Error loading notes:', err);
-            self.notes = [];
-            self.folders = [];
             self._renderFolders();
             self._render();
         });
