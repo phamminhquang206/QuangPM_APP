@@ -2888,8 +2888,6 @@
         this.modeBtnText = document.getElementById('note-mode-btn-text');
         this.modalTip = document.getElementById('notion-modal-tip');
         this.closeViewBtn = document.getElementById('note-modal-close-view');
-        this.toggleRawBtn = document.getElementById('notion-toggle-raw-btn');
-        this.isRawMode = false;
 
         // Folder Modal
         this.folderOverlay = document.getElementById('folder-modal-overlay');
@@ -3375,179 +3373,58 @@
         }
     };
 
-    NoteApp.prototype._toggleRawEditor = function () {
-        this.isRawMode = !this.isRawMode;
-        if (this.isRawMode) {
-            // Rich WYSIWYG -> Raw Markdown
-            if (this.modalContainer) this.modalContainer.classList.add('raw-mode-active');
-            if (this.rawTextarea && this.contentEditor) {
-                this.rawTextarea.value = notionHtmlToMarkdown(this.contentEditor);
-                this.rawTextarea.style.display = 'block';
-                this.rawTextarea.focus();
-            }
-            if (this.contentEditor) this.contentEditor.style.display = 'none';
-            if (this.toggleRawBtn) this.toggleRawBtn.textContent = '👁️ Trực quan';
-        } else {
-            // Raw Markdown -> Rich WYSIWYG
-            if (this.modalContainer) this.modalContainer.classList.remove('raw-mode-active');
-            if (this.rawTextarea && this.contentEditor) {
-                var rawVal = this.rawTextarea.value;
-                this.contentEditor.innerHTML = (window.MarkdownRenderer && typeof window.MarkdownRenderer.render === 'function')
-                    ? window.MarkdownRenderer.render(rawVal)
-                    : legacyToNotionHtml(rawVal);
-                this.contentEditor.style.display = 'block';
-                this.contentEditor.focus();
-            }
-            if (this.rawTextarea) this.rawTextarea.style.display = 'none';
-            if (this.toggleRawBtn) this.toggleRawBtn.textContent = '‹/› Mã thô';
-        }
-    };
-
     NoteApp.prototype._handleToolbarCommand = function (cmd) {
         if (!this.isEditing) {
             this._setNoteModalMode(true);
         }
 
-        if (cmd === 'toggle-raw') {
-            this._toggleRawEditor();
-            return;
-        }
+        var ta = this.rawTextarea;
+        if (!ta) return;
+        ta.focus();
+        var start = ta.selectionStart;
+        var end = ta.selectionEnd;
+        var val = ta.value;
+        var selected = val.substring(start, end);
 
-        // If in Raw Markdown mode, apply formatting to raw textarea
-        if (this.isRawMode && this.rawTextarea) {
-            var ta = this.rawTextarea;
+        function wrap(before, after, defaultText) {
+            var textToWrap = selected || defaultText || '';
+            var replacement = before + textToWrap + after;
+            ta.value = val.substring(0, start) + replacement + val.substring(end);
+            var cursorStart = start + before.length;
+            var cursorEnd = cursorStart + textToWrap.length;
             ta.focus();
-            var start = ta.selectionStart;
-            var end = ta.selectionEnd;
-            var val = ta.value;
-            var selected = val.substring(start, end);
-
-            function wrap(before, after, defaultText) {
-                var textToWrap = selected || defaultText || '';
-                var replacement = before + textToWrap + after;
-                ta.value = val.substring(0, start) + replacement + val.substring(end);
-                var cursorStart = start + before.length;
-                var cursorEnd = cursorStart + textToWrap.length;
-                ta.focus();
-                ta.setSelectionRange(cursorStart, cursorEnd);
-                ta.dispatchEvent(new Event('input'));
-            }
-
-            function prefixLine(pref) {
-                var lineStart = val.lastIndexOf('\n', start - 1) + 1;
-                ta.value = val.substring(0, lineStart) + pref + val.substring(lineStart);
-                ta.focus();
-                ta.setSelectionRange(start + pref.length, start + pref.length);
-                ta.dispatchEvent(new Event('input'));
-            }
-
-            switch (cmd) {
-                case 'h1': prefixLine('# '); break;
-                case 'h2': prefixLine('## '); break;
-                case 'h3': prefixLine('### '); break;
-                case 'bold': wrap('**', '**', 'chữ đậm'); break;
-                case 'italic': wrap('*', '*', 'chữ nghiêng'); break;
-                case 'strike': wrap('~~', '~~', 'chữ gạch'); break;
-                case 'bullet': prefixLine('- '); break;
-                case 'number': prefixLine('1. '); break;
-                case 'todo': prefixLine('- [ ] '); break;
-                case 'quote': prefixLine('> '); break;
-                case 'table':
-                    wrap('\n| Tiêu đề 1 | Tiêu đề 2 | Tiêu đề 3 |\n| :--- | :--- | :--- |\n| Mục 1 | Mục 2 | Mục 3 |\n| Mục 4 | Mục 5 | Mục 6 |\n\n', '', '');
-                    break;
-                case 'code':
-                    wrap('```javascript\n', '\n```\n', '// code...');
-                    break;
-                case 'divider':
-                    wrap('\n---\n', '', '');
-                    break;
-            }
-            return;
+            ta.setSelectionRange(cursorStart, cursorEnd);
+            ta.dispatchEvent(new Event('input'));
         }
 
-        // WYSIWYG Mode (Default): Direct rich formatting on this.contentEditor
-        var ed = this.contentEditor;
-        if (!ed) return;
-        ed.focus();
+        function prefixLine(pref) {
+            var lineStart = val.lastIndexOf('\n', start - 1) + 1;
+            ta.value = val.substring(0, lineStart) + pref + val.substring(lineStart);
+            ta.focus();
+            ta.setSelectionRange(start + pref.length, start + pref.length);
+            ta.dispatchEvent(new Event('input'));
+        }
 
         switch (cmd) {
-            case 'h1':
-                document.execCommand('formatBlock', false, '<h1>');
-                break;
-            case 'h2':
-                document.execCommand('formatBlock', false, '<h2>');
-                break;
-            case 'h3':
-                document.execCommand('formatBlock', false, '<h3>');
-                break;
-            case 'bold':
-                document.execCommand('bold', false, null);
-                break;
-            case 'italic':
-                document.execCommand('italic', false, null);
-                break;
-            case 'strike':
-                document.execCommand('strikeThrough', false, null);
-                break;
-            case 'bullet':
-                document.execCommand('insertUnorderedList', false, null);
-                break;
-            case 'number':
-                document.execCommand('insertOrderedList', false, null);
-                break;
-            case 'quote':
-                document.execCommand('formatBlock', false, '<blockquote>');
-                break;
-            case 'divider':
-                document.execCommand('insertHorizontalRule', false, null);
-                break;
-            case 'todo':
-                this._insertHtml('<div class="notion-todo-row"><input type="checkbox" class="notion-todo-checkbox"><div class="notion-todo-text">Việc cần làm...</div></div><p><br></p>');
-                break;
+            case 'h1': prefixLine('# '); break;
+            case 'h2': prefixLine('## '); break;
+            case 'h3': prefixLine('### '); break;
+            case 'bold': wrap('**', '**', 'chữ đậm'); break;
+            case 'italic': wrap('*', '*', 'chữ nghiêng'); break;
+            case 'strike': wrap('~~', '~~', 'chữ gạch'); break;
+            case 'bullet': prefixLine('- '); break;
+            case 'number': prefixLine('1. '); break;
+            case 'todo': prefixLine('- [ ] '); break;
+            case 'quote': prefixLine('> '); break;
             case 'table':
-                this._insertHtml('<div class="notion-table-container table-responsive"><table class="notion-table nihon-table"><thead><tr><th>Tiêu đề 1</th><th>Tiêu đề 2</th><th>Tiêu đề 3</th></tr></thead><tbody><tr><td>Nội dung 1</td><td>Nội dung 2</td><td>Nội dung 3</td></tr><tr><td>Nội dung 4</td><td>Nội dung 5</td><td>Nội dung 6</td></tr></tbody></table></div><p><br></p>');
+                wrap('\n| Tiêu đề 1 | Tiêu đề 2 | Tiêu đề 3 |\n| :--- | :--- | :--- |\n| Mục 1 | Mục 2 | Mục 3 |\n| Mục 4 | Mục 5 | Mục 6 |\n\n', '', '');
                 break;
             case 'code':
-                this._insertHtml('<div class="notion-code-wrapper"><div class="notion-code-header"><span class="notion-code-lang">code</span><button type="button" class="notion-copy-code-btn" data-code=""><span>Sao chép</span></button></div><pre class="notion-pre"><code>// Gõ mã ở đây...</code></pre></div><p><br></p>');
+                wrap('```javascript\n', '\n```\n', '// code...');
                 break;
-        }
-    };
-
-    NoteApp.prototype._handleEditorKeydown = function (e) {
-        if (e.key === 'Tab') {
-            var sel = window.getSelection();
-            if (sel && sel.anchorNode) {
-                var node = sel.anchorNode.nodeType === 1 ? sel.anchorNode : sel.anchorNode.parentElement;
-                var cell = node ? node.closest('td, th') : null;
-                if (cell) {
-                    e.preventDefault();
-                    var table = cell.closest('table');
-                    var allCells = Array.from(table.querySelectorAll('th, td'));
-                    var idx = allCells.indexOf(cell);
-                    if (e.shiftKey) {
-                        if (idx > 0) {
-                            allCells[idx - 1].focus();
-                        }
-                    } else {
-                        if (idx < allCells.length - 1) {
-                            allCells[idx + 1].focus();
-                        } else {
-                            // Last cell in table! Auto-create new row!
-                            var tbody = table.querySelector('tbody') || table;
-                            var lastRow = table.querySelector('tbody tr:last-child') || table.querySelector('tr:last-child');
-                            var colCount = lastRow ? lastRow.children.length : (table.querySelector('thead tr') ? table.querySelector('thead tr').children.length : 3);
-                            var newTr = document.createElement('tr');
-                            for (var c = 0; c < colCount; c++) {
-                                var newTd = document.createElement('td');
-                                newTd.innerHTML = '<br>';
-                                newTr.appendChild(newTd);
-                            }
-                            tbody.appendChild(newTr);
-                            if (newTr.children[0]) newTr.children[0].focus();
-                        }
-                    }
-                }
-            }
+            case 'divider':
+                wrap('\n---\n', '', '');
+                break;
         }
     };
 
@@ -3556,21 +3433,9 @@
     // =========================================================
     NoteApp.prototype._setNoteModalMode = function (isEditing) {
         this.isEditing = isEditing;
-        this.isRawMode = false;
         if (this.modalContainer) {
             this.modalContainer.classList[isEditing ? 'add' : 'remove']('edit-mode');
             this.modalContainer.classList[isEditing ? 'remove' : 'add']('view-mode');
-            this.modalContainer.classList.remove('raw-mode-active');
-        }
-        if (this.contentEditor) {
-            this.contentEditor.setAttribute('contenteditable', isEditing ? 'true' : 'false');
-            this.contentEditor.style.display = 'block';
-        }
-        if (this.rawTextarea) {
-            this.rawTextarea.style.display = 'none';
-        }
-        if (this.toggleRawBtn) {
-            this.toggleRawBtn.textContent = '‹/› Mã thô';
         }
         if (this.modeToggleBtn) {
             this.modeToggleBtn.classList[isEditing ? 'add' : 'remove']('editing');
@@ -3594,11 +3459,11 @@
             this._setNoteModalMode(false);
             if (document.activeElement) document.activeElement.blur();
         } else {
-            // User clicked "✏️ Chỉnh sửa" -> Enter Edit Mode & Focus rich WYSIWYG editor
+            // User clicked "✏️ Chỉnh sửa" -> Enter Edit Mode & Focus raw textarea
             this._setNoteModalMode(true);
             setTimeout(function () {
-                if (self.contentEditor) {
-                    self.contentEditor.focus();
+                if (self.rawTextarea) {
+                    self.rawTextarea.focus();
                 }
             }, 100);
         }
@@ -3606,7 +3471,6 @@
 
     NoteApp.prototype._openModal = function (noteId) {
         this.editingNoteId = noteId;
-        this.isRawMode = false;
         if (this.colorDots) {
             this.colorDots.forEach(function (d) { d.classList.remove('active'); });
         }
@@ -3628,8 +3492,7 @@
             this.currentColor = note.color || 'default';
             if (this.folderSelect) this.folderSelect.value = note.folderId || '';
 
-            // Open existing note in SAFE VIEW MODE!
-            // Do not focus, so mobile on-screen keyboard DOES NOT pop up!
+            // Open existing note in View Mode
             this._setNoteModalMode(false);
         } else {
             if (this.modalTitle) this.modalTitle.textContent = '';
@@ -3645,7 +3508,7 @@
                 }
             }
 
-            // Open new note in EDIT MODE directly!
+            // Open new note directly in Edit Mode
             this._setNoteModalMode(true);
             setTimeout(function () {
                 if (self.titleInput) self.titleInput.focus();
@@ -3667,20 +3530,11 @@
         if (this.overlay) this.overlay.classList.remove('active');
         this.editingNoteId = null;
         this.isEditing = false;
-        this.isRawMode = false;
     };
 
     NoteApp.prototype._saveFromModal = function (keepOpen) {
         var title = this.titleInput ? this.titleInput.value.trim() : '';
-        var markdownContent = '';
-
-        if (this.isRawMode && this.rawTextarea) {
-            markdownContent = this.rawTextarea.value.trim();
-        } else if (this.contentEditor) {
-            markdownContent = notionHtmlToMarkdown(this.contentEditor).trim();
-        } else if (this.rawTextarea) {
-            markdownContent = this.rawTextarea.value.trim();
-        }
+        var markdownContent = this.rawTextarea ? this.rawTextarea.value.trim() : '';
 
         if (!title && !markdownContent) {
             if (!keepOpen) this._closeModal();
@@ -3712,8 +3566,7 @@
             this.editingNoteId = newNote.id;
         }
 
-        if (this.rawTextarea) this.rawTextarea.value = markdownContent;
-        if (keepOpen && this.contentEditor && !this.isRawMode) {
+        if (this.contentEditor) {
             this.contentEditor.innerHTML = (window.MarkdownRenderer && typeof window.MarkdownRenderer.render === 'function')
                 ? window.MarkdownRenderer.render(markdownContent)
                 : legacyToNotionHtml(markdownContent);

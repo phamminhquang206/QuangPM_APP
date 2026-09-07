@@ -477,18 +477,14 @@
                     <button type="button" class="notion-tool-btn" data-command="code" title="Khối mã (```)">‹/› Code</button>
                     <button type="button" class="notion-tool-btn" data-command="divider" title="Đường kẻ (---)">— Line</button>
                 </div>
-                <span class="notion-tool-divider"></span>
-                <div class="notion-toolbar-group">
-                    <button type="button" class="notion-tool-btn" data-command="toggle-raw" id="notion-toggle-raw-btn" title="Chuyển sang Markdown thô">‹/› Mã thô</button>
-                </div>
             </div>
 
             <div class="modal-body notion-modal-body">
                 <input type="text" class="note-title-input notion-title-input" id="note-title-input" data-i18n-placeholder="noteTitlePlaceholder" placeholder="Tiêu đề ghi chú..." autocomplete="off" />
                 
-                <!-- Notion Unified Rich WYSIWYG Editor -->
-                <div class="notion-editor markdown-body" id="note-content-editor" data-placeholder="Gõ nội dung ghi chú (hỗ trợ đầy đủ Markdown, Bảng, Danh sách, Khối code...)..."></div>
-                <textarea class="notion-editor-textarea" id="note-content-editor-raw" placeholder="Gõ nội dung ghi chú (hỗ trợ đầy đủ Markdown, Bảng, Danh sách, Khối code...)..." spellcheck="false" style="display: none;"></textarea>
+                <!-- Notion Dual Mode: Raw Markdown Textarea for Editing & Rich Preview for Viewing -->
+                <textarea class="notion-editor-textarea" id="note-content-editor-raw" placeholder="Gõ nội dung ghi chú (hỗ trợ đầy đủ Markdown, Bảng, Danh sách, Khối code...)..." spellcheck="false"></textarea>
+                <div class="notion-editor notion-editor-preview markdown-body" id="note-content-editor"></div>
 
                 <div class="note-color-picker">
                     <span class="color-label" data-i18n="noteColor">Màu thẻ:</span>
