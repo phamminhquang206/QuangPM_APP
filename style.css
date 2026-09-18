@@ -529,23 +529,9 @@ body {
 }
 
 #pomodoro-section {
-    position: relative;
-    isolation: isolate;
     max-width: 680px;
     margin: 0 auto;
     width: 100%;
-}
-
-/* Extend the garden backdrop to the screen edges and below its content.
-   The shadow paints the remaining viewport without adding scroll height. */
-#pomodoro-section.active::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background: #1e4a41;
-    box-shadow: 0 100vmax 0 100vmax #1e4a41;
 }
 
 #pomodoro-section.active {
@@ -6605,13 +6591,22 @@ body {
     }
 
     .garden-card {
-        padding: 24px 18px;
+        padding: 16px 14px;
         border-radius: 24px;
     }
+
+    .garden-title { font-size: 18px; }
+    .garden-eyebrow { font-size: 10px; letter-spacing: 0.1em; }
+    .garden-hint, #garden-message { font-size: 12px; }
+    .garden-badge, .garden-pages { font-size: 12px; }
+    .garden-species-btn, .garden-primary-btn { font-size: 13px; }
+    #plant-caption, #dial-hint { font-size: 11px; }
+    .garden-stat-box strong { font-size: 21px; }
 
     .garden-scene {
         --scene-size: clamp(160px, calc(100vh - 500px), 300px);
         --scene-size: clamp(160px, calc(100dvh - 500px), 300px);
+        --scene-size: var(--garden-phone-scene, clamp(160px, calc(100dvh - 500px), 300px));
         margin: 8px 0 24px;
     }
 
@@ -6639,12 +6634,13 @@ body {
     }
 
     .garden-land-card {
-        gap: 12px;
+        gap: 8px;
     }
 
     .garden-land {
         width: min(100%, 420px, max(200px, calc(100vh - 380px)));
         width: min(100%, 420px, max(200px, calc(100dvh - 380px)));
+        width: min(100%, var(--garden-phone-land, max(200px, calc(100dvh - 380px))), 420px);
         padding: 14px;
         margin: 4px 0 8px;
     }
@@ -6659,7 +6655,7 @@ body {
     }
 
     .garden-stat-box {
-        padding: 12px 6px;
+        padding: 8px 6px;
     }
 }
 

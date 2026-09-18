@@ -6093,8 +6093,59 @@
     // =========================================================
     //  INITIALIZATION
     // =========================================================
+    function initGardenViewport() {
+        var section = document.getElementById('pomodoro-section');
+        var header = document.querySelector('.app-header');
+        var subnav = section.querySelector('.garden-subnav');
+        var pending = false;
+
+        function update() {
+            pending = false;
+            if (window.innerWidth >= 768 || !section.classList.contains('active') || !section.offsetHeight) return;
+            var viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+            var bottomPadding = parseFloat(getComputedStyle(section.parentElement).paddingBottom) || 10;
+            var top = section.getBoundingClientRect().top + window.scrollY;
+            var available = viewportHeight - top - subnav.offsetHeight - 10 - bottomPadding;
+
+            [['.garden-focus-card', '.garden-scene', '--garden-phone-scene', 300],
+             ['.garden-land-card', '.garden-land', '--garden-phone-land', 420]].forEach(function (config) {
+                var card = section.querySelector(config[0]);
+                if (!card.offsetHeight) return;
+                var style = getComputedStyle(card);
+                var overhead = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom)
+                    + parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth);
+                var count = 0;
+                Array.from(card.children).forEach(function (child) {
+                    var childStyle = getComputedStyle(child);
+                    if (childStyle.display === 'none') return;
+                    count++;
+                    overhead += (parseFloat(childStyle.marginTop) || 0) + (parseFloat(childStyle.marginBottom) || 0);
+                    if (!child.matches(config[1])) overhead += child.getBoundingClientRect().height;
+                });
+                overhead += Math.max(0, count - 1) * (parseFloat(style.rowGap) || 0);
+                var size = Math.floor(Math.max(120, Math.min(config[3], available - overhead - 4))) + 'px';
+                if (section.style.getPropertyValue(config[2]) !== size) section.style.setProperty(config[2], size);
+            });
+        }
+
+        function schedule() {
+            if (!pending) { pending = true; requestAnimationFrame(update); }
+        }
+        if ('ResizeObserver' in window) {
+            var observer = new ResizeObserver(schedule);
+            [header, subnav].concat(Array.from(section.querySelectorAll('.garden-card'))).forEach(function (element) {
+                observer.observe(element);
+            });
+        }
+        new MutationObserver(schedule).observe(section, { attributes: true, attributeFilter: ['class'] });
+        window.addEventListener('resize', schedule);
+        if (window.visualViewport) window.visualViewport.addEventListener('resize', schedule);
+        schedule();
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         initTabs();
+        initGardenViewport();
         setLanguage(currentLang);
         initAuth();
         initConfirmModal();
