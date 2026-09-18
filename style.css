@@ -6604,15 +6604,21 @@ body {
     .garden-stat-box strong { font-size: 21px; }
 
     .garden-scene {
-        --scene-size: clamp(160px, calc(100vh - 500px), 300px);
-        --scene-size: clamp(160px, calc(100dvh - 500px), 300px);
-        --scene-size: var(--garden-phone-scene, clamp(160px, calc(100dvh - 500px), 300px));
-        margin: 8px 0 24px;
+        --scene-size: clamp(120px, calc(100vh - 540px), 220px);
+        --scene-size: clamp(120px, calc(100dvh - 540px), 220px);
+        --scene-size: var(--garden-phone-scene, clamp(120px, calc(100dvh - 540px), 220px));
+        margin: 4px 0 22px;
+        container-type: inline-size;
+    }
+
+    .garden-scene #plant-art {
+        font-size: calc(var(--scene-size) * 0.4);
+        font-size: 40cqw;
     }
 
     #garden-timer {
-        font-size: clamp(44px, 7vh, 60px);
-        font-size: clamp(44px, 7dvh, 60px);
+        font-size: clamp(40px, 6vh, 52px);
+        font-size: clamp(40px, 6dvh, 52px);
     }
 
     #garden-message {

@@ -6107,7 +6107,7 @@
             var top = section.getBoundingClientRect().top + window.scrollY;
             var available = viewportHeight - top - subnav.offsetHeight - 10 - bottomPadding;
 
-            [['.garden-focus-card', '.garden-scene', '--garden-phone-scene', 300],
+            [['.garden-focus-card', '.garden-scene', '--garden-phone-scene', 220],
              ['.garden-land-card', '.garden-land', '--garden-phone-land', 420]].forEach(function (config) {
                 var card = section.querySelector(config[0]);
                 if (!card.offsetHeight) return;
