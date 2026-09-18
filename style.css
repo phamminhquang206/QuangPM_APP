@@ -655,6 +655,15 @@ body {
     cursor: grabbing;
 }
 
+#duration-dial:focus {
+    outline: none;
+}
+
+#duration-dial:focus-visible {
+    outline: 2px solid var(--garden-mint);
+    outline-offset: 4px;
+}
+
 #duration-dial[aria-disabled="true"] {
     cursor: default;
     opacity: 0.7;
