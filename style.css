@@ -517,272 +517,785 @@ body {
     margin-bottom: 14px;
 }
 
-/* ===== MODE SELECTOR ===== */
-.mode-options {
-    display: flex;
-    gap: 10px;
+/* ===== MYGARDEN SECTION (Forest Pomodoro) ===== */
+:root {
+    --garden-mint: #d5e9a7;
+    --garden-mint-hover: #e2edb5;
+    --garden-muted: #a3c4b5;
+    --garden-dark: #245f54;
+    --garden-base: #377d70;
+    --garden-card-bg: #225148;
+    --garden-soil: #2c6356;
 }
 
-.mode-btn {
-    flex: 1;
-    padding: 14px 12px;
-    border: 1px solid var(--glass-border);
-    background: transparent;
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition: var(--transition);
-    text-align: center;
-    font-family: var(--font);
-}
-
-.mode-btn:hover {
-    border-color: rgba(124, 58, 237, 0.3);
-    background: rgba(124, 58, 237, 0.05);
-}
-
-.mode-btn.active {
-    border-color: var(--accent-purple);
-    background: rgba(124, 58, 237, 0.1);
-    box-shadow: 0 0 20px rgba(124, 58, 237, 0.15);
-}
-
-.mode-btn.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.mode-time {
-    display: block;
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 4px;
-}
-
-.mode-btn.active .mode-time {
-    color: var(--accent-purple);
-}
-
-.mode-detail {
-    display: block;
-    font-size: 0.8rem;
-    color: var(--text-muted);
-}
-
-/* ===== REP SELECTOR ===== */
-.rep-controls {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 24px;
-}
-
-.rep-btn {
-    width: 46px;
-    height: 46px;
-    border-radius: 50%;
-    border: 1px solid var(--glass-border);
-    background: var(--glass-bg);
-    color: var(--text-primary);
-    font-size: 1.4rem;
-    font-family: var(--font);
-    cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-}
-
-.rep-btn:hover {
-    background: rgba(124, 58, 237, 0.15);
-    border-color: var(--accent-purple);
-    transform: scale(1.1);
-}
-
-.rep-btn:active {
-    transform: scale(0.95);
-}
-
-.rep-btn.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.rep-btn.disabled:hover {
-    transform: none;
-    background: var(--glass-bg);
-    border-color: var(--glass-border);
-}
-
-.rep-count {
-    font-size: 2.4rem;
-    font-weight: 800;
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    min-width: 56px;
-    text-align: center;
-    user-select: none;
-}
-
-/* ===== TIMER CARD ===== */
-.timer-card {
-    text-align: center;
-    padding: 28px 20px;
-}
-
-.timer-status {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    margin-bottom: 20px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    transition: var(--transition);
-}
-
-.timer-status.working {
-    color: var(--accent-purple);
-}
-
-.timer-status.breaking {
-    color: var(--accent-green);
-}
-
-.timer-status.completed {
-    color: var(--accent-orange);
-}
-
-/* Timer Ring */
-.timer-ring-container {
+#pomodoro-section {
     position: relative;
-    width: 224px;
-    height: 224px;
-    margin: 0 auto 28px;
+    isolation: isolate;
+    max-width: 680px;
+    margin: 0 auto;
+    width: 100%;
 }
 
-.timer-ring {
+/* Extend the garden backdrop to the screen edges and below its content.
+   The shadow paints the remaining viewport without adding scroll height. */
+#pomodoro-section.active::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: #1e4a41;
+    box-shadow: 0 100vmax 0 100vmax #1e4a41;
+}
+
+#pomodoro-section.active {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+/* Garden Sub-navigation (Focus / Land / History) */
+.garden-subnav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(36, 95, 84, 0.45);
+    border: 1px solid rgba(213, 233, 167, 0.25);
+    border-radius: 18px;
+    padding: 6px;
+    width: 100%;
+    max-width: 440px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+.garden-subnav-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: none;
+    background: transparent;
+    color: #c5dace;
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 0.92rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: var(--font);
+}
+
+.garden-subnav-btn:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.garden-subnav-btn.active {
+    background: #377d70;
+    color: var(--garden-mint);
+    font-weight: 600;
+    box-shadow: 0 4px 14px rgba(36, 95, 84, 0.5);
+}
+
+/* Common Garden Card */
+.garden-view-pane {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.garden-card {
+    background: linear-gradient(165deg, #2b6155, #1e4a41);
+    border: 1px solid rgba(213, 233, 167, 0.25);
+    border-radius: 28px;
+    box-shadow: 0 20px 60px rgba(7, 30, 25, 0.45);
+    color: #f1f6ea;
+    width: 100%;
+    max-width: 480px;
+    padding: 24px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.garden-eyebrow {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: #c0dbc8;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+
+/* Interactive Dial Scene */
+.garden-scene {
+    --scene-size: clamp(210px, 32vh, 280px);
+    position: relative;
+    width: min(100%, var(--scene-size));
+    aspect-ratio: 1;
+    flex-shrink: 0;
+    margin: 8px 0 16px;
+}
+
+.garden-orbit {
+    position: absolute;
+    width: 86.666667%;
+    height: 86.666667%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: rgba(224, 239, 192, 0.04);
+}
+
+#duration-dial {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    touch-action: none;
+    user-select: none;
+    cursor: grab;
+    border-radius: 50%;
+}
+
+#duration-dial:active {
+    cursor: grabbing;
+}
+
+#duration-dial[aria-disabled="true"] {
+    cursor: default;
+    opacity: 0.7;
+}
+
+#duration-dial svg {
+    display: block;
     width: 100%;
     height: 100%;
-    transform: rotate(-90deg);
+    overflow: visible;
+    pointer-events: none;
 }
 
-.timer-ring-bg {
+.dial-track, .dial-progress {
     fill: none;
-    stroke: rgba(255, 255, 255, 0.05);
-    stroke-width: 6;
-}
-
-.timer-ring-progress {
-    fill: none;
-    stroke: url(#gradient-work);
-    stroke-width: 6;
+    stroke-width: 2.5;
     stroke-linecap: round;
-    stroke-dasharray: 753.98;
-    stroke-dashoffset: 0;
-    transition: stroke-dashoffset 1s linear;
-    filter: drop-shadow(0 0 6px rgba(124, 58, 237, 0.4));
 }
 
-.timer-ring-progress.break-mode {
-    stroke: url(#gradient-break);
-    filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.4));
+.dial-track {
+    stroke: rgba(219, 233, 182, 0.25);
 }
 
-.timer-display {
+.dial-progress {
+    stroke: var(--garden-mint);
+    stroke-width: 3.5;
+    filter: drop-shadow(0 0 8px rgba(213, 233, 167, 0.4));
+}
+
+#dial-handle {
     position: absolute;
-    top: 50%;
-    left: 50%;
+    width: 22px;
+    height: 22px;
+    background: #e2edb5;
+    border: 3px solid #377d70;
+    border-radius: 50%;
     transform: translate(-50%, -50%);
-    text-align: center;
+    box-shadow: 0 0 0 1px #d5e9a7, 0 4px 10px rgba(0,0,0,0.3);
+    pointer-events: none;
+    transition: transform 0.05s ease;
 }
 
-.timer-time {
-    display: block;
-    font-size: 3.2rem;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    color: var(--text-primary);
-    font-variant-numeric: tabular-nums;
+.dial-min, .dial-max {
+    position: absolute;
+    top: 87%;
+    font-size: 11px;
+    color: #d4e5ce;
+    pointer-events: none;
+}
+
+.dial-min { left: 17%; }
+.dial-max { right: 15%; }
+
+/* Floating Earth Island */
+.garden-island {
+    position: absolute;
+    left: 50%;
+    bottom: 21%;
+    transform: translateX(-50%);
+    width: 70%;
+    height: 17%;
+    border-radius: 50%;
+    background: #b4c77d;
+    box-shadow: 0 8px 0 #718d50, 0 16px 0 #486c46, 0 25px 25px rgba(30, 80, 71, 0.35);
+}
+
+#plant-art {
+    position: absolute;
+    left: 50%;
+    top: 48%;
+    transform: translate(-50%, -50%);
+    font-size: clamp(84px, 14vh, 120px);
     line-height: 1;
+    filter: drop-shadow(3px 7px 4px rgba(33, 79, 67, 0.4));
+    z-index: 1;
+    pointer-events: none;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.timer-rep {
-    display: block;
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    margin-top: 8px;
-    font-weight: 500;
+.garden-spark {
+    position: absolute;
+    color: #dddfab;
+    top: 14%;
+    right: 4%;
+    pointer-events: none;
+    font-size: 14px;
+    opacity: 0.8;
 }
 
-/* Timer Controls */
-.timer-controls {
+#plant-caption {
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 12px;
+    color: #d3e5cc;
+    line-height: 1.5;
+}
+
+/* Timer Display & Messages */
+#garden-timer {
+    font-size: clamp(48px, 8vh, 68px);
+    font-weight: 250;
+    line-height: 1.1;
+    letter-spacing: 2px;
+    font-variant-numeric: tabular-nums;
+    color: #fff;
+    margin-top: 4px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+#garden-message {
+    font-size: 13px;
+    color: var(--garden-muted);
+    margin: 4px 0 12px;
+    text-align: center;
+    line-height: 1.6;
+}
+
+/* Setup & Action Button */
+#garden-setup {
     display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin: 4px 0 14px;
+    width: min(100%, 320px);
+}
+
+.garden-species-btn {
+    min-height: 44px;
+    min-width: 180px;
+    padding: 10px 18px;
+    background: rgba(36, 95, 84, 0.4);
+    color: #eef4dc;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 14px;
+    text-align: center;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
     justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    font-family: var(--font);
+}
+
+.garden-species-btn:hover {
+    background: rgba(36, 95, 84, 0.6);
+    border-color: rgba(213, 233, 167, 0.4);
+    transform: translateY(-1px);
+}
+
+.garden-chevron {
+    font-size: 11px;
+    opacity: 0.7;
+}
+
+#dial-hint {
+    font-size: 11px;
+    color: #d1e1ce;
+}
+
+.garden-primary-btn {
+    background: var(--garden-mint);
+    color: #2b5744;
+    border: none;
+    border-radius: 14px;
+    padding: 13px 24px;
+    font-size: 15px;
+    font-weight: 650;
+    min-height: 46px;
+    width: min(100%, 320px);
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: var(--font);
+    box-shadow: 0 6px 18px rgba(36, 95, 84, 0.4);
+}
+
+.garden-primary-btn:hover:not(:disabled) {
+    background: var(--garden-mint-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(36, 95, 84, 0.5);
+}
+
+.garden-primary-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.garden-primary-btn.running {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    color: #edf2df;
+    box-shadow: none;
+}
+
+.garden-primary-btn.running:hover {
+    background: rgba(239, 68, 68, 0.25);
+    border-color: rgba(239, 68, 68, 0.5);
+    color: #fee2e2;
+}
+
+/* Ambient Sound Controls */
+.garden-sound-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 14px;
+    color: #d4e3d4;
+    max-width: 100%;
+}
+
+.garden-sound-bar button {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    color: inherit;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.garden-sound-bar button:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.garden-sound-bar button[aria-pressed="true"] {
+    background: var(--garden-mint);
+    color: #2b5744;
+    border-color: var(--garden-mint);
+    box-shadow: 0 0 12px rgba(213, 233, 167, 0.4);
+}
+
+.garden-sound-bar select {
+    background: rgba(36, 95, 84, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    color: inherit;
+    font-size: 12px;
+    max-width: 160px;
+    min-width: 0;
+    min-height: 38px;
+    padding: 0 8px;
+    font-family: var(--font);
+}
+
+.garden-sound-bar option {
+    background: #245b4e;
+    color: #fff;
+}
+
+.garden-volume-wrap {
+    display: flex;
+    align-items: center;
+}
+
+.garden-sound-bar input[type="range"] {
+    width: 70px;
+    min-width: 40px;
+    accent-color: var(--garden-mint);
+    cursor: pointer;
+}
+
+/* =========================================================
+   GARDEN LAND VIEW (Grid, Pagination, Stats)
+   ========================================================= */
+.garden-land-card {
+    max-width: 520px;
     gap: 12px;
 }
 
-.control-btn {
-    padding: 13px 28px;
-    border: none;
-    border-radius: var(--radius-md);
-    background: var(--gradient-primary);
-    color: #fff;
-    font-family: var(--font);
-    font-size: 0.95rem;
+.garden-heading {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.garden-heading .garden-eyebrow {
+    text-align: left;
+    font-size: 9px;
+}
+
+.garden-title {
     font-weight: 600;
+    font-size: clamp(20px, 3vw, 26px);
+    margin: 2px 0 0;
+    line-height: 1.3;
+    color: #fff;
+    text-align: left;
+}
+
+.garden-badge {
+    background: rgba(213, 233, 167, 0.15);
+    color: var(--garden-mint);
+    border: 1px solid rgba(213, 233, 167, 0.3);
+    border-radius: 12px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.garden-hint {
+    font-size: 13px;
+    color: var(--garden-muted);
+    width: 100%;
+    margin: 0;
+    text-align: left;
+    line-height: 1.5;
+}
+
+.garden-land {
+    width: min(100%, 420px);
+    padding: clamp(12px, 3vw, 18px);
+    background: #2c6356;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 26px;
+    box-shadow: 0 10px 0 #235344, 0 18px 30px rgba(25, 70, 61, 0.4);
+    margin: 4px 0 8px;
+}
+
+#garden-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(6px, 1.2vw, 10px);
+}
+
+.plot {
+    aspect-ratio: 1;
+    min-width: 0;
+    min-height: 0;
+    padding: 0;
+    border-radius: 13px;
+    border: 1px solid rgba(201, 219, 158, 0.3);
+    background: linear-gradient(145deg, #9aaf6a, #819c5c);
+    box-shadow: inset 0 -5px rgba(87, 108, 65, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(26px, 7vw, 44px);
+    color: #dfe7b9;
     cursor: pointer;
-    transition: var(--transition);
-    box-shadow: 0 4px 16px rgba(124, 58, 237, 0.3);
+    transition: transform 0.15s ease, filter 0.15s ease;
 }
 
-.control-btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 24px rgba(124, 58, 237, 0.45);
+.plot:hover {
+    filter: brightness(1.1);
+    transform: scale(1.03);
 }
 
-.control-btn:active:not(:disabled) {
-    transform: translateY(0);
+.plot.empty {
+    background: linear-gradient(145deg, #708f5b, #628353);
+    font-size: 26px;
+    color: rgba(212, 227, 181, 0.45);
 }
 
-.control-btn.secondary {
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    color: var(--text-secondary);
-    box-shadow: none;
+.plot.selected {
+    outline: 3px solid #ecdfa5;
+    outline-offset: 1px;
+    filter: brightness(1.15);
 }
 
-.control-btn.secondary:hover:not(:disabled) {
-    background: var(--glass-hover);
-    color: var(--text-primary);
-    box-shadow: none;
-    transform: translateY(-2px);
+.plot.reserved {
+    background: #a4b579;
+    animation: plot-pulse 2s ease-in-out infinite;
 }
 
-.control-btn:disabled {
-    opacity: 0.35;
+@keyframes plot-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.75; }
+}
+
+.garden-pages {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    font-size: 13px;
+    color: #d4e3ce;
+    margin: 4px 0;
+}
+
+.garden-pages button {
+    width: 40px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    color: inherit;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.garden-pages button:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.garden-pages button:disabled {
+    opacity: 0.3;
     cursor: not-allowed;
 }
 
-/* Pulse animation when timer is running */
-@keyframes pulse-glow {
-    0%, 100% { box-shadow: var(--shadow-card), 0 0 0 0 rgba(124, 58, 237, 0.15); }
-    50% { box-shadow: var(--shadow-card), 0 0 0 12px rgba(124, 58, 237, 0); }
+.garden-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    width: 100%;
+    padding: 8px 0 4px;
 }
 
-.timer-card.running {
-    animation: pulse-glow 2s ease-in-out infinite;
+.garden-stat-box {
+    text-align: center;
+    background: rgba(36, 95, 84, 0.35);
+    border: 1px solid rgba(213, 233, 167, 0.15);
+    border-radius: 14px;
+    padding: 10px 6px;
 }
 
-.timer-card.running.break-active {
-    animation: pulse-glow-green 2s ease-in-out infinite;
+.garden-stat-box strong {
+    font-size: 24px;
+    font-weight: 600;
+    display: block;
+    color: var(--garden-mint);
 }
 
-@keyframes pulse-glow-green {
-    0%, 100% { box-shadow: var(--shadow-card), 0 0 0 0 rgba(16, 185, 129, 0.15); }
-    50% { box-shadow: var(--shadow-card), 0 0 0 12px rgba(16, 185, 129, 0); }
+.garden-stat-box span {
+    display: block;
+    color: var(--garden-muted);
+    font-size: 11px;
+    margin-top: 4px;
+}
+
+/* =========================================================
+   HISTORY VIEW (Cloud Sync)
+   ========================================================= */
+.garden-history-card {
+    max-width: 560px;
+    text-align: left;
+    align-items: stretch;
+}
+
+.garden-history-list {
+    width: 100%;
+    margin-top: 14px;
+    max-height: 480px;
+    overflow-y: auto;
+}
+
+/* =========================================================
+   GARDEN DIALOGS (Species Selector & Cancel Confirmation)
+   ========================================================= */
+.garden-dialog {
+    background: #f3f4e7;
+    color: #315c49;
+    border: none;
+    border-radius: 24px;
+    padding: 24px;
+    width: calc(100% - 32px);
+    max-width: 440px;
+    max-height: calc(100dvh - 48px);
+    overflow-y: auto;
+    box-shadow: 0 20px 80px rgba(18, 60, 53, 0.6);
+    font-family: var(--font);
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+}
+
+.garden-dialog::backdrop {
+    background: rgba(18, 59, 52, 0.7);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+.garden-dialog h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+    color: #245f54;
+}
+
+.garden-dialog p {
+    font-size: 13px;
+    color: #6d8273;
+    line-height: 1.6;
+    margin: 8px 0 14px;
+}
+
+.dialog-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.dialog-top button {
+    background: none;
+    border: none;
+    font-size: 22px;
+    color: #527560;
+    min-width: 40px;
+    min-height: 40px;
+    cursor: pointer;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dialog-top button:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.unlock-progress {
+    background: #e4ead6;
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: #3f674f;
+    font-weight: 500;
+}
+
+.species-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.species {
+    background: #e5ead6;
+    border: 1px solid #cfdbc0;
+    border-radius: 14px;
+    padding: 14px 4px;
+    color: #375e48;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: var(--font);
+    transition: all 0.2s ease;
+}
+
+.species:hover:not(:disabled) {
+    background: #dce8c8;
+    transform: translateY(-2px);
+}
+
+.species span {
+    display: block;
+    font-size: 34px;
+    margin-bottom: 6px;
+}
+
+.species.chosen {
+    border: 2px solid #598d60;
+    background: #dce8c8;
+    box-shadow: 0 4px 12px rgba(89, 141, 96, 0.2);
+}
+
+.species small {
+    display: block;
+    font-size: 10px;
+    margin-top: 6px;
+    color: #68795f;
+}
+
+.species.locked {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.species.locked span {
+    filter: grayscale(1);
+}
+
+.dialog-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.garden-dialog-btn {
+    border: none;
+    border-radius: 12px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    min-height: 44px;
+    font-family: var(--font);
+    transition: all 0.2s;
+}
+
+.garden-dialog-btn.primary {
+    background: #377d70;
+    color: #f3f4e7;
+}
+
+.garden-dialog-btn.primary:hover {
+    background: #2b6356;
+}
+
+.garden-dialog-btn.secondary {
+    background: #e3e9d7;
+    border: 1px solid #ccd8c6;
+    color: #52705b;
+}
+
+.garden-dialog-btn.secondary:hover {
+    background: #d6e0ca;
 }
 
 /* ===== HISTORY ===== */
@@ -4471,74 +4984,25 @@ body {
         margin-bottom: 20px;
     }
 
-    /* --- POMODORO SECTION (Symmetrical & Focused Hub) --- */
+    /* --- MYGARDEN SECTION --- */
     #pomodoro-section {
         max-width: 680px;
         margin: 0 auto;
     }
 
     #pomodoro-section.active {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        grid-template-areas:
-            "mode reps"
-            "timer timer"
-            "history history";
-        gap: 16px;
-    }
-
-    #pomodoro-section .mode-selector {
-        grid-area: mode;
-        margin-bottom: 0;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
-    }
-
-    #pomodoro-section .rep-selector {
-        grid-area: reps;
-        margin-bottom: 0;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-    }
-
-    #pomodoro-section .timer-card {
-        grid-area: timer;
-        margin-bottom: 0;
-        padding: 32px 24px 28px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
         align-items: center;
+        gap: 20px;
     }
 
-    #pomodoro-section .timer-ring-container {
-        margin: 16px auto 24px;
+    #pomodoro-section .garden-card {
+        padding: 32px 28px;
     }
 
-    #pomodoro-section .timer-ring {
-        width: 250px;
-        height: 250px;
-    }
-
-    #pomodoro-section .timer-time {
-        font-size: 3.4rem;
-    }
-
-    #pomodoro-section .timer-controls {
-        gap: 16px;
-    }
-
-    #pomodoro-section .control-btn {
-        min-width: 140px;
-        padding: 13px 28px;
-        font-size: 0.95rem;
-    }
-
-    #pomodoro-section .history-card {
-        grid-area: history;
-        margin-bottom: 0;
+    #pomodoro-section .garden-scene {
+        --scene-size: clamp(230px, 34vh, 300px);
     }
 
     /* --- TO-DO SECTION (Spacious Centered Workspace) --- */
@@ -4748,22 +5212,13 @@ body {
         max-width: 760px;
     }
 
-    /* Pomodoro Desktop Polish */
+    /* MyGarden Desktop Polish */
     #pomodoro-section {
         max-width: 720px;
     }
 
-    #pomodoro-section .timer-card {
-        padding: 36px 28px;
-    }
-
-    #pomodoro-section .timer-ring {
-        width: 260px;
-        height: 260px;
-    }
-
-    #pomodoro-section .timer-time {
-        font-size: 3.5rem;
+    #pomodoro-section .garden-card {
+        max-width: 520px;
     }
 
     /* To-do Desktop Polish */
@@ -6110,6 +6565,104 @@ body {
     100% { opacity: 0; transform: translateY(-50px) scale(0.9); }
 }
 
+/* Keep MyGarden controls visible on phone screens, including browser chrome. */
+@media (max-width: 767px) {
+    .app-container {
+        padding: 10px 10px max(10px, env(safe-area-inset-bottom));
+    }
+
+    .app-header {
+        margin-bottom: 12px;
+    }
+
+    .header-top {
+        margin-bottom: 8px;
+    }
+
+    .user-bar {
+        padding: 8px 12px;
+        margin-bottom: 12px;
+    }
+
+    .tab-btn {
+        padding: 8px 4px;
+        font-size: 0.85rem;
+    }
+
+    #pomodoro-section.active {
+        gap: 10px;
+    }
+
+    .garden-subnav {
+        padding: 4px;
+        gap: 4px;
+    }
+
+    .garden-subnav-btn {
+        min-height: 40px;
+        padding: 8px 6px;
+        font-size: 0.85rem;
+    }
+
+    .garden-card {
+        padding: 24px 18px;
+        border-radius: 24px;
+    }
+
+    .garden-scene {
+        --scene-size: clamp(160px, calc(100vh - 500px), 300px);
+        --scene-size: clamp(160px, calc(100dvh - 500px), 300px);
+        margin: 8px 0 24px;
+    }
+
+    #garden-timer {
+        font-size: clamp(44px, 7vh, 60px);
+        font-size: clamp(44px, 7dvh, 60px);
+    }
+
+    #garden-message {
+        margin-bottom: 10px;
+    }
+
+    #garden-setup {
+        margin: 4px 0 12px;
+        gap: 6px;
+    }
+
+    .garden-species-btn {
+        padding: 8px 14px;
+    }
+
+    .garden-sound-bar {
+        margin-top: 14px;
+        gap: 8px;
+    }
+
+    .garden-land-card {
+        gap: 12px;
+    }
+
+    .garden-land {
+        width: min(100%, 420px, max(200px, calc(100vh - 380px)));
+        width: min(100%, 420px, max(200px, calc(100dvh - 380px)));
+        padding: 14px;
+        margin: 4px 0 8px;
+    }
+
+    .garden-pages {
+        margin: 2px 0;
+    }
+
+    .garden-stats-grid {
+        gap: 8px;
+        padding: 4px 0 0;
+    }
+
+    .garden-stat-box {
+        padding: 12px 6px;
+    }
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
     .habit-stats-banner {
@@ -6138,5 +6691,3 @@ body {
         min-width: 110px;
     }
 }
-
-

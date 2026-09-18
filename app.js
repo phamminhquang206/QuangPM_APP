@@ -173,8 +173,41 @@
             clearHistory: 'Xóa lịch sử',
             perfectDayToast: '🎉 Ngày hoàn hảo! Bạn đã hoàn thành 100% thói quen hôm nay (+50 XP Bonus)!',
             habitCompletedToast: '+10 XP! Hoàn thành thói quen: {title}',
-            redeemSuccess: '🎉 Đã đổi thưởng: {title} (-{xp} XP). Hãy tận hưởng nhé!',
-            notEnoughXp: 'Bạn chưa đủ điểm XP để đổi phần thưởng này!'
+            notEnoughXp: 'Bạn chưa đủ điểm XP để đổi phần thưởng này!',
+            // MyGarden
+            gardenTab: 'MyGarden',
+            gardenFocusTab: 'Tập trung',
+            gardenLandTab: 'Khu vườn',
+            gardenHistoryTab: 'Lịch sử',
+            gardenFocusEyebrow: 'DÀNH MỘT CHÚT THỜI GIAN CHO BẠN',
+            gardenGrowingEyebrow: 'MỘT MẦM SỐNG ĐANG LỚN LÊN',
+            gardenFocusMessage: 'Đặt điện thoại xuống. Để khu vườn lớn lên.',
+            gardenGrowingMessage: 'Cứ chậm rãi. Thời gian này là của bạn.',
+            gardenDialHint: 'Xoay vòng quanh cây để chọn số phút',
+            gardenStartAction: 'Bắt đầu {verb} ↗',
+            gardenGiveUpAction: 'Kết thúc sớm',
+            gardenLandEyebrow: 'TỪ NHỮNG PHÚT BẠN TẬP TRUNG',
+            gardenLandTitle: 'Khu vườn của bạn',
+            gardenLandHint: 'Chọn một ô đất trống để gieo mầm.',
+            gardenLandGrowingHint: 'Mầm đang lớn. Hãy ngắm vườn trong lúc tập trung.',
+            gardenStatPlants: 'Sinh vật',
+            gardenStatMinutes: 'Phút tập trung',
+            gardenStatSessions: 'Phiên hoàn thành',
+            gardenHistoryEyebrow: 'DỮ LIỆU ĐÁM MÂY',
+            gardenHistoryTitle: '📊 Lịch sử tập trung',
+            chooseSpeciesTitle: 'Chọn một mầm sống',
+            chooseSpeciesSub: 'Mỗi phiên hoàn thành là một thành viên mới trong khu vườn.',
+            cancelFocusTitle: 'Dừng phiên tập trung?',
+            cancelFocusDesc: 'Sinh vật của phiên này sẽ không được thêm vào vườn. Bạn có thể bắt đầu lại bất cứ lúc nào.',
+            keepFocusBtn: 'Tiếp tục tập trung',
+            giveUpBtn: 'Kết thúc sớm',
+            unlockProgressText: 'Đã tập trung {h} giờ {m} phút · Còn {rem} phút để mở khóa 3 sinh vật mới.',
+            allUnlockedText: 'Bạn đã mở khóa toàn bộ bộ sưu tập 18 sinh vật!',
+            sessionCompleteToast: 'Hoàn thành! Khu vườn có một thành viên mới ✿',
+            unlockSpeciesToast: 'Hoàn thành! Mở khóa thêm: {names}',
+            cancelSessionToast: 'Ô đất vẫn còn trống. Khi sẵn sàng, hãy thử lại.',
+            selectPlotToast: 'Đã chọn ô đất {index}',
+            finishCurrentSessionFirst: 'Hãy hoàn thành phiên hiện tại trước khi gieo mầm mới.'
         },
         en: {
             mode: 'Mode', mode30: '30 min', mode30Detail: "25' work + 5' rest",
@@ -337,8 +370,41 @@
             clearHistory: 'Clear History',
             perfectDayToast: '🎉 Perfect Day! You completed 100% of habits today (+50 XP Bonus)!',
             habitCompletedToast: '+10 XP! Completed habit: {title}',
-            redeemSuccess: '🎉 Redeemed: {title} (-{xp} XP). Enjoy!',
-            notEnoughXp: 'Not enough XP to redeem this reward!'
+            notEnoughXp: 'Not enough XP to redeem this reward!',
+            // MyGarden
+            gardenTab: 'MyGarden',
+            gardenFocusTab: 'Focus',
+            gardenLandTab: 'Garden',
+            gardenHistoryTab: 'History',
+            gardenFocusEyebrow: 'TAKE A LITTLE TIME FOR YOURSELF',
+            gardenGrowingEyebrow: 'A NEW LIFE IS GROWING',
+            gardenFocusMessage: 'Put your phone down. Let the garden grow.',
+            gardenGrowingMessage: 'Take your time. This moment is yours.',
+            gardenDialHint: 'Rotate around the tree to pick minutes',
+            gardenStartAction: 'Start {verb} ↗',
+            gardenGiveUpAction: 'Give Up',
+            gardenLandEyebrow: 'FROM YOUR FOCUSED MOMENTS',
+            gardenLandTitle: 'Your Garden',
+            gardenLandHint: 'Choose an empty plot to plant.',
+            gardenLandGrowingHint: 'Growing nicely. Enjoy the garden during your session.',
+            gardenStatPlants: 'Creatures',
+            gardenStatMinutes: 'Focus Minutes',
+            gardenStatSessions: 'Completed Sessions',
+            gardenHistoryEyebrow: 'CLOUD DATA',
+            gardenHistoryTitle: '📊 Focus History',
+            chooseSpeciesTitle: 'Choose a Creature',
+            chooseSpeciesSub: 'Each completed session adds a new member to your garden.',
+            cancelFocusTitle: 'Stop focus session?',
+            cancelFocusDesc: 'The creature from this session will not be added to the garden. You can try again anytime.',
+            keepFocusBtn: 'Keep Focusing',
+            giveUpBtn: 'Give Up',
+            unlockProgressText: 'Focused {h}h {m}m · {rem}m remaining to unlock 3 new species.',
+            allUnlockedText: 'You have unlocked the full collection of 18 species!',
+            sessionCompleteToast: 'Completed! A new creature joined your garden ✿',
+            unlockSpeciesToast: 'Completed! Unlocked: {names}',
+            cancelSessionToast: 'The plot is still empty. Try again whenever you are ready.',
+            selectPlotToast: 'Selected plot {index}',
+            finishCurrentSessionFirst: 'Please complete the ongoing session before planting a new one.'
         }
     };
 
@@ -649,387 +715,777 @@
     }
 
     // =========================================================
-    //  POMODORO TIMER
+    //  MYGARDEN (FOREST POMODORO) ENGINE
     // =========================================================
-    function PomodoroTimer() {
-        this.mode = '30'; this.totalReps = 3; this.currentRep = 1;
-        this.isWorking = true; this.timeRemaining = MODES['30'].work;
-        this.totalTime = MODES['30'].work; this.isRunning = false;
-        this.isPaused = false; this.intervalId = null;
-        this.endTime = null;
+    var GARDEN_SPECIES = [
+        { id: 'pine', name: { vi: 'Cây thông', en: 'Pine Tree' }, icon: '🌲', stages: ['🌱', '🌿', '🌲'], verb: { vi: 'trồng', en: 'plant' } },
+        { id: 'oak', name: { vi: 'Cây xanh', en: 'Oak Tree' }, icon: '🌳', stages: ['🌱', '🌿', '🌳'], verb: { vi: 'trồng', en: 'plant' } },
+        { id: 'cherry', name: { vi: 'Anh đào', en: 'Cherry Blossom' }, icon: '🌸', stages: ['🌱', '🌿', '🌸'], verb: { vi: 'trồng', en: 'plant' } },
+        { id: 'sunflower', name: { vi: 'Hướng dương', en: 'Sunflower' }, icon: '🌻', stages: ['🌱', '🌿', '🌻'], verb: { vi: 'trồng', en: 'plant' } },
+        { id: 'rabbit', name: { vi: 'Thỏ nhỏ', en: 'Rabbit' }, icon: '🐇', stages: ['🐰', '🐰', '🐇'], verb: { vi: 'nuôi', en: 'raise' } },
+        { id: 'cat', name: { vi: 'Mèo con', en: 'Kitten' }, icon: '🐈', stages: ['🐱', '🐱', '🐈'], verb: { vi: 'nuôi', en: 'raise' } }
+    ];
 
-        this._cacheElements(); this._bindEvents();
-        this._loadHistory();
+    var GARDEN_ADDITIONS = [
+        ['palm', { vi: 'Cây cọ', en: 'Palm Tree' }, '🌴', 'plant'],
+        ['tulip', { vi: 'Tulip', en: 'Tulip' }, '🌷', 'plant'],
+        ['dog', { vi: 'Cún nhỏ', en: 'Puppy' }, '🐕', 'raise'],
+        ['cactus', { vi: 'Xương rồng', en: 'Cactus' }, '🌵', 'plant'],
+        ['rose', { vi: 'Hoa hồng', en: 'Rose' }, '🌹', 'plant'],
+        ['deer', { vi: 'Hươu', en: 'Deer' }, '🦌', 'raise'],
+        ['bamboo', { vi: 'Tre xanh', en: 'Bamboo' }, '🎋', 'plant'],
+        ['hibiscus', { vi: 'Dâm bụt', en: 'Hibiscus' }, '🌺', 'plant'],
+        ['fox', { vi: 'Cáo nhỏ', en: 'Fox' }, '🦊', 'raise'],
+        ['maple', { vi: 'Phong đỏ', en: 'Maple Tree' }, '🍁', 'plant'],
+        ['lotus', { vi: 'Hoa sen', en: 'Lotus' }, '🪷', 'plant'],
+        ['squirrel', { vi: 'Sóc nhỏ', en: 'Squirrel' }, '🐿️', 'raise']
+    ];
+
+    GARDEN_ADDITIONS.forEach(function (item, i) {
+        var id = item[0], name = item[1], icon = item[2], type = item[3];
+        var verb = type === 'plant' ? { vi: 'trồng', en: 'plant' } : { vi: 'nuôi', en: 'raise' };
+        var stages = type === 'plant' ? ['🌱', '🌿', icon] : [icon, icon, icon];
+        var unlockMinutes = (Math.floor(i / 3) + 1) * 300; // 5h, 10h, 15h, 20h
+        GARDEN_SPECIES.push({ id: id, name: name, icon: icon, verb: verb, stages: stages, unlockMinutes: unlockMinutes });
+    });
+
+    var GARDEN_SOUNDS = {
+        rain: './sound/liecio-calming-rain.mp3',
+        stream: './sound/alex_jauk-calm-zen-river-flowing-228223.mp3',
+        ambient: './sound/focus.mp3'
+    };
+
+    function totalGardenMinutes(state) {
+        if (!state || !Array.isArray(state.plots)) return 0;
+        return state.plots.reduce(function (sum, p) { return sum + (p && p.minutes ? p.minutes : 0); }, 0);
+    }
+
+    function isSpeciesUnlocked(state, speciesId) {
+        var sp = GARDEN_SPECIES.find(function (s) { return s.id === speciesId; });
+        if (!sp) return false;
+        if (!sp.unlockMinutes) return true;
+        return totalGardenMinutes(state) >= sp.unlockMinutes;
+    }
+
+    function freshGardenState() {
+        return {
+            version: 1,
+            plots: Array(16).fill(null),
+            session: null,
+            selectedSpecies: 'pine',
+            duration: 25,
+            sound: 'rain',
+            volume: 35
+        };
+    }
+
+    function validGardenState(v) {
+        if (!v || v.version !== 1 || !Array.isArray(v.plots) || v.plots.length < 16 || (v.plots.length % 16 !== 0)) {
+            return freshGardenState();
+        }
+        var b = freshGardenState();
+        b.plots = v.plots.map(function (p) {
+            if (p && GARDEN_SPECIES.some(function (s) { return s.id === p.species; }) && Number.isFinite(p.minutes) && p.minutes > 0) {
+                return {
+                    species: p.species,
+                    minutes: p.minutes,
+                    completedAt: Number(p.completedAt) || 0,
+                    id: String(p.id || ('plot-' + Date.now()))
+                };
+            }
+            return null;
+        });
+        if (GARDEN_SPECIES.some(function (s) { return s.id === v.selectedSpecies; })) b.selectedSpecies = v.selectedSpecies;
+        if (Number.isInteger(v.duration) && v.duration >= 0 && v.duration <= 180) b.duration = v.duration;
+        if (['rain', 'stream', 'ambient'].indexOf(v.sound) !== -1) b.sound = v.sound;
+        if (Number.isFinite(v.volume)) b.volume = Math.max(0, Math.min(100, v.volume));
+        var s = v.session;
+        if (s && typeof s.id === 'string' && GARDEN_SPECIES.some(function (x) { return x.id === s.species; }) &&
+            Number.isInteger(s.plot) && s.plot >= 0 && s.plot < b.plots.length && !b.plots[s.plot] &&
+            Number.isFinite(s.startedAt) && Number.isInteger(s.minutes) && s.minutes >= 1 && s.minutes <= 180 &&
+            s.endsAt === s.startedAt + s.minutes * 60000) {
+            b.session = Object.assign({}, s);
+        }
+        if (b.plots.every(Boolean)) b.plots.push.apply(b.plots, Array(16).fill(null));
+        if (!isSpeciesUnlocked(b, b.selectedSpecies)) b.selectedSpecies = 'pine';
+        return b;
+    }
+
+    function minutesFromPoint(x, y, cx, cy) {
+        var angle = (Math.atan2(x - cx, cy - y) * 180 / Math.PI + 360) % 360;
+        var sweep = (angle - 225 + 360) % 360;
+        return Math.round((sweep <= 270 ? sweep : sweep < 315 ? 270 : 0) / 270 * 60);
+    }
+
+    function dialPosition(minutes) {
+        var m = Math.max(0, Math.min(60, minutes));
+        var angle = (225 + m / 60 * 270) * Math.PI / 180;
+        return {
+            x: 50 + Math.sin(angle) * 43.333333,
+            y: 50 - Math.cos(angle) * 43.333333
+        };
+    }
+
+    function formatTimeSeconds(totalSec) {
+        var s = Math.max(0, totalSec);
+        var mins = Math.floor(s / 60);
+        var secs = s % 60;
+        return String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+    }
+
+    // Main MyGarden App Controller (named PomodoroTimer for full compatibility)
+    function PomodoroTimer() {
+        this.KEY = 'flowhub_mygarden_v1';
+        this.state = freshGardenState();
+        this.selectedPlot = 0;
+        this.page = 0;
+        this.activeView = 'focus';
+        this.audio = null;
+        this.audioPlaying = false;
+        this.soundRequest = 0;
+        this.dialPointer = null;
+        this.toastTimeout = null;
+
+        // Compatibility dummy properties
+        this.isRunning = false;
+        this.isPaused = false;
+        this.statusEl = { textContent: '' };
+        this.startBtn = { textContent: '' };
+
+        this._loadLocalState();
+        this._cacheElements();
+        this._bindEvents();
+        this._bindDialEvents();
         this._restoreSession();
-        this._updateDisplay();
+        this._loadHistory();
+        this._render();
+
+        var self = this;
+        setInterval(function () {
+            self._tick();
+        }, 1000);
     }
 
     PomodoroTimer.prototype._cacheElements = function () {
-        this.statusEl = document.getElementById('timer-status');
-        this.timeEl = document.getElementById('timer-time');
-        this.repEl = document.getElementById('timer-rep');
-        this.ringEl = document.getElementById('timer-ring-progress');
-        this.startBtn = document.getElementById('btn-start');
-        this.resetBtn = document.getElementById('btn-reset');
-        this.repCountEl = document.getElementById('rep-count');
-        this.timerCard = document.getElementById('timer-card');
-        this.historyListEl = document.getElementById('history-list');
-        this.historyContent = document.getElementById('history-content');
-        this.historyArrow = document.getElementById('history-arrow');
+        // Sub-nav buttons
+        this.subnavFocus = document.getElementById('garden-subnav-focus');
+        this.subnavGarden = document.getElementById('garden-subnav-garden');
+        this.subnavHistory = document.getElementById('garden-subnav-history');
+
+        // Views
+        this.viewFocus = document.getElementById('garden-focus-view');
+        this.viewGarden = document.getElementById('garden-land-view');
+        this.viewHistory = document.getElementById('garden-history-view');
+
+        // Focus scene
+        this.dialEl = document.getElementById('duration-dial');
+        this.dialProgress = document.getElementById('dial-progress');
+        this.dialHandle = document.getElementById('dial-handle');
+        this.plantArt = document.getElementById('plant-art');
+        this.plantCaption = document.getElementById('plant-caption');
+        this.focusLabel = document.getElementById('garden-focus-label');
+        this.timerEl = document.getElementById('garden-timer');
+        this.messageEl = document.getElementById('garden-message');
+        this.chooseSpeciesBtn = document.getElementById('choose-species');
+        this.speciesIcon = document.getElementById('choose-species-icon');
+        this.speciesName = document.getElementById('choose-species-name');
+        this.dialHint = document.getElementById('dial-hint');
+        this.actionBtn = document.getElementById('garden-action');
+        this.setupContainer = document.getElementById('garden-setup');
+
+        // Sound bar
+        this.soundToggleBtn = document.getElementById('garden-sound-toggle');
+        this.soundKindSelect = document.getElementById('garden-sound-kind');
+        this.soundVolumeInput = document.getElementById('garden-volume');
+
+        // Garden view
+        this.gardenCountBadge = document.getElementById('garden-count');
+        this.gardenGrid = document.getElementById('garden-grid');
+        this.gardenHint = document.getElementById('garden-hint');
+        this.prevPageBtn = document.getElementById('garden-prev-page');
+        this.nextPageBtn = document.getElementById('garden-next-page');
+        this.pageLabel = document.getElementById('garden-page-label');
+        this.statPlants = document.getElementById('garden-stat-plants');
+        this.statMinutes = document.getElementById('garden-stat-minutes');
+        this.statSessions = document.getElementById('garden-stat-sessions');
+
+        // History
+        this.historyListEl = document.getElementById('garden-history-list');
+
+        // Dialogs
+        this.speciesDialog = document.getElementById('species-dialog');
+        this.speciesListEl = document.getElementById('species-list');
+        this.unlockProgressEl = document.getElementById('unlock-progress');
+        this.closeSpeciesBtn = document.getElementById('close-species');
+        this.cancelDialog = document.getElementById('cancel-dialog');
+        this.keepFocusBtn = document.getElementById('keep-focus');
+        this.confirmCancelBtn = document.getElementById('confirm-cancel');
     };
 
-    PomodoroTimer.prototype._saveSession = function () {
-        if (!this.isRunning && !this.isPaused) {
-            localStorage.removeItem('flowhub_pomodoro_session');
-            return;
-        }
-        var session = {
-            mode: this.mode,
-            totalReps: this.totalReps,
-            currentRep: this.currentRep,
-            isWorking: this.isWorking,
-            totalTime: this.totalTime,
-            isRunning: this.isRunning,
-            isPaused: this.isPaused,
-            timeRemaining: this.timeRemaining,
-            endTime: this.endTime,
-            pausedRemaining: this.isPaused ? this.timeRemaining : null
-        };
-        localStorage.setItem('flowhub_pomodoro_session', JSON.stringify(session));
-    };
-
-    PomodoroTimer.prototype._clearSession = function () {
-        localStorage.removeItem('flowhub_pomodoro_session');
-    };
-
-    PomodoroTimer.prototype._restoreSession = function () {
+    PomodoroTimer.prototype._loadLocalState = function () {
         try {
-            var raw = localStorage.getItem('flowhub_pomodoro_session');
-            if (!raw) return;
-            var s = JSON.parse(raw);
-            if (!s) return;
-
-            this.mode = s.mode || '30';
-            this.totalReps = s.totalReps || 3;
-            this.currentRep = s.currentRep || 1;
-            this.isWorking = (s.isWorking !== undefined) ? s.isWorking : true;
-            this.totalTime = s.totalTime || (this.isWorking ? MODES[this.mode].work : MODES[this.mode].break);
-
-            // Cập nhật giao diện nút mode
-            var self = this;
-            document.querySelectorAll('.mode-btn').forEach(function (b) {
-                b.classList.toggle('active', b.getAttribute('data-mode') === self.mode);
-            });
-            if (this.repCountEl) this.repCountEl.textContent = this.totalReps;
-
-            // Cập nhật giao diện Work vs Break
-            if (!this.isWorking) {
-                this.ringEl.classList.add('break-mode');
-                this.timerCard.classList.add('break-active');
+            var raw = localStorage.getItem(this.KEY);
+            if (raw) {
+                this.state = validGardenState(JSON.parse(raw));
             } else {
-                this.ringEl.classList.remove('break-mode');
-                this.timerCard.classList.remove('break-active');
-            }
-
-            if (s.isPaused) {
-                // Khôi phục trạng thái tạm dừng
-                this.isRunning = true;
-                this.isPaused = true;
-                this.timeRemaining = s.pausedRemaining || s.timeRemaining || this.totalTime;
-                this.startBtn.textContent = t('resume');
-                this.resetBtn.disabled = false;
-                this.timerCard.classList.remove('running');
-                this._setLockedUI(true);
-                this._updateStatus();
-            } else if (s.isRunning && s.endTime) {
-                var now = Date.now();
-                var diff = Math.round((s.endTime - now) / 1000);
-
-                if (diff > 0) {
-                    // Phiên hiện tại vẫn chưa kết thúc -> khôi phục tiếp tục đếm
-                    this.isRunning = true;
-                    this.isPaused = false;
-                    this.timeRemaining = diff;
-                    this.endTime = s.endTime;
-                    this.resetBtn.disabled = false;
-                    this.startBtn.textContent = t('pause');
-                    this.timerCard.classList.add('running');
-                    this._setLockedUI(true);
-                    this._updateStatus();
-
-                    if (this.intervalId) clearInterval(this.intervalId);
-                    this.intervalId = setInterval(function () { self._tick(); }, 1000);
-                } else {
-                    // Thời gian trôi qua trong lúc đóng tab/refresh đã vượt quá phiên hiện tại
-                    this._advanceElapsedSession(s, Math.abs(diff));
+                // Check legacy myForest key if present
+                var legacy = JSON.parse(localStorage.getItem('myForest') || '[]');
+                if (Array.isArray(legacy) && legacy.length > 0) {
+                    var trees = legacy.filter(function (x) { return x === '🌳'; });
+                    this.state.plots = Array(Math.max(16, (Math.floor(trees.length / 16) + 1) * 16)).fill(null);
+                    for (var i = 0; i < trees.length; i++) {
+                        this.state.plots[i] = { id: 'legacy-' + i, species: 'oak', minutes: 25, completedAt: 0 };
+                    }
                 }
             }
         } catch (e) {
-            console.warn('Pomodoro session restore error:', e);
-            localStorage.removeItem('flowhub_pomodoro_session');
+            console.warn('MyGarden state load warning:', e);
+        }
+        this.selectedPlot = this.state.session ? this.state.session.plot : this.state.plots.findIndex(function (p) { return !p; });
+        if (this.selectedPlot < 0) this.selectedPlot = 0;
+    };
+
+    PomodoroTimer.prototype._save = function () {
+        try {
+            localStorage.setItem(this.KEY, JSON.stringify(this.state));
+            this._saveToCloud();
+            return true;
+        } catch (e) {
+            console.warn('MyGarden save error:', e);
+            return false;
         }
     };
 
-    PomodoroTimer.prototype._advanceElapsedSession = function (s, elapsedPast) {
-        var isWork = s.isWorking;
-        var curRep = s.currentRep;
-        var totalR = s.totalReps;
-        var modeVal = s.mode;
-        var remainingOver = elapsedPast;
+    PomodoroTimer.prototype._saveToCloud = function () {
+        if (!currentUser) return;
+        try {
+            var cleanPlots = this.state.plots.map(function (p) {
+                return p ? { species: p.species, minutes: p.minutes, completedAt: p.completedAt, id: p.id } : null;
+            });
+            var payload = {
+                version: 1,
+                plots: cleanPlots,
+                selectedSpecies: this.state.selectedSpecies,
+                duration: this.state.duration,
+                sound: this.state.sound,
+                volume: this.state.volume,
+                updatedAt: Date.now()
+            };
+            userDocRef('data').doc('garden').set(payload, { merge: true }).catch(function () {});
+        } catch (e) {}
+    };
+
+    PomodoroTimer.prototype._loadCloudGarden = function () {
+        if (!currentUser) return;
         var self = this;
-
-        while (true) {
-            if (isWork) {
-                // Hết phiên làm việc -> chuyển sang phiên nghỉ ngơi
-                isWork = false;
-                var breakTime = MODES[modeVal].break;
-                if (remainingOver < breakTime) {
-                    this.isRunning = true;
-                    this.isPaused = false;
-                    this.isWorking = false;
-                    this.currentRep = curRep;
-                    this.totalTime = breakTime;
-                    this.timeRemaining = breakTime - remainingOver;
-                    this.endTime = Date.now() + this.timeRemaining * 1000;
-                    this.ringEl.classList.add('break-mode');
-                    this.timerCard.classList.add('break-active');
-                    this.timerCard.classList.add('running');
-                    this.startBtn.textContent = t('pause');
-                    this.resetBtn.disabled = false;
-                    this._setLockedUI(true);
-                    this._updateStatus();
-                    this._saveSession();
-
-                    if (this.intervalId) clearInterval(this.intervalId);
-                    this.intervalId = setInterval(function () { self._tick(); }, 1000);
-                    return;
-                } else {
-                    remainingOver -= breakTime;
-                }
-            } else {
-                // Hết phiên nghỉ ngơi -> chuyển sang rep tiếp theo hoặc hoàn thành
-                if (curRep < totalR) {
-                    curRep++;
-                    isWork = true;
-                    var workTime = MODES[modeVal].work;
-                    if (remainingOver < workTime) {
-                        this.isRunning = true;
-                        this.isPaused = false;
-                        this.isWorking = true;
-                        this.currentRep = curRep;
-                        this.totalTime = workTime;
-                        this.timeRemaining = workTime - remainingOver;
-                        this.endTime = Date.now() + this.timeRemaining * 1000;
-                        this.ringEl.classList.remove('break-mode');
-                        this.timerCard.classList.remove('break-active');
-                        this.timerCard.classList.add('running');
-                        this.startBtn.textContent = t('pause');
-                        this.resetBtn.disabled = false;
-                        this._setLockedUI(true);
-                        this._updateStatus();
-                        this._saveSession();
-
-                        if (this.intervalId) clearInterval(this.intervalId);
-                        this.intervalId = setInterval(function () { self._tick(); }, 1000);
-                        return;
-                    } else {
-                        remainingOver -= workTime;
+        userDocRef('data').doc('garden').get().then(function (doc) {
+            if (doc.exists) {
+                var cloudData = doc.data();
+                if (cloudData && Array.isArray(cloudData.plots)) {
+                    var cloudMinutes = totalGardenMinutes(cloudData);
+                    var localMinutes = totalGardenMinutes(self.state);
+                    // If cloud has equal or more progress, adopt cloud state while preserving active session
+                    if (cloudMinutes >= localMinutes) {
+                        var currentSession = self.state.session;
+                        self.state = validGardenState(cloudData);
+                        if (currentSession) self.state.session = currentSession;
+                        self._save();
+                        self._render();
                     }
-                } else {
-                    // Đã hoàn thành toàn bộ chu kỳ
-                    this._clearSession();
-                    this.currentRep = totalR;
-                    this._onAllComplete();
-                    return;
                 }
             }
-        }
+        }).catch(function (e) {
+            console.warn('Cloud garden load error:', e);
+        });
     };
 
     PomodoroTimer.prototype._bindEvents = function () {
         var self = this;
-        document.querySelectorAll('.mode-btn').forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                if (self.isRunning) return;
-                document.querySelectorAll('.mode-btn').forEach(function (b) { b.classList.remove('active'); });
-                btn.classList.add('active');
-                self.mode = btn.getAttribute('data-mode');
-                self._reset();
+
+        // Subnav switching
+        if (this.subnavFocus) this.subnavFocus.addEventListener('click', function () { self._switchView('focus'); });
+        if (this.subnavGarden) this.subnavGarden.addEventListener('click', function () { self._switchView('garden'); });
+        if (this.subnavHistory) this.subnavHistory.addEventListener('click', function () { self._switchView('history'); });
+
+        // Action button (Start / Give up)
+        if (this.actionBtn) {
+            this.actionBtn.addEventListener('click', function () {
+                if (self.state.session) {
+                    if (self.cancelDialog) self.cancelDialog.showModal();
+                } else {
+                    var mins = self.state.duration;
+                    if (!Number.isInteger(mins) || mins < 1 || mins > 60) {
+                        toast(t('gardenDialHint'));
+                        return;
+                    }
+                    if (self.state.plots[self.selectedPlot]) {
+                        self.selectedPlot = self.state.plots.findIndex(function (p) { return !p; });
+                        if (self.selectedPlot === -1) {
+                            self.state.plots.push.apply(self.state.plots, Array(16).fill(null));
+                            self.selectedPlot = self.state.plots.findIndex(function (p) { return !p; });
+                        }
+                    }
+                    var now = Date.now();
+                    self.state.session = {
+                        id: 'ses-' + now,
+                        plot: self.selectedPlot,
+                        species: self.state.selectedSpecies,
+                        minutes: mins,
+                        startedAt: now,
+                        endsAt: now + mins * 60000
+                    };
+                    self.isRunning = true;
+                    self._save();
+                    self._render();
+                }
             });
-        });
-        document.getElementById('rep-decrease').addEventListener('click', function () {
-            if (self.isRunning || self.totalReps <= 1) return;
-            self.totalReps--; self.repCountEl.textContent = self.totalReps; self._reset();
-        });
-        document.getElementById('rep-increase').addEventListener('click', function () {
-            if (self.isRunning || self.totalReps >= 10) return;
-            self.totalReps++; self.repCountEl.textContent = self.totalReps; self._reset();
-        });
-        this.startBtn.addEventListener('click', function () {
-            if (!self.isRunning) self._start();
-            else if (self.isPaused) self._resume();
-            else self._pause();
-        });
-        this.resetBtn.addEventListener('click', function () { self._reset(); });
-        document.getElementById('history-toggle').addEventListener('click', function () {
-            self.historyContent.classList.toggle('open');
-            self.historyArrow.classList.toggle('open');
-        });
-    };
-
-    PomodoroTimer.prototype._start = function () {
-        var self = this;
-        this.isRunning = true;
-        this.isPaused = false;
-        this.endTime = Date.now() + this.timeRemaining * 1000;
-        this.resetBtn.disabled = false;
-        this.startBtn.textContent = t('pause');
-        this.timerCard.classList.add('running');
-        this._updateStatus();
-        this._setLockedUI(true);
-        this._saveSession();
-
-        if (this.intervalId) clearInterval(this.intervalId);
-        this.intervalId = setInterval(function () { self._tick(); }, 1000);
-    };
-
-    PomodoroTimer.prototype._pause = function () {
-        this.isPaused = true;
-        if (this.intervalId) clearInterval(this.intervalId);
-        if (this.endTime) {
-            this.timeRemaining = Math.max(0, Math.round((this.endTime - Date.now()) / 1000));
         }
-        this.startBtn.textContent = t('resume');
-        this.timerCard.classList.remove('running');
-        this._saveSession();
+
+        // Cancel modal buttons
+        if (this.keepFocusBtn) {
+            this.keepFocusBtn.addEventListener('click', function () {
+                if (self.cancelDialog) self.cancelDialog.close();
+            });
+        }
+        if (this.confirmCancelBtn) {
+            this.confirmCancelBtn.addEventListener('click', function () {
+                self.state.session = null;
+                self.isRunning = false;
+                self._stopSound();
+                self._save();
+                if (self.cancelDialog) self.cancelDialog.close();
+                self._render();
+                toast(t('cancelSessionToast'));
+            });
+        }
+
+        // Species picker button
+        if (this.chooseSpeciesBtn) {
+            this.chooseSpeciesBtn.addEventListener('click', function () {
+                self._openSpeciesDialog();
+            });
+        }
+        if (this.closeSpeciesBtn) {
+            this.closeSpeciesBtn.addEventListener('click', function () {
+                if (self.speciesDialog) self.speciesDialog.close();
+            });
+        }
+
+        // Sound bar
+        if (this.soundToggleBtn) {
+            this.soundToggleBtn.addEventListener('click', function () {
+                if (self.audio) self._stopSound();
+                else self._startSound();
+            });
+        }
+        if (this.soundKindSelect) {
+            this.soundKindSelect.addEventListener('change', function () {
+                var wasPlaying = !!self.audio;
+                self.state.sound = self.soundKindSelect.value;
+                self._save();
+                if (wasPlaying) self._startSound();
+            });
+        }
+        if (this.soundVolumeInput) {
+            this.soundVolumeInput.addEventListener('input', function () {
+                self.state.volume = Number(self.soundVolumeInput.value);
+                if (self.audio) self.audio.volume = self.state.volume / 100;
+                self._save();
+            });
+        }
+
+        // Garden Pagination
+        if (this.prevPageBtn) {
+            this.prevPageBtn.addEventListener('click', function () {
+                if (self.page > 0) {
+                    self.page--;
+                    self._renderGardenPlots();
+                }
+            });
+        }
+        if (this.nextPageBtn) {
+            this.nextPageBtn.addEventListener('click', function () {
+                if (self.page < (self.state.plots.length / 16 - 1)) {
+                    self.page++;
+                    self._renderGardenPlots();
+                }
+            });
+        }
+
+        // Cross-tab and visibility sync
+        window.addEventListener('storage', function (e) {
+            if (e.key === self.KEY) {
+                self._loadLocalState();
+                if (!self.state.session) self._stopSound();
+                self._render();
+            }
+        });
+        document.addEventListener('visibilitychange', function () {
+            if (!document.hidden) {
+                self._tick();
+                self._render();
+            }
+        });
     };
 
-    PomodoroTimer.prototype._resume = function () {
+    PomodoroTimer.prototype._bindDialEvents = function () {
         var self = this;
-        this.isPaused = false;
-        this.endTime = Date.now() + this.timeRemaining * 1000;
-        this.startBtn.textContent = t('pause');
-        this.timerCard.classList.add('running');
-        this._saveSession();
+        var dial = this.dialEl;
+        if (!dial) return;
 
-        if (this.intervalId) clearInterval(this.intervalId);
-        this.intervalId = setInterval(function () { self._tick(); }, 1000);
+        function drag(event) {
+            if (self.state.session) return;
+            var r = dial.getBoundingClientRect();
+            var mins = minutesFromPoint(event.clientX, event.clientY, r.left + r.width / 2, r.top + r.height / 2);
+            self.state.duration = mins;
+            self._updateDialUI();
+            self._save();
+        }
+
+        dial.addEventListener('pointerdown', function (event) {
+            if (self.state.session || !event.isPrimary || event.button !== 0) return;
+            var r = dial.getBoundingClientRect();
+            var dist = Math.hypot(event.clientX - r.left - r.width / 2, event.clientY - r.top - r.height / 2);
+            if (dist < r.width * 0.3) return; // ignore center clicks
+            event.preventDefault();
+            self.dialPointer = event.pointerId;
+            dial.setPointerCapture(event.pointerId);
+            dial.focus({ preventScroll: true });
+            drag(event);
+        });
+
+        dial.addEventListener('pointermove', function (event) {
+            if (event.pointerId === self.dialPointer) drag(event);
+        });
+
+        function endDial(event) {
+            if (event.pointerId === self.dialPointer) {
+                self.dialPointer = null;
+                if (dial.hasPointerCapture(event.pointerId)) {
+                    dial.releasePointerCapture(event.pointerId);
+                }
+            }
+        }
+        dial.addEventListener('pointerup', endDial);
+        dial.addEventListener('pointercancel', endDial);
+        dial.addEventListener('lostpointercapture', function () { self.dialPointer = null; });
+
+        dial.addEventListener('keydown', function (event) {
+            if (self.state.session) return;
+            var steps = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1, PageUp: 5, PageDown: -5 };
+            var mins;
+            if (event.key === 'Home') mins = 0;
+            else if (event.key === 'End') mins = 60;
+            else if (event.key in steps) mins = Math.max(0, Math.min(60, self.state.duration + steps[event.key]));
+            else return;
+            event.preventDefault();
+            self.state.duration = mins;
+            self._updateDialUI();
+            self._save();
+        });
     };
 
-    PomodoroTimer.prototype._reset = function () {
-        if (this.intervalId) clearInterval(this.intervalId);
-        this.isRunning = false;
-        this.isPaused = false;
-        this.endTime = null;
-        this.currentRep = 1;
-        this.isWorking = true;
-        this.timeRemaining = MODES[this.mode].work;
-        this.totalTime = MODES[this.mode].work;
-        this.startBtn.textContent = t('start');
-        this.resetBtn.disabled = true;
-        this.statusEl.textContent = t('ready');
-        this.statusEl.className = 'timer-status';
-        this.timerCard.classList.remove('running', 'break-active');
-        this.ringEl.classList.remove('break-mode');
-        this._setLockedUI(false);
-        this._clearSession();
-        this._updateDisplay();
+    PomodoroTimer.prototype._switchView = function (viewName) {
+        this.activeView = viewName;
+        if (this.subnavFocus) this.subnavFocus.classList.toggle('active', viewName === 'focus');
+        if (this.subnavGarden) this.subnavGarden.classList.toggle('active', viewName === 'garden');
+        if (this.subnavHistory) this.subnavHistory.classList.toggle('active', viewName === 'history');
+
+        if (this.viewFocus) this.viewFocus.style.display = viewName === 'focus' ? 'flex' : 'none';
+        if (this.viewGarden) this.viewGarden.style.display = viewName === 'garden' ? 'flex' : 'none';
+        if (this.viewHistory) this.viewHistory.style.display = viewName === 'history' ? 'flex' : 'none';
+
+        if (viewName === 'garden') this._renderGardenPlots();
+        if (viewName === 'history') this._loadHistory();
+    };
+
+    PomodoroTimer.prototype._updateDialUI = function () {
+        var mins = Math.min(60, this.state.session ? this.state.session.minutes : this.state.duration);
+        var pos = dialPosition(mins);
+        if (this.dialEl) {
+            this.dialEl.setAttribute('aria-valuenow', mins);
+            this.dialEl.setAttribute('aria-valuetext', mins + ' phút');
+            this.dialEl.setAttribute('aria-disabled', String(!!this.state.session));
+            this.dialEl.tabIndex = this.state.session ? -1 : 0;
+        }
+        if (this.dialHandle) {
+            this.dialHandle.style.left = pos.x + '%';
+            this.dialHandle.style.top = pos.y + '%';
+        }
+        if (this.dialProgress) {
+            this.dialProgress.style.strokeDasharray = mins + ' 60';
+        }
+        if (this.actionBtn) {
+            this.actionBtn.disabled = !this.state.session && this.state.duration === 0;
+        }
+        if (!this.state.session && this.timerEl) {
+            this.timerEl.textContent = formatTimeSeconds(this.state.duration * 60);
+        }
+    };
+
+    PomodoroTimer.prototype._render = function () {
+        var session = this.state.session;
+        this.isRunning = !!session;
+        var sp = GARDEN_SPECIES.find(function (s) { return s.id === (session ? session.species : this.state.selectedSpecies); }.bind(this)) || GARDEN_SPECIES[0];
+        var lang = currentLang === 'en' ? 'en' : 'vi';
+        var spName = sp.name[lang] || sp.name.vi;
+        var spVerb = sp.verb[lang] || sp.verb.vi;
+
+        var seconds = session ? Math.max(0, Math.ceil((session.endsAt - Date.now()) / 1000)) : this.state.duration * 60;
+        if (this.timerEl) this.timerEl.textContent = formatTimeSeconds(seconds);
+
+        var progress = session ? Math.max(0, Math.min(1, 1 - seconds / (session.minutes * 60))) : 1;
+        var stageIdx = progress < 0.35 ? 0 : progress < 0.75 ? 1 : 2;
+
+        if (this.plantArt) {
+            this.plantArt.textContent = session ? sp.stages[stageIdx] : sp.icon;
+            this.plantArt.setAttribute('aria-label', spName);
+        }
+
+        if (this.plantCaption) {
+            this.plantCaption.textContent = session
+                ? (spName + (lang === 'vi' ? ' đang lớn lên · ô ' : ' is growing · plot ') + (session.plot + 1))
+                : (lang === 'vi' ? ('Một ' + spName.toLowerCase() + ' đang chờ bạn') : ('A ' + spName.toLowerCase() + ' is waiting for you'));
+        }
+
+        if (this.focusLabel) {
+            this.focusLabel.textContent = session ? t('gardenGrowingEyebrow') : t('gardenFocusEyebrow');
+        }
+
+        if (this.messageEl) {
+            this.messageEl.textContent = session ? t('gardenGrowingMessage') : t('gardenFocusMessage');
+        }
+
+        if (this.actionBtn) {
+            this.actionBtn.textContent = session ? t('gardenGiveUpAction') : t('gardenStartAction').replace('{verb}', spVerb);
+            this.actionBtn.classList.toggle('running', !!session);
+        }
+
+        if (this.setupContainer) {
+            this.setupContainer.style.display = session ? 'none' : 'flex';
+        }
+
+        if (this.speciesIcon) this.speciesIcon.textContent = sp.icon;
+        if (this.speciesName) this.speciesName.textContent = spName;
+
+        if (this.soundKindSelect) this.soundKindSelect.value = this.state.sound;
+        if (this.soundVolumeInput) this.soundVolumeInput.value = this.state.volume;
+
+        this._updateDialUI();
+        this._renderGardenPlots();
+    };
+
+    PomodoroTimer.prototype._renderGardenPlots = function () {
+        var self = this;
+        var session = this.state.session;
+        var lang = currentLang === 'en' ? 'en' : 'vi';
+        var occupied = this.state.plots.filter(Boolean);
+
+        if (this.gardenCountBadge) {
+            this.gardenCountBadge.textContent = occupied.length + ' / ' + this.state.plots.length;
+        }
+        if (this.statPlants) this.statPlants.textContent = occupied.length;
+        if (this.statSessions) this.statSessions.textContent = occupied.length;
+        if (this.statMinutes) this.statMinutes.textContent = totalGardenMinutes(this.state);
+
+        var totalPages = Math.max(1, Math.ceil(this.state.plots.length / 16));
+        this.page = Math.max(0, Math.min(this.page, totalPages - 1));
+        if (this.pageLabel) this.pageLabel.textContent = (lang === 'vi' ? 'Khu ' : 'Area ') + (this.page + 1) + ' / ' + totalPages;
+        if (this.prevPageBtn) this.prevPageBtn.disabled = this.page === 0;
+        if (this.nextPageBtn) this.nextPageBtn.disabled = this.page >= totalPages - 1;
+
+        if (this.gardenHint) {
+            this.gardenHint.textContent = session ? t('gardenLandGrowingHint') : t('gardenLandHint');
+        }
+
+        if (!this.gardenGrid) return;
+        this.gardenGrid.innerHTML = '';
+        var slice = this.state.plots.slice(this.page * 16, this.page * 16 + 16);
+
+        slice.forEach(function (plant, i) {
+            var index = self.page * 16 + i;
+            var isReserved = session && session.plot === index;
+            var btn = document.createElement('button');
+            btn.className = 'plot ' + (plant ? '' : 'empty ') + (isReserved ? 'reserved ' : '') + (!plant && self.selectedPlot === index ? 'selected' : '');
+
+            var plantSp = plant ? (GARDEN_SPECIES.find(function (s) { return s.id === plant.species; }) || GARDEN_SPECIES[0]) : null;
+            btn.textContent = plant ? plantSp.icon : (isReserved ? '🌱' : '+');
+
+            btn.addEventListener('click', function () {
+                if (plant) {
+                    var spName = plantSp.name[lang] || plantSp.name.vi;
+                    toast(spName + ' · ' + plant.minutes + (lang === 'vi' ? ' phút tập trung' : ' focus mins'));
+                } else if (session) {
+                    toast(t('finishCurrentSessionFirst'));
+                } else {
+                    self.selectedPlot = index;
+                    self._switchView('focus');
+                    toast(t('selectPlotToast').replace('{index}', index + 1));
+                }
+            });
+            self.gardenGrid.appendChild(btn);
+        });
+    };
+
+    PomodoroTimer.prototype._openSpeciesDialog = function () {
+        var self = this;
+        var minutes = totalGardenMinutes(this.state);
+        var lang = currentLang === 'en' ? 'en' : 'vi';
+        var next = GARDEN_SPECIES.find(function (s) { return (s.unlockMinutes || 0) > minutes; });
+
+        if (this.unlockProgressEl) {
+            if (next) {
+                var h = Math.floor(minutes / 60);
+                var m = minutes % 60;
+                var rem = next.unlockMinutes - minutes;
+                this.unlockProgressEl.textContent = t('unlockProgressText')
+                    .replace('{h}', h).replace('{m}', m).replace('{rem}', rem);
+            } else {
+                this.unlockProgressEl.textContent = t('allUnlockedText');
+            }
+        }
+
+        if (!this.speciesListEl) return;
+        this.speciesListEl.innerHTML = '';
+
+        GARDEN_SPECIES.forEach(function (sp) {
+            var btn = document.createElement('button');
+            var isCurrent = self.state.selectedSpecies === sp.id;
+            var unlocked = isSpeciesUnlocked(self.state, sp.id);
+            btn.className = 'species' + (isCurrent ? ' chosen' : '') + (!unlocked ? ' locked' : '');
+            if (!unlocked) btn.disabled = true;
+
+            var art = document.createElement('span');
+            art.textContent = sp.icon;
+            var spName = sp.name[lang] || sp.name.vi;
+            btn.append(art, spName);
+
+            if (!unlocked) {
+                var hint = document.createElement('small');
+                hint.textContent = '🔒 ' + (sp.unlockMinutes / 60) + (lang === 'vi' ? ' giờ' : ' hrs');
+                btn.append(hint);
+            }
+
+            btn.addEventListener('click', function () {
+                if (!isSpeciesUnlocked(self.state, sp.id)) return;
+                self.state.selectedSpecies = sp.id;
+                self._save();
+                if (self.speciesDialog) self.speciesDialog.close();
+                self._render();
+            });
+
+            self.speciesListEl.appendChild(btn);
+        });
+
+        if (this.speciesDialog) this.speciesDialog.showModal();
+    };
+
+    PomodoroTimer.prototype._restoreSession = function () {
+        if (!this.state.session) return;
+        var now = Date.now();
+        if (now >= this.state.session.endsAt) {
+            this._settleSession(now);
+        } else {
+            this.isRunning = true;
+        }
     };
 
     PomodoroTimer.prototype._tick = function () {
-        if (this.endTime) {
-            this.timeRemaining = Math.max(0, Math.round((this.endTime - Date.now()) / 1000));
+        if (!this.state.session) return;
+        var now = Date.now();
+        if (now >= this.state.session.endsAt) {
+            this._settleSession(now);
         } else {
-            this.timeRemaining--;
-        }
-
-        if (this.timeRemaining <= 0) {
-            this._onPhaseComplete();
-        } else {
-            this._updateDisplay();
-            // Lưu session định kỳ mỗi 5s để giảm I/O
-            if (this.timeRemaining % 5 === 0) {
-                this._saveSession();
-            }
+            var s = Math.max(0, Math.ceil((this.state.session.endsAt - now) / 1000));
+            if (this.timerEl) this.timerEl.textContent = formatTimeSeconds(s);
+            var progress = 1 - s / (this.state.session.minutes * 60);
+            var sp = GARDEN_SPECIES.find(function (x) { return x.id === this.state.session.species; }.bind(this)) || GARDEN_SPECIES[0];
+            var stageIdx = progress < 0.35 ? 0 : progress < 0.75 ? 1 : 2;
+            if (this.plantArt) this.plantArt.textContent = sp.stages[stageIdx];
         }
     };
 
-    PomodoroTimer.prototype._onPhaseComplete = function () {
-        if (this.isWorking) {
-            playBeep(600, 200, 2);
-            this.isWorking = false;
-            this.timeRemaining = MODES[this.mode].break;
-            this.totalTime = MODES[this.mode].break;
-            this.endTime = Date.now() + this.timeRemaining * 1000;
-            this.ringEl.classList.add('break-mode');
-            this.timerCard.classList.add('break-active');
-        } else {
-            this.ringEl.classList.remove('break-mode');
-            this.timerCard.classList.remove('break-active');
-            if (this.currentRep < this.totalReps) {
-                playBeep(800, 200, 2);
-                this.currentRep++;
-                this.isWorking = true;
-                this.timeRemaining = MODES[this.mode].work;
-                this.totalTime = MODES[this.mode].work;
-                this.endTime = Date.now() + this.timeRemaining * 1000;
-            } else {
-                playBeep(1000, 300, 4);
-                this._onAllComplete();
-                return;
-            }
-        }
-        this._updateStatus();
-        this._updateDisplay();
-        this._saveSession();
-    };
+    PomodoroTimer.prototype._settleSession = function (now) {
+        var s = this.state.session;
+        if (!s) return;
+        var beforeMinutes = totalGardenMinutes(this.state);
+        var completedPlot = s.plot;
 
-    PomodoroTimer.prototype._onAllComplete = function () {
-        if (this.intervalId) clearInterval(this.intervalId);
+        if (!this.state.plots[completedPlot]) {
+            this.state.plots[completedPlot] = {
+                id: s.id,
+                species: s.species,
+                minutes: s.minutes,
+                completedAt: s.endsAt
+            };
+        }
+
+        this.state.session = null;
         this.isRunning = false;
-        this.isPaused = false;
-        this.endTime = null;
-        this.statusEl.textContent = t('completed');
-        this.statusEl.className = 'timer-status completed';
-        this.startBtn.textContent = t('start');
-        this.resetBtn.disabled = false;
-        this.timerCard.classList.remove('running');
-        this._setLockedUI(false);
-        this._clearSession();
-        this._saveHistory();
-    };
 
-    PomodoroTimer.prototype._updateDisplay = function () {
-        this.timeEl.textContent = formatTime(this.timeRemaining);
-        this.repEl.textContent = 'Rep ' + this.currentRep + '/' + this.totalReps;
-        var progress = 1 - (this.timeRemaining / this.totalTime);
-        this.ringEl.style.strokeDashoffset = CIRCUMFERENCE * (1 - progress);
-    };
-    PomodoroTimer.prototype._updateStatus = function () {
-        if (this.isWorking) {
-            this.statusEl.textContent = t('working');
-            this.statusEl.className = 'timer-status working';
-        } else {
-            this.statusEl.textContent = t('breaking');
-            this.statusEl.className = 'timer-status breaking';
+        // Auto expand if full
+        if (this.state.plots.every(Boolean)) {
+            this.state.plots.push.apply(this.state.plots, Array(16).fill(null));
         }
-    };
-    PomodoroTimer.prototype._setLockedUI = function (locked) {
-        var cls = locked ? 'add' : 'remove';
-        document.querySelectorAll('.mode-btn, .rep-btn').forEach(function (b) { b.classList[cls]('disabled'); });
+
+        this._stopSound();
+        this._save();
+
+        // Save session entry to Firestore history
+        this._saveHistoryEntry(s.minutes, s.species);
+
+        // Sound chime / beep
+        playBeep(880, 300, 3);
+
+        // Check unlocked new species
+        var afterMinutes = totalGardenMinutes(this.state);
+        var newlyUnlocked = GARDEN_SPECIES.filter(function (sp) {
+            return (sp.unlockMinutes || 0) > beforeMinutes && (sp.unlockMinutes || 0) <= afterMinutes;
+        });
+
+        var lang = currentLang === 'en' ? 'en' : 'vi';
+        if (newlyUnlocked.length > 0) {
+            var names = newlyUnlocked.map(function (sp) { return sp.name[lang] || sp.name.vi; }).join(', ');
+            toast(t('unlockSpeciesToast').replace('{names}', names));
+        } else {
+            toast(t('sessionCompleteToast'));
+        }
+
+        this.selectedPlot = this.state.plots.findIndex(function (p) { return !p; });
+        if (this.selectedPlot < 0) this.selectedPlot = 0;
+        this._render();
     };
 
-    // History — Firestore
-    PomodoroTimer.prototype._saveHistory = function () {
+    PomodoroTimer.prototype._saveHistoryEntry = function (minutes, speciesId) {
         if (!currentUser) return;
-        var entry = { mode: this.mode, reps: this.totalReps, completedAt: getTimeStr(), date: getTodayStr() };
-        userDocRef('pomodoro_history').add(entry).then(function () {
-            if (window.__pomodoroApp) window.__pomodoroApp._loadHistory();
-        });
-    };
-    PomodoroTimer.prototype._loadHistory = function () {
-        if (!currentUser) return;
+        var sp = GARDEN_SPECIES.find(function (s) { return s.id === speciesId; }) || GARDEN_SPECIES[0];
+        var lang = currentLang === 'en' ? 'en' : 'vi';
+        var entry = {
+            mode: 'garden',
+            duration: minutes,
+            species: speciesId,
+            speciesName: sp.name[lang] || sp.name.vi,
+            speciesIcon: sp.icon,
+            completedAt: getTimeStr(),
+            date: getTodayStr()
+        };
         var self = this;
+        userDocRef('pomodoro_history').add(entry).then(function () {
+            self._loadHistory();
+        }).catch(function () {});
+    };
+
+    PomodoroTimer.prototype._loadHistory = function () {
+        if (!currentUser) {
+            if (this.historyListEl) {
+                this.historyListEl.innerHTML = '<div class="history-empty">' + t('noHistory') + '</div>';
+            }
+            return;
+        }
+        var self = this;
+        // Also check and load cloud garden state
+        this._loadCloudGarden();
+
         userDocRef('pomodoro_history').orderBy('date', 'desc').get().then(function (snap) {
             var history = {};
             snap.forEach(function (doc) {
@@ -1038,12 +1494,16 @@
                 history[d.date].push(d);
             });
             self._renderHistory(history);
+        }).catch(function (e) {
+            console.warn('History load error:', e);
         });
     };
+
     PomodoroTimer.prototype._renderHistory = function (history) {
+        if (!this.historyListEl) return;
         var days = Object.keys(history).sort().reverse();
         if (days.length === 0) {
-            this.historyListEl.innerHTML = '<div class="history-empty">' + t('noHistory') + '</div>';
+            this.historyListEl.innerHTML = '<div class="history-empty" style="text-align:center; padding:24px 0; color:var(--garden-muted); font-size:13px;">' + t('noHistory') + '</div>';
             return;
         }
         var html = '';
@@ -1052,13 +1512,73 @@
             var items = history[day];
             var dateObj = new Date(day + 'T00:00:00');
             var dateStr = dateObj.toLocaleDateString(locale, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-            html += '<div class="history-day"><div class="history-date">' + dateStr + '</div>';
+            html += '<div class="history-day" style="margin-bottom:14px;"><div class="history-date" style="font-size:12px; font-weight:600; color:var(--garden-mint); margin-bottom:6px;">' + dateStr + '</div>';
             items.forEach(function (item) {
-                html += '<div class="history-item"><span class="history-item-mode">🍅 ' + t('modeLabel' + item.mode) + ' × ' + item.reps + ' rep</span><span class="history-item-detail">' + item.completedAt + '</span></div>';
+                var icon = item.speciesIcon || '🌱';
+                var name = item.speciesName || (item.species ? item.species : 'Cây trồng');
+                var mins = item.duration || item.minutes || (item.mode === '50' ? 40 : 25);
+                html += '<div class="history-item" style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:rgba(36,95,84,0.3); border:1px solid rgba(213,233,167,0.15); border-radius:10px; margin-bottom:6px; font-size:13px;">' +
+                    '<span>' + icon + ' ' + name + ' · ' + mins + 'm</span>' +
+                    '<span style="color:var(--garden-muted); font-size:12px;">' + (item.completedAt || '') + '</span></div>';
             });
             html += '</div>';
         });
         this.historyListEl.innerHTML = html;
+    };
+
+    // Ambient Sound Manager
+    PomodoroTimer.prototype._startSound = function () {
+        var self = this;
+        this._stopSound();
+        var req = ++this.soundRequest;
+        var trackUrl = GARDEN_SOUNDS[this.state.sound] || GARDEN_SOUNDS.rain;
+        var player = new Audio(trackUrl);
+        this.audio = player;
+        player.loop = true;
+        player.volume = (this.state.volume || 35) / 100;
+        player.preload = 'auto';
+
+        player.addEventListener('error', function () {
+            if (self.audio === player) {
+                self._stopSound();
+                toast('Không tải được âm thanh. Hãy kết nối mạng một lần để Service Worker lưu ngoại tuyến.');
+            }
+        });
+
+        player.play().then(function () {
+            if (req !== self.soundRequest || self.audio !== player) {
+                player.pause();
+                return;
+            }
+            self.audioPlaying = true;
+            if (self.soundToggleBtn) {
+                self.soundToggleBtn.textContent = '⏸';
+                self.soundToggleBtn.setAttribute('aria-pressed', 'true');
+            }
+        }).catch(function () {
+            if (req === self.soundRequest) {
+                self._stopSound();
+            }
+        });
+    };
+
+    PomodoroTimer.prototype._stopSound = function () {
+        this.soundRequest++;
+        if (this.audio) {
+            this.audio.pause();
+            this.audio.removeAttribute('src');
+            this.audio.load();
+        }
+        this.audio = null;
+        this.audioPlaying = false;
+        if (this.soundToggleBtn) {
+            this.soundToggleBtn.textContent = '♫';
+            this.soundToggleBtn.setAttribute('aria-pressed', 'false');
+        }
+    };
+
+    PomodoroTimer.prototype._onLanguageChange = function () {
+        this._render();
     };
 
     // =========================================================
@@ -5586,15 +6106,8 @@
             setLanguage(currentLang === 'vi' ? 'en' : 'vi');
             if (window.__pomodoroApp) {
                 window.__pomodoroApp._loadHistory();
-                if (!window.__pomodoroApp.isRunning) {
-                    window.__pomodoroApp.statusEl.textContent = t('ready');
-                    window.__pomodoroApp.startBtn.textContent = t('start');
-                } else if (window.__pomodoroApp.isPaused) {
-                    window.__pomodoroApp.startBtn.textContent = t('resume');
-                    window.__pomodoroApp._updateStatus();
-                } else {
-                    window.__pomodoroApp.startBtn.textContent = t('pause');
-                    window.__pomodoroApp._updateStatus();
+                if (typeof window.__pomodoroApp._onLanguageChange === 'function') {
+                    window.__pomodoroApp._onLanguageChange();
                 }
             }
             if (window.__todoApp) window.__todoApp._render();

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'quangpm-app-v22';
+const CACHE_NAME = 'quangpm-app-v27';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -8,6 +8,9 @@ const ASSETS_TO_CACHE = [
   './marked.min.js',
   './firebase-config.js',
   './icon.svg',
+  './sound/liecio-calming-rain.mp3',
+  './sound/alex_jauk-calm-zen-river-flowing-228223.mp3',
+  './sound/focus.mp3',
   'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap'
 ];
 
