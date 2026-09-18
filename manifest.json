@@ -1,31 +1,32 @@
 {
+  "id": "./",
   "name": "FlowHub - All in One App",
   "short_name": "FlowHub",
   "description": "Pomodoro Timer, To-do List & Quick Notes - FlowHub by QuangPM",
-  "start_url": ".",
-  "scope": ".",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#7c3aed",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "icon.svg",
-      "type": "image/svg+xml",
-      "sizes": "any",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icon.svg",
-      "type": "image/svg+xml",
+      "src": "icons/icon-192.png",
+      "type": "image/png",
       "sizes": "192x192",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "icon.svg",
-      "type": "image/svg+xml",
+      "src": "icons/icon-512.png",
+      "type": "image/png",
       "sizes": "512x512",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
     }
   ]
 }

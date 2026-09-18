@@ -1,4 +1,4 @@
-const CACHE_NAME = 'quangpm-app-v34';
+const CACHE_NAME = 'quangpm-app-v35';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -8,10 +8,13 @@ const ASSETS_TO_CACHE = [
   './marked.min.js',
   './firebase-config.js',
   './icon.svg',
+  './manifest.json',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/icon-maskable-512.png',
   './sound/liecio-calming-rain.mp3',
   './sound/alex_jauk-calm-zen-river-flowing-228223.mp3',
-  './sound/focus.mp3',
-  'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap'
+  './sound/focus.mp3'
 ];
 
 // In-memory background timers for fallback scheduling
@@ -34,7 +37,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
+          if (cacheName.startsWith('quangpm-app-') && cacheName !== CACHE_NAME) {
             console.log('[SW] Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }

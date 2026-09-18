@@ -87,6 +87,8 @@
             gotIt: 'Đã hiểu',
             installedToast: 'Đã cài đặt FlowHub thành công! 🎉',
             alreadyInstalledToast: 'FlowHub đã được cài đặt trên thiết bị của bạn! ✨',
+            installNotReadyToast: 'Trình duyệt chưa cho phép cài trực tiếp. Hãy mở FlowHub qua HTTPS và tải lại trang.',
+            installFailedToast: 'Chưa mở được hộp thoại cài đặt. Hãy tải lại trang và thử lại.',
             setTaskDates: 'Thời hạn công việc',
             setTaskDatesAndReminder: 'Thời hạn & Nhắc nhở',
             enableTaskReminder: 'Bật thông báo nhắc nhở',
@@ -288,6 +290,8 @@
             gotIt: 'Got it',
             installedToast: 'FlowHub installed successfully! 🎉',
             alreadyInstalledToast: 'FlowHub is already installed on your device! ✨',
+            installNotReadyToast: 'Direct installation is not available yet. Open FlowHub over HTTPS and reload the page.',
+            installFailedToast: 'Could not open the installation dialog. Reload the page and try again.',
             reminderTime: 'Time:',
             reminderFrequency: 'Repeat:',
             freqOnce: 'Once',
@@ -5876,6 +5880,20 @@
         var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
         var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 
+        // Capture readiness immediately, even before the UI is initialized.
+        window.addEventListener('beforeinstallprompt', function (e) {
+            e.preventDefault();
+            deferredPrompt = e;
+            showInstallPrompts();
+        });
+
+        window.addEventListener('appinstalled', function () {
+            isStandalone = true;
+            deferredPrompt = null;
+            hideInstallPrompts();
+            showToast(t('installedToast'), '🎉');
+        });
+
         function init() {
             headerBtn = document.getElementById('btn-header-install');
             loginBtn = document.getElementById('btn-login-install');
@@ -5886,6 +5904,7 @@
             guideCloseBtn = document.getElementById('pwa-guide-close');
             guideOkBtn = document.getElementById('pwa-guide-ok');
             toastEl = document.getElementById('pwa-toast');
+            hideInstallPrompts();
 
             // If already installed (running in standalone app mode)
             if (isStandalone) {
@@ -5898,25 +5917,8 @@
                 return;
             }
 
-            // Capture beforeinstallprompt event (Chromium on Android / Windows / Mac)
-            window.addEventListener('beforeinstallprompt', function (e) {
-                e.preventDefault();
-                deferredPrompt = e;
-                showInstallPrompts();
-            });
-
-            // App installed event
-            window.addEventListener('appinstalled', function () {
-                deferredPrompt = null;
-                hideInstallPrompts();
-                if (headerBtn) {
-                    headerBtn.classList.add('installed');
-                }
-                showToast(t('installedToast'), '🎉');
-            });
-
             // If on iOS Safari, install is supported via Add to Home Screen
-            if (isIOS && !isStandalone) {
+            if (deferredPrompt || isIOS) {
                 showInstallPrompts();
             }
 
@@ -5952,7 +5954,10 @@
         }
 
         function showInstallPrompts() {
-            if (isStandalone) return;
+            if (isStandalone || (!deferredPrompt && !isIOS)) return;
+            if (headerBtn) headerBtn.style.display = '';
+            var loginWrapper = document.getElementById('login-install-wrapper');
+            if (loginWrapper) loginWrapper.style.display = '';
             var dismissed = sessionStorage.getItem('pwa_banner_dismissed');
             if (!dismissed && banner) {
                 setTimeout(function () {
@@ -5964,12 +5969,13 @@
         }
 
         function hideInstallPrompts() {
+            if (headerBtn) headerBtn.style.display = 'none';
             if (banner) banner.style.display = 'none';
             var loginWrapper = document.getElementById('login-install-wrapper');
             if (loginWrapper) loginWrapper.style.display = 'none';
         }
 
-        function handleInstallClick() {
+        async function handleInstallClick() {
             if (isStandalone) {
                 showToast(t('alreadyInstalledToast'), '✨');
                 return;
@@ -5977,18 +5983,22 @@
 
             // 1. If deferredPrompt exists (Chrome/Android/Edge)
             if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then(function (choiceResult) {
-                    if (choiceResult && choiceResult.outcome === 'accepted') {
-                        hideInstallPrompts();
-                    }
-                    deferredPrompt = null;
-                });
+                var promptEvent = deferredPrompt;
+                deferredPrompt = null;
+                hideInstallPrompts();
+                try {
+                    await promptEvent.prompt();
+                    await promptEvent.userChoice;
+                } catch (error) {
+                    console.error('[PWA] Installation prompt failed:', error);
+                    showToast(t('installFailedToast'), '⚠️');
+                }
                 return;
             }
 
-            // 2. If iOS Safari or unsupported automated prompt: show Guide Modal
-            openGuideModal();
+            // iOS requires the browser's Share menu; Android uses the native prompt.
+            if (isIOS) openGuideModal();
+            else showToast(t('installNotReadyToast'), 'ℹ️');
         }
 
         function openGuideModal() {
