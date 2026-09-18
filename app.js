@@ -1150,7 +1150,11 @@
             event.preventDefault();
             self.dialPointer = event.pointerId;
             dial.setPointerCapture(event.pointerId);
-            dial.focus({ preventScroll: true });
+            if (event.pointerType === 'mouse') {
+                dial.focus({ preventScroll: true });
+            } else if (document.activeElement === dial) {
+                dial.blur();
+            }
             drag(event);
         });
 

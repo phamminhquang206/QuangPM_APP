@@ -649,19 +649,21 @@ body {
     user-select: none;
     cursor: grab;
     border-radius: 50%;
+    -webkit-tap-highlight-color: transparent;
 }
 
 #duration-dial:active {
     cursor: grabbing;
 }
 
-#duration-dial:focus {
+#duration-dial:focus,
+#duration-dial:focus-visible {
     outline: none;
 }
 
-#duration-dial:focus-visible {
-    outline: 2px solid var(--garden-mint);
-    outline-offset: 4px;
+#duration-dial:focus-visible .dial-track {
+    stroke: var(--garden-mint);
+    stroke-width: 4;
 }
 
 #duration-dial[aria-disabled="true"] {
@@ -6558,6 +6560,115 @@ body {
     0% { opacity: 0; transform: translateY(0) scale(0.6); }
     20% { opacity: 1; transform: translateY(-10px) scale(1.15); }
     100% { opacity: 0; transform: translateY(-50px) scale(0.9); }
+}
+
+/* Use the available workspace on tablets and computers. */
+@media (min-width: 768px) {
+    .app-container {
+        width: 100%;
+        max-width: 1600px;
+        padding-left: clamp(24px, 3vw, 48px);
+        padding-right: clamp(24px, 3vw, 48px);
+    }
+
+    .tab-nav,
+    #pomodoro-section,
+    #todo-section,
+    #habits-section {
+        max-width: none;
+        width: 100%;
+    }
+
+    #pomodoro-section .garden-card,
+    #pomodoro-section .garden-subnav {
+        max-width: none;
+    }
+
+    #pomodoro-section .garden-focus-card {
+        display: grid;
+        grid-template-columns: minmax(0, 400px) minmax(0, 360px);
+        column-gap: clamp(24px, 5vw, 80px);
+        row-gap: 8px;
+        justify-content: center;
+        justify-items: center;
+        align-content: center;
+    }
+
+    .garden-focus-card > .garden-eyebrow {
+        grid-column: 2;
+        grid-row: 1;
+        margin-bottom: 4px;
+        letter-spacing: 0.1em;
+    }
+
+    #pomodoro-section .garden-focus-card .garden-scene {
+        grid-column: 1;
+        grid-row: 1 / 7;
+        --scene-size: clamp(260px, 32vw, 360px);
+        margin: 0 0 24px;
+        align-self: center;
+    }
+
+    .garden-focus-card > #garden-timer { grid-column: 2; grid-row: 2; }
+    .garden-focus-card > #garden-message { grid-column: 2; grid-row: 3; }
+    .garden-focus-card > #garden-setup { grid-column: 2; grid-row: 4; }
+    .garden-focus-card > .garden-primary-btn { grid-column: 2; grid-row: 5; }
+    .garden-focus-card > .garden-sound-bar { grid-column: 2; grid-row: 6; }
+
+    .garden-focus-card > #garden-message {
+        margin: 0 0 8px;
+    }
+
+    .garden-focus-card > #garden-setup {
+        margin: 0 0 8px;
+    }
+
+    .garden-focus-card > .garden-sound-bar {
+        margin-top: 8px;
+    }
+
+    .garden-land {
+        width: min(100%, 560px);
+    }
+
+    .notes-grid {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    }
+
+    .prices-grid {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+}
+
+@media (min-width: 1024px) {
+    #pomodoro-section .garden-land-card {
+        gap: 16px;
+    }
+
+    .garden-land-card > .garden-land {
+        width: 100%;
+        padding: 20px;
+        margin: 4px 0 8px;
+    }
+
+    #garden-grid {
+        grid-template-columns: repeat(8, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .garden-land-card > .garden-pages {
+        margin: 4px 0 0;
+    }
+
+    .garden-land-card > .garden-stats-grid {
+        max-width: 720px;
+        gap: 16px;
+        padding-top: 0;
+    }
+
+    .garden-land-card .garden-stat-box {
+        padding: 14px 12px;
+    }
 }
 
 /* Keep MyGarden controls visible on phone screens, including browser chrome. */
