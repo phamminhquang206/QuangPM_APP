@@ -5961,7 +5961,7 @@
             var dismissed = sessionStorage.getItem('pwa_banner_dismissed');
             if (!dismissed && banner) {
                 setTimeout(function () {
-                    if (banner && !sessionStorage.getItem('pwa_banner_dismissed') && !isStandalone) {
+                    if (banner && !sessionStorage.getItem('pwa_banner_dismissed') && !isStandalone && (deferredPrompt || isIOS)) {
                         banner.style.display = 'flex';
                     }
                 }, 1200);
@@ -5969,10 +5969,12 @@
         }
 
         function hideInstallPrompts() {
-            if (headerBtn) headerBtn.style.display = 'none';
+            // Keep the user's install entry point visible while browsing.
+            // Only promotional banners depend on the native prompt being ready.
+            if (headerBtn) headerBtn.style.display = isStandalone ? 'none' : '';
             if (banner) banner.style.display = 'none';
             var loginWrapper = document.getElementById('login-install-wrapper');
-            if (loginWrapper) loginWrapper.style.display = 'none';
+            if (loginWrapper) loginWrapper.style.display = isStandalone ? 'none' : '';
         }
 
         async function handleInstallClick() {
