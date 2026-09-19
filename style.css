@@ -6897,14 +6897,25 @@ html[data-theme="light"] .habit-stat-card:hover {
     border-color: rgba(124, 58, 237, 0.22);
 }
 
-html[data-theme="light"] .tab-btn:hover,
-html[data-theme="light"] .filter-btn:hover,
-html[data-theme="light"] .todo-item:hover,
-html[data-theme="light"] .subtask-item:hover,
-html[data-theme="light"] .folder-pill:hover,
-html[data-theme="light"] .notion-tool-btn:hover,
-html[data-theme="light"] .habit-table tbody tr:hover {
-    background: rgba(124, 58, 237, 0.06);
+@media (hover: hover) and (pointer: fine) {
+    html[data-theme="light"] .tab-btn:not(.active):hover,
+    html[data-theme="light"] .filter-btn:not(.active):hover,
+    html[data-theme="light"] .todo-item:hover,
+    html[data-theme="light"] .subtask-item:hover,
+    html[data-theme="light"] .folder-pill:not(.active):hover,
+    html[data-theme="light"] .notion-tool-btn:hover,
+    html[data-theme="light"] .habit-table tbody tr:hover {
+        background: rgba(124, 58, 237, 0.06);
+    }
+}
+
+/* Active state must win immediately on touch devices (mobile browsers can
+   retain :hover until the user taps somewhere else). */
+html[data-theme="light"] .tab-btn.active,
+html[data-theme="light"] .tab-btn.active:hover {
+    background: var(--gradient-primary);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(124, 58, 237, 0.35);
 }
 
 html[data-theme="light"] input,

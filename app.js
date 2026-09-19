@@ -749,6 +749,11 @@
                     s.style.animation = 'none'; s.offsetHeight; s.style.animation = '';
                 });
                 document.getElementById(tab + '-section').classList.add('active');
+                // Mobile browsers may keep :hover on the tapped tab until the
+                // next touch. Remove focus so the new active color paints now.
+                if (window.matchMedia && window.matchMedia('(hover: none)').matches) {
+                    btn.blur();
+                }
                 if (tab === 'prices' && window.FlowHubStockFeature) {
                     window.FlowHubStockFeature.refresh();
                 }
