@@ -37,7 +37,133 @@
     
     --transition-fast: 0.15s ease;
     --transition-normal: 0.25s ease;
-}.flowhub-stock, .flowhub-stock *{
+}
+
+/* Light theme refinements for the self-contained stock terminal. */
+html[data-theme="light"] .flowhub-stock {
+    background: #edf2f7;
+    border-color: #d8dfeb;
+    box-shadow: 0 12px 34px rgba(36, 48, 78, 0.08);
+}
+
+html[data-theme="light"] .flowhub-stock .stock-feature-header {
+    background: linear-gradient(135deg, #f8f9ff 0%, #eef4ff 100%);
+    border-bottom-color: #dce3ef;
+}
+
+html[data-theme="light"] .flowhub-stock .stock-feature-eyebrow { color: #64748b; }
+html[data-theme="light"] .flowhub-stock .stock-feature-title { color: #1e293b; }
+html[data-theme="light"] .flowhub-stock .stock-feature-status { color: #718096; }
+
+html[data-theme="light"] .flowhub-stock .market-ticker-bar {
+    background: #eef2f8;
+    border-bottom-color: #d8e0ec;
+}
+
+html[data-theme="light"] .flowhub-stock .ticker-name,
+html[data-theme="light"] .flowhub-stock .ticker-price { color: #334155; }
+
+html[data-theme="light"] .flowhub-stock .ticker-item:hover {
+    background: rgba(124, 58, 237, 0.07);
+}
+
+html[data-theme="light"] .flowhub-stock .main-container { background: #edf2f7; }
+
+html[data-theme="light"] .flowhub-stock .chat-panel,
+html[data-theme="light"] .flowhub-stock .panel-card {
+    border-color: #dce3ed;
+    box-shadow: 0 8px 24px rgba(36, 48, 78, 0.08);
+}
+
+html[data-theme="light"] .flowhub-stock .chat-header { background: #fbfcfe; }
+
+html[data-theme="light"] .flowhub-stock .prompt-chips {
+    background: #f1f4f9;
+    border-top-color: #dce3ed;
+}
+
+html[data-theme="light"] .flowhub-stock .chip-btn {
+    background: #ffffff;
+    border-color: #d6deea;
+    color: #526079;
+}
+
+html[data-theme="light"] .flowhub-stock .chip-btn:hover {
+    background: #f0eaff;
+    color: #6d28d9;
+}
+
+html[data-theme="light"] .flowhub-stock .message-content,
+html[data-theme="light"] .flowhub-stock .chat-stock-card {
+    background: #eef3fa;
+    border-color: #d9e1ed;
+}
+
+html[data-theme="light"] .flowhub-stock .message.user .message-content {
+    background: #ede9fe;
+    border-color: #c4b5fd;
+    color: #4c1d95;
+}
+
+html[data-theme="light"] .flowhub-stock .fireant-banner-card {
+    background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+    border-color: #fdba74;
+}
+
+html[data-theme="light"] .flowhub-stock .fa-live-badge {
+    color: #c2410c;
+    background: #ffedd5;
+}
+
+html[data-theme="light"] .flowhub-stock .metric-box,
+html[data-theme="light"] .flowhub-stock .wl-item {
+    background: #f1f5f9;
+    border-color: #e1e7ef;
+}
+
+html[data-theme="light"] .flowhub-stock .comm-item,
+html[data-theme="light"] .flowhub-stock .commodities-note {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+}
+
+html[data-theme="light"] .flowhub-stock .comm-trend,
+html[data-theme="light"] .flowhub-stock .commodities-refresh-btn { background: #eef2f7; }
+
+@media (max-width: 992px), (max-width: 1024px) and (orientation: portrait) {
+    html[data-theme="light"] .flowhub-stock .mobile-tab-bar-inner {
+        background: #ffffff;
+        box-shadow: 0 4px 16px rgba(36, 48, 78, 0.1);
+    }
+}
+
+html[data-theme="light"] .flowhub-stock {
+    --bg-main: #edf2f7;
+    --bg-card: #f8fafc;
+    --bg-card-hover: #eef2f7;
+    --bg-elevated: #e7edf5;
+    --bg-input: #f1f5f9;
+    --border-color: rgba(15, 23, 42, 0.12);
+    --border-highlight: rgba(124, 58, 237, 0.28);
+    --text-primary: #172033;
+    --text-secondary: #526079;
+    --text-muted: #7a869c;
+    --accent-glow: 0 0 20px rgba(124, 58, 237, 0.16);
+}
+
+html[data-theme="light"] .flowhub-stock .app-header {
+    background: rgba(255, 255, 255, 0.9);
+}
+
+html[data-theme="light"] .flowhub-stock .mobile-nav {
+    background: rgba(255, 255, 255, 0.96);
+}
+
+html[data-theme="light"] .flowhub-stock ::-webkit-scrollbar-thumb {
+    background: rgba(15, 23, 42, 0.18);
+}
+
+.flowhub-stock, .flowhub-stock *{
     margin: 0;
     padding: 0;
     box-sizing: border-box;

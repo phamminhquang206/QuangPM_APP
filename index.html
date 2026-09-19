@@ -5,11 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QuangPM - All in One App</title>
     <meta name="description" content="Pomodoro Timer, To-do List & Quick Notes - All in One Productivity App by QuangPM">
+    <script>
+        // Apply the saved theme before styles render to avoid a bright/dark flash.
+        (function () {
+            try {
+                document.documentElement.dataset.theme = localStorage.getItem('flowhub_theme') === 'light' ? 'light' : 'dark';
+            } catch (error) {
+                document.documentElement.dataset.theme = 'dark';
+            }
+        })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=2.12">
-    <link rel="stylesheet" href="stock/stock-feature.css?v=1.0">
+    <link rel="stylesheet" href="style.css?v=2.15">
+    <link rel="stylesheet" href="stock/stock-feature.css?v=1.3">
 
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="manifest.json">
@@ -88,6 +98,9 @@
                     <span class="app-version">v1.5</span>
                 </div>
                 <div class="header-actions">
+                    <button class="theme-toggle" id="btn-theme-toggle" type="button" title="Chuyển sang chế độ sáng" aria-label="Chuyển sang chế độ sáng" aria-pressed="false">
+                        <span class="theme-toggle-icon" aria-hidden="true">☀️</span>
+                    </button>
                     <button class="install-header-btn" id="btn-header-install" title="Cài đặt FlowHub" aria-label="Cài đặt FlowHub">
                         <span class="install-header-icon">📲</span>
                         <span class="install-header-text" data-i18n="installApp">Cài app</span>
@@ -1293,7 +1306,7 @@
     <script src="stock/stock-api.js?v=1.0"></script>
     <script src="stock/stock-agent.js?v=1.0"></script>
     <script src="stock/stock-feature.js?v=1.0"></script>
-    <script src="app.js?v=2.5"></script>
+    <script src="app.js?v=2.6"></script>
 
     <!-- Register Service Worker for PWA -->
     <script>

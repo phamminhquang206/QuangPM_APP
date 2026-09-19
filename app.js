@@ -439,6 +439,50 @@
         applyI18nToDOM();
     }
 
+    // ===== THEME MANAGER =====
+    var THEME_STORAGE_KEY = 'flowhub_theme';
+
+    function getTheme() {
+        return document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+    }
+
+    function updateThemeButton(theme) {
+        var button = document.getElementById('btn-theme-toggle');
+        if (!button) return;
+
+        var isLight = theme === 'light';
+        var label = isLight ? 'Chuyển sang chế độ tối' : 'Chuyển sang chế độ sáng';
+        var icon = button.querySelector('.theme-toggle-icon');
+
+        if (icon) icon.textContent = isLight ? '🌙' : '☀️';
+        button.title = label;
+        button.setAttribute('aria-label', label);
+        button.setAttribute('aria-pressed', String(isLight));
+    }
+
+    function applyTheme(theme, persist) {
+        var nextTheme = theme === 'light' ? 'light' : 'dark';
+        document.documentElement.dataset.theme = nextTheme;
+        updateThemeButton(nextTheme);
+
+        var themeMeta = document.querySelector('meta[name="theme-color"]');
+        if (themeMeta) themeMeta.content = nextTheme === 'light' ? '#e9eef5' : '#7c3aed';
+
+        if (persist) {
+            try { localStorage.setItem(THEME_STORAGE_KEY, nextTheme); } catch (error) { /* Storage may be unavailable. */ }
+        }
+    }
+
+    function initThemeToggle() {
+        var button = document.getElementById('btn-theme-toggle');
+        applyTheme(getTheme(), false);
+        if (!button) return;
+
+        button.addEventListener('click', function () {
+            applyTheme(getTheme() === 'dark' ? 'light' : 'dark', true);
+        });
+    }
+
     // ===== UTILITY FUNCTIONS =====
     function formatTime(s) {
         return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
@@ -6022,6 +6066,7 @@
         initTabs();
         initGardenViewport();
         setLanguage();
+        initThemeToggle();
         initAuth();
         initConfirmModal();
         initBatteryGuideModal();
