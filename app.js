@@ -677,7 +677,36 @@
         var loadingOverlay = document.getElementById('loading-overlay');
         var loginError = document.getElementById('login-error');
         var avatarEl = document.getElementById('user-avatar');
+        var avatarFallbackEl = document.getElementById('user-avatar-fallback');
         var nameEl = document.getElementById('user-name');
+        var accountMenu = document.getElementById('account-menu');
+        var accountToggle = document.getElementById('account-menu-toggle');
+        var accountPopover = document.getElementById('account-popover');
+
+        function setAccountMenuOpen(open) {
+            if (!accountMenu || !accountToggle || !accountPopover) return;
+            accountMenu.classList.toggle('open', open);
+            accountToggle.setAttribute('aria-expanded', String(open));
+            accountPopover.hidden = !open;
+        }
+
+        if (accountToggle) {
+            accountToggle.addEventListener('click', function (event) {
+                event.stopPropagation();
+                setAccountMenuOpen(accountPopover.hidden);
+            });
+        }
+
+        document.addEventListener('click', function (event) {
+            if (accountMenu && !accountMenu.contains(event.target)) setAccountMenuOpen(false);
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && accountPopover && !accountPopover.hidden) {
+                setAccountMenuOpen(false);
+                accountToggle.focus();
+            }
+        });
 
         // Google login
         document.getElementById('btn-login-google').addEventListener('click', function () {
@@ -699,6 +728,7 @@
 
         // Logout
         document.getElementById('btn-logout').addEventListener('click', function () {
+            setAccountMenuOpen(false);
             if (window.confirm(t('logoutConfirm'))) {
                 auth.signOut();
             }
@@ -711,8 +741,20 @@
             if (user) {
                 currentUser = user;
                 // Update UI
-                avatarEl.src = user.photoURL || '';
-                nameEl.textContent = user.displayName || user.email || 'User';
+                var accountName = user.displayName || user.email || 'User';
+                nameEl.textContent = accountName;
+                accountToggle.title = accountName;
+                accountToggle.setAttribute('aria-label', 'Mở menu tài khoản của ' + accountName);
+                if (user.photoURL) {
+                    avatarEl.src = user.photoURL;
+                    avatarEl.hidden = false;
+                    avatarFallbackEl.hidden = true;
+                } else {
+                    avatarEl.removeAttribute('src');
+                    avatarEl.hidden = true;
+                    avatarFallbackEl.textContent = accountName.trim().charAt(0) || 'U';
+                    avatarFallbackEl.hidden = false;
+                }
                 loginPage.classList.add('hidden');
                 appContainer.style.display = '';
 
@@ -720,6 +762,7 @@
                 loadAllUserData();
             } else {
                 currentUser = null;
+                setAccountMenuOpen(false);
                 loginPage.classList.remove('hidden');
                 appContainer.style.display = 'none';
             }

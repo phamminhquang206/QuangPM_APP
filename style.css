@@ -244,59 +244,128 @@ body {
     min-height: 20px;
 }
 
-/* ===== USER BAR ===== */
-.user-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-md);
-    padding: 8px 14px;
-    margin-bottom: 16px;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+/* ===== ACCOUNT MENU ===== */
+.account-menu {
+    position: relative;
+    flex: 0 0 auto;
+    z-index: 120;
 }
 
-.user-info {
+.account-menu-toggle {
+    width: 38px;
+    height: 38px;
+    padding: 2px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: center;
+    border: 1px solid var(--glass-border);
+    border-radius: 50%;
+    background: var(--glass-bg);
+    cursor: pointer;
     overflow: hidden;
+    transition: var(--transition);
+    box-shadow: 0 3px 12px rgba(15, 23, 42, 0.12);
+}
+
+.account-menu-toggle:hover,
+.account-menu.open .account-menu-toggle {
+    border-color: rgba(124, 58, 237, 0.55);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+    transform: translateY(-1px);
+}
+
+.account-menu-toggle:focus-visible {
+    outline: 2px solid var(--accent-purple);
+    outline-offset: 2px;
+}
+
+.user-avatar,
+.user-avatar-fallback {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
 }
 
 .user-avatar {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    border: 2px solid var(--glass-border);
     object-fit: cover;
-    flex-shrink: 0;
+    display: block;
+}
+
+.user-avatar-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gradient-primary);
+    color: #fff;
+    font-size: 0.86rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.user-avatar-fallback[hidden],
+.user-avatar[hidden] {
+    display: none;
+}
+
+.account-popover {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: min(260px, calc(100vw - 24px));
+    padding: 12px;
+    background: rgba(18, 18, 42, 0.97);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.38);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    transform-origin: top right;
+    animation: accountMenuIn 0.16s ease-out;
+}
+
+.account-popover[hidden] { display: none; }
+
+@keyframes accountMenuIn {
+    from { opacity: 0; transform: translateY(-5px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.account-popover-label {
+    margin-bottom: 5px;
+    color: var(--text-muted);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
 .user-name {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 160px;
+    color: var(--text-primary);
+    font-size: 0.92rem;
+    font-weight: 700;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.account-popover-divider {
+    height: 1px;
+    margin: 11px 0 8px;
+    background: var(--glass-border);
 }
 
 .logout-btn {
-    padding: 6px 14px;
-    border: 1px solid var(--glass-border);
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid transparent;
     border-radius: var(--radius-sm);
     background: transparent;
-    color: var(--text-muted);
+    color: var(--text-secondary);
     font-family: var(--font);
-    font-size: 0.78rem;
-    font-weight: 500;
+    font-size: 0.84rem;
+    font-weight: 600;
     cursor: pointer;
     transition: var(--transition);
-    white-space: nowrap;
-    flex-shrink: 0;
+    text-align: left;
 }
 
 .logout-btn:hover {
@@ -2156,6 +2225,11 @@ body {
         width: 34px;
         height: 34px;
         font-size: 0.9rem;
+    }
+
+    .account-menu-toggle {
+        width: 34px;
+        height: 34px;
     }
 
     .lang-toggle {
@@ -5005,15 +5079,7 @@ body {
         height: 340px;
     }
 
-    /* User Bar & Header */
-    .user-bar {
-        padding: 10px 18px;
-        margin-bottom: 20px;
-    }
-    .user-name {
-        max-width: 280px;
-        font-size: 0.9rem;
-    }
+    /* Header */
     .app-title {
         font-size: 2rem;
     }
@@ -6740,11 +6806,6 @@ body {
         margin-bottom: 8px;
     }
 
-    .user-bar {
-        padding: 8px 12px;
-        margin-bottom: 12px;
-    }
-
     .tab-btn {
         padding: 8px 4px;
         font-size: 0.85rem;
@@ -6881,7 +6942,6 @@ html[data-theme="light"] .orb-3 { background: radial-gradient(circle, rgba(16, 1
 
 html[data-theme="light"] .login-card,
 html[data-theme="light"] .card,
-html[data-theme="light"] .user-bar,
 html[data-theme="light"] .tab-nav,
 html[data-theme="light"] .modal-container,
 html[data-theme="light"] .habit-modal-container,
@@ -6889,6 +6949,12 @@ html[data-theme="light"] .folder-dropdown-menu,
 html[data-theme="light"] .pwa-install-banner,
 html[data-theme="light"] .pwa-guide-container {
     box-shadow: var(--shadow-card);
+}
+
+html[data-theme="light"] .account-popover {
+    background: rgba(248, 250, 252, 0.98);
+    border-color: #d4dce8;
+    box-shadow: 0 18px 45px rgba(36, 48, 78, 0.18);
 }
 
 html[data-theme="light"] .card:hover,
