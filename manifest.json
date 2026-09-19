@@ -3,6 +3,7 @@
   "name": "FlowHub - All in One App",
   "short_name": "FlowHub",
   "description": "Pomodoro Timer, To-do List & Quick Notes - FlowHub by QuangPM",
+  "lang": "vi",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

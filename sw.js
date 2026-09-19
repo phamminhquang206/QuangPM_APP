@@ -1,4 +1,4 @@
-const CACHE_NAME = 'quangpm-app-v36';
+const CACHE_NAME = 'quangpm-app-v37';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -12,6 +12,11 @@ const ASSETS_TO_CACHE = [
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',
+  './stock/stock-feature.css',
+  './stock/stock-data.js',
+  './stock/stock-api.js',
+  './stock/stock-agent.js',
+  './stock/stock-feature.js',
   './sound/liecio-calming-rain.mp3',
   './sound/alex_jauk-calm-zen-river-flowing-228223.mp3',
   './sound/focus.mp3'
@@ -51,8 +56,19 @@ self.addEventListener('activate', (event) => {
 // Fetch events: Stale-While-Revalidate strategy for static assets
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
-  if (event.request.url.includes('firestore.googleapis.com')) return;
-  if (event.request.url.includes('identitytoolkit.googleapis.com')) return;
+  const liveDomains = [
+    'firestore.googleapis.com',
+    'identitytoolkit.googleapis.com',
+    'generativelanguage.googleapis.com',
+    'bgapidatafeed.vps.com.vn',
+    'dchart-api.vndirect.com.vn',
+    'services.entrade.com.vn',
+    'api.gold-api.com',
+    'api.binance.com',
+    'vang.today',
+    'fireant.vn'
+  ];
+  if (liveDomains.some((domain) => event.request.url.includes(domain))) return;
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {

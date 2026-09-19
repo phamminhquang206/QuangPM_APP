@@ -7,9 +7,10 @@
     <meta name="description" content="Pomodoro Timer, To-do List & Quick Notes - All in One Productivity App by QuangPM">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=2.12">
-    
+    <link rel="stylesheet" href="stock/stock-feature.css?v=1.0">
+
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#7c3aed">
@@ -94,10 +95,6 @@
                     <button class="reload-btn" id="btn-app-reload" title="Tải lại trang (F5)" aria-label="Tải lại trang">
                         <span class="reload-icon">🔄</span>
                     </button>
-                    <button class="lang-toggle" id="lang-toggle" title="Switch language">
-                        <span class="lang-flag" id="lang-flag">🇻🇳</span>
-                        <span class="lang-label" id="lang-label">VI</span>
-                    </button>
                 </div>
             </div>
             <!-- User info bar -->
@@ -119,7 +116,7 @@
                     📝 Notes
                 </button>
                 <button class="tab-btn" data-tab="prices" role="tab" id="tab-prices">
-                    💰 Prices
+                    📈 Chứng khoán
                 </button>
                 <button class="tab-btn" data-tab="habits" role="tab" id="tab-habits">
                     🎯 <span data-i18n="habitsTab">Habits</span>
@@ -146,7 +143,7 @@
             <div id="garden-focus-view" class="garden-view-pane active">
                 <div class="garden-card garden-focus-card">
                     <div class="garden-eyebrow" id="garden-focus-label" data-i18n="gardenFocusEyebrow">DÀNH MỘT CHÚT THỜI GIAN CHO BẠN</div>
-                    
+
                     <div class="garden-scene">
                         <div class="garden-orbit"></div>
                         <div id="duration-dial" role="slider" tabindex="0" aria-label="Thời lượng tập trung" aria-valuemin="0" aria-valuemax="60" aria-valuenow="25" aria-valuetext="25 phút">
@@ -206,7 +203,7 @@
                         </div>
                     </div>
                     <p id="garden-hint" class="garden-hint" data-i18n="gardenLandHint">Chọn một ô đất trống để gieo mầm.</p>
-                    
+
                     <div class="garden-land">
                         <div id="garden-grid" aria-label="Các ô trong khu vườn"></div>
                     </div>
@@ -337,91 +334,286 @@
             </div>
         </section>
 
-        <!-- ===== PRICES SECTION ===== -->
-        <section id="prices-section" class="section" role="tabpanel">
-            <div class="prices-toolbar">
-                <h3 class="prices-title" data-i18n="goldPrices">Giá Vàng DOJI</h3>
-                <button class="prices-refresh-btn" id="btn-refresh-prices" data-i18n="refresh">🔄 Làm mới</button>
-            </div>
-            <div class="prices-last-update" id="prices-last-update"></div>
-            
-            <div class="prices-grid" id="prices-grid">
-                <!-- SJC -->
-                <div class="price-card">
-                    <div class="price-card-header">
-                        <span class="price-icon">🥇</span>
-                        <h4 data-i18n="goldSJC">Vàng miếng SJC</h4>
-                        <span class="trend-badge" id="trend-sjc">--</span>
+        <!-- ===== STOCKS SECTION ===== -->
+        <section id="prices-section" class="section stock-section" role="tabpanel">
+            <div class="flowhub-stock" id="flowhub-stock" data-active-tab="market">
+                <div class="stock-feature-header">
+                    <div>
+                        <div class="stock-feature-eyebrow">THỊ TRƯỜNG CHỨNG KHOÁN VIỆT NAM</div>
+                        <h2 class="stock-feature-title">QPM Stock AI <span class="brand-badge">Realtime</span></h2>
+                        <div class="stock-feature-status" id="stock-refresh-status">Đang chuẩn bị dữ liệu thị trường...</div>
                     </div>
-                    <div class="price-row">
-                        <div class="price-col">
-                            <span class="price-label" data-i18n="buyPrice">Mua vào</span>
-                            <span class="price-value" id="price-sjc-buy">--</span>
+                    <button class="btn-icon" id="btn-open-settings" title="Cấu hình Gemini API">
+                        <span class="status-dot" id="api-status-dot"></span>
+                        <span id="api-status-text">Cấu hình Gemini API</span>
+                        <span>⚙️</span>
+                    </button>
+                </div>
+                    <!-- Real-Time Market Ticker Tape -->
+                    <div class="market-ticker-bar" id="market-ticker-bar">
+                        <div class="ticker-item"><span class="ticker-name">Đang tải chỉ số thị trường...</span></div>
+                    </div>
+                <!-- ===== MOBILE & TABLET PORTRAIT TAB BAR ===== -->
+                <nav class="mobile-tab-bar" id="mobile-tab-bar" aria-label="Điều hướng tab di động">
+                    <div class="mobile-tab-bar-inner">
+                        <button type="button" class="mobile-tab-btn" id="tab-btn-chat" data-tab="chat" aria-selected="false">
+                            <span class="tab-icon">🤖</span>
+                            <span class="tab-title">Chat AI</span>
+                        </button>
+                        <button type="button" class="mobile-tab-btn active" id="tab-btn-market" data-tab="market" aria-selected="true">
+                            <span class="tab-icon">📊</span>
+                            <span class="tab-title">Thị trường</span>
+                        </button>
+                    </div>
+                </nav>
+
+                <!-- ===== MAIN WORKSPACE ===== -->
+                <main class="main-container">
+
+                    <!-- Left Pane: AI Chat Terminal -->
+                    <section class="chat-panel">
+                        <div class="chat-header">
+                            <div class="chat-title-group">
+                                <div class="pulse-indicator"></div>
+                                <span style="font-weight: 700; font-size: 0.95rem;">Trợ Lý Phân Tích Gemini Pro (Tools Grounded)</span>
+                            </div>
+                            <span style="font-size: 0.8rem; color: var(--text-muted);">Dữ liệu khớp lệnh trực tiếp</span>
                         </div>
-                        <div class="price-col">
-                            <span class="price-label" data-i18n="sellPrice">Bán ra</span>
-                            <span class="price-value" id="price-sjc-sell">--</span>
+
+                        <!-- Chat Stream -->
+                        <div class="chat-messages" id="chat-messages">
+                            <div class="message ai">
+                                <div class="message-avatar">⚡</div>
+                                <div class="message-content">
+                                    Xin chào! Tôi là <strong>QPM Stock AI</strong>.
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Quick Prompt Suggestions -->
+                        <div class="prompt-chips" id="prompt-chips">
+                            <button class="chip-btn" data-prompt="Thị trường VN-INDEX và VN30 hôm nay diễn biến ra sao? Thanh khoản thế nào?">📈 Nhận định VN-INDEX</button>
+                            <button class="chip-btn" data-prompt="Gợi ý 3 cổ phiếu có thể tham gia T+ hôm nay">🎯 Gợi ý 3 cổ phiếu T+</button>
+                            <button class="chip-btn" data-prompt="So sánh cung cầu và diễn biến giá giữa VCB và TCB">⚖️ So sánh VCB và TCB</button>
+                            <button class="chip-btn" data-prompt="Cổ phiếu nào thuộc nhóm Ngân hàng, Chứng khoán đang có dòng tiền mạnh?">⚡ Dòng tiền nhóm Ngành</button>
+                        </div>
+
+                        <!-- Input Area -->
+                        <div class="chat-input-area">
+                            <input type="text" class="chat-input" id="chat-input" placeholder="Hỏi về mã cổ phiếu, phân tích kỹ thuật, khối ngoại... (Nhấn Enter để gửi)" autocomplete="off" />
+                            <button class="btn-send" id="btn-send">
+                                <span>Gửi</span>
+                                <span>➤</span>
+                            </button>
+                        </div>
+                    </section>
+
+                    <!-- Right Pane: Live Stock Inspector & FireAnt Integration -->
+                    <aside class="inspector-panel">
+
+                        <!-- Quick Search & Overview Card -->
+                        <div class="panel-card">
+                            <div class="search-container">
+                                <span class="search-icon">🔍</span>
+                                <input type="text" class="search-input" id="search-input" placeholder="Nhập mã (FPT, HPG, SSI, DRI, VNM...)" maxlength="10" />
+                            </div>
+
+                            <div class="stock-hero">
+                                <div>
+                                    <div class="hero-symbol" id="hero-symbol">FPT</div>
+                                    <div class="hero-name" id="hero-name">Công ty Cổ phần FPT</div>
+                                </div>
+                                <div class="hero-price-box">
+                                    <div class="hero-price up" id="hero-price">--</div>
+                                    <div class="hero-change" id="hero-change">--</div>
+                                </div>
+                            </div>
+
+                            <!-- FireAnt Live Dashboard Integration -->
+                            <div class="fireant-banner-card">
+                                <div class="fa-banner-top">
+                                    <div class="fa-brand-info">
+                                        <div class="fa-flame-icon">🔥</div>
+                                        <div>
+                                            <div class="fa-title">Biểu đồ & Bảng giá <span class="fa-ticker-tag" id="fa-target-symbol">FPT</span></div>
+                                            <div class="fa-subtitle">Nền tảng chứng khoán FireAnt (Web & App)</div>
+                                        </div>
+                                    </div>
+                                    <span class="fa-live-badge">⚡ FireAnt Pro</span>
+                                </div>
+
+                                <div class="fa-action-buttons">
+                                    <button type="button" class="btn-fireant-main" id="btn-fireant-launch" onclick="window.openFireAnt(window.currentStockTicker || 'FPT')">
+                                        <span class="fa-btn-icon">🚀</span>
+                                        <span>Mở Biểu Đồ & Dữ Liệu FireAnt</span>
+                                        <span class="fa-arrow">↗</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Live Trading Metrics Grid -->
+                            <div class="metrics-grid">
+                                <div class="metric-box">
+                                    <div class="metric-label">Mở Cửa</div>
+                                    <div class="metric-value" id="metric-open">--</div>
+                                </div>
+                                <div class="metric-box">
+                                    <div class="metric-label">Tham Chiếu</div>
+                                    <div class="metric-value" id="metric-ref">--</div>
+                                </div>
+                                <div class="metric-box">
+                                    <div class="metric-label">Trần / Sàn</div>
+                                    <div class="metric-value" id="metric-ceil-floor" style="font-size: 0.78rem;">--</div>
+                                </div>
+                                <div class="metric-box">
+                                    <div class="metric-label">Tổng Khối Lượng</div>
+                                    <div class="metric-value" id="metric-vol">--</div>
+                                </div>
+                                <div class="metric-box">
+                                    <div class="metric-label">Ngoại Mua / Bán</div>
+                                    <div class="metric-value" id="metric-foreign-buy-sell" style="font-size: 0.78rem;">--</div>
+                                </div>
+                                <div class="metric-box">
+                                    <div class="metric-label">Thấp - Cao</div>
+                                    <div class="metric-value" id="metric-highlow" style="font-size: 0.78rem;">--</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Watchlist Panel -->
+                        <div class="panel-card">
+                            <div class="watchlist-header">
+                                <div class="watchlist-title">⭐ Danh Mục Theo Dõi</div>
+                                <button class="wl-add-toggle-btn" id="btn-wl-add-toggle" title="Thêm mã cổ phiếu">＋ Thêm mã</button>
+                            </div>
+                            <!-- Add Stock Input Row (hidden by default) -->
+                            <div class="wl-add-row" id="wl-add-row">
+                                <input type="text" class="wl-add-input" id="wl-add-input" placeholder="Nhập mã (VD: VCB, MWG...)" maxlength="10" autocomplete="off" />
+                                <button class="wl-add-confirm-btn" id="btn-wl-add-confirm">Thêm</button>
+                            </div>
+                            <div class="watchlist-items" id="watchlist-items">
+                                <!-- Items populated dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Gold Market Panel -->
+                        <div class="panel-card commodities-card">
+                            <div class="commodities-header">
+                                <div class="commodities-title">🏆 Bảng Giá Vàng Trực Tuyến</div>
+                                <button class="commodities-refresh-btn" id="btn-refresh-commodities" title="Làm mới giá vàng">🔄 Làm mới</button>
+                            </div>
+                            <div class="commodities-last-update" id="commodities-last-update">Đang tải dữ liệu...</div>
+
+                            <div class="commodities-grid">
+                                <!-- SJC -->
+                                <div class="comm-item">
+                                    <div class="comm-item-header">
+                                        <span class="comm-icon">🥇</span>
+                                        <span class="comm-name">Vàng miếng SJC</span>
+                                        <span class="comm-trend" id="trend-sjc">--</span>
+                                    </div>
+                                    <div class="comm-price-row">
+                                        <div class="comm-price-col">
+                                            <span class="comm-label">Mua vào</span>
+                                            <span class="comm-val" id="price-sjc-buy">--</span>
+                                        </div>
+                                        <div class="comm-price-col">
+                                            <span class="comm-label">Bán ra</span>
+                                            <span class="comm-val" id="price-sjc-sell">--</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Nhẫn DOJI -->
+                                <div class="comm-item">
+                                    <div class="comm-item-header">
+                                        <span class="comm-icon">💍</span>
+                                        <span class="comm-name">Nhẫn tròn DOJI</span>
+                                        <span class="comm-trend" id="trend-ring">--</span>
+                                    </div>
+                                    <div class="comm-price-row">
+                                        <div class="comm-price-col">
+                                            <span class="comm-label">Mua vào</span>
+                                            <span class="comm-val" id="price-ring-buy">--</span>
+                                        </div>
+                                        <div class="comm-price-col">
+                                            <span class="comm-label">Bán ra</span>
+                                            <span class="comm-val" id="price-ring-sell">--</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- World Gold -->
+                                <div class="comm-item">
+                                    <div class="comm-item-header">
+                                        <span class="comm-icon">🌍</span>
+                                        <span class="comm-name">Vàng Thế giới (XAU/USD)</span>
+                                        <span class="comm-trend" id="trend-gold">--</span>
+                                    </div>
+                                    <div class="comm-price-row">
+                                        <div class="comm-price-col">
+                                            <span class="comm-label">Giá khớp</span>
+                                            <span class="comm-val" id="price-gold">--</span>
+                                        </div>
+                                        <div class="comm-price-col">
+                                            <span class="comm-label">Đơn vị</span>
+                                            <span class="comm-val" style="color: var(--text-muted); font-size: 0.78rem;">USD / oz</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="commodities-note">
+                                * Mức +/- và % phản ánh biến động lũy kế cả phiên (so với giá mở cửa đầu ngày của DOJI & SJC, và 24h đối với Vàng Thế giới).
+                            </div>
+                        </div>
+
+                    </aside>
+
+                </main>
+
+                <!-- ===== SETTINGS / API KEY MODAL ===== -->
+                <div class="modal-overlay" id="api-key-modal">
+                    <div class="modal-card">
+                        <div class="modal-header">
+                            <h3 class="modal-title">🔑 Cấu Hình Google Gemini API</h3>
+                            <button class="modal-close" id="btn-close-modal">✕</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label class="form-label" for="input-api-key">Gemini API Key</label>
+                                <input type="password" class="form-input" id="input-api-key" placeholder="AIzaSy..." />
+                                <p class="form-help">
+                                    API Key được lưu trong vùng dữ liệu riêng của tài khoản FlowHub trên Firestore.
+                                    <br/>Nhận miễn phí tại <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: #c084fc; text-decoration: underline;">Google AI Studio</a>.
+                                </p>
+                            </div>
+
+                            <div class="form-group">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <label class="form-label" for="select-model">Mô hình AI</label>
+                                    <button type="button" id="btn-fetch-models" style="background: none; border: none; color: #38bdf8; font-size: 0.78rem; cursor: pointer; text-decoration: underline;">🔄 Tự động dò danh sách Model</button>
+                                </div>
+                                <select class="form-select" id="select-model">
+                                    <option value="gemini-2.5-flash">gemini-2.5-flash (Khuyên dùng - Nhanh & Chuẩn xác)</option>
+                                    <option value="gemini-3.6-flash">gemini-3.6-flash (Mới nhất)</option>
+                                    <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite (Siêu tốc & Tiết kiệm)</option>
+                                    <option value="gemini-3.1-pro">gemini-3.1-pro (Phân tích chuyên sâu)</option>
+                                    <option value="gemini-2.0-flash">gemini-2.0-flash (Thế hệ 2.0)</option>
+                                    <option value="gemini-1.5-flash">gemini-1.5-flash (Thế hệ 1.5 Legacy)</option>
+                                </select>
+                            </div>
+
+                            <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                                <button class="btn-secondary" id="btn-test-api" type="button">⚡ Kiểm tra kết nối</button>
+                                <span id="test-result" style="font-size: 0.82rem; font-weight: 500;"></span>
+                            </div>
+                        </div>
+                        <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">FlowHub Stocks</span>
+                            <button class="btn-primary" id="btn-save-settings">Lưu Cấu Hình</button>
                         </div>
                     </div>
                 </div>
-
-                <!-- Nhẫn Tròn -->
-                <div class="price-card">
-                    <div class="price-card-header">
-                        <span class="price-icon">💍</span>
-                        <h4 data-i18n="goldRing">Nhẫn tròn Hưng Thịnh Vượng</h4>
-                        <span class="trend-badge" id="trend-ring">--</span>
-                    </div>
-                    <div class="price-row">
-                        <div class="price-col">
-                            <span class="price-label" data-i18n="buyPrice">Mua vào</span>
-                            <span class="price-value" id="price-ring-buy">--</span>
-                        </div>
-                        <div class="price-col">
-                            <span class="price-label" data-i18n="sellPrice">Bán ra</span>
-                            <span class="price-value" id="price-ring-sell">--</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Global Commodities -->
-            <div class="prices-toolbar" style="margin-top: 24px;">
-                <h3 class="prices-title" data-i18n="globalPrices">Hàng Hóa Toàn Cầu</h3>
-            </div>
-            
-            <div class="prices-grid" id="global-prices-grid">
-                <!-- Gold -->
-                <div class="price-card">
-                    <div class="price-card-header">
-                        <span class="price-icon">🟡</span>
-                        <h4 data-i18n="worldGold">Vàng (World)</h4>
-                        <span class="trend-badge" id="trend-gold">--</span>
-                    </div>
-                    <div class="price-row">
-                        <div class="price-col">
-                            <span class="price-label">Giá (USD/oz)</span>
-                            <span class="price-value" id="price-gold">--</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Oil -->
-                <div class="price-card">
-                    <div class="price-card-header">
-                        <span class="price-icon">🛢️</span>
-                        <h4 data-i18n="crudeOil">Dầu Thô (WTI)</h4>
-                        <span class="trend-badge" id="trend-oil">--</span>
-                    </div>
-                    <div class="price-row">
-                        <div class="price-col">
-                            <span class="price-label">Giá (USD/bbl)</span>
-                            <span class="price-value" id="price-oil">--</span>
-                        </div>
-                    </div>
-                </div>
-
-
             </div>
         </section>
 
@@ -567,7 +759,7 @@
 
             <div class="modal-body notion-modal-body">
                 <input type="text" class="note-title-input notion-title-input" id="note-title-input" data-i18n-placeholder="noteTitlePlaceholder" placeholder="Tiêu đề ghi chú..." autocomplete="off" />
-                
+
                 <!-- Notion Dual Mode: Raw Markdown Textarea for Editing & Rich Preview for Viewing -->
                 <textarea class="notion-editor-textarea" id="note-content-editor-raw" placeholder="Gõ nội dung ghi chú (hỗ trợ đầy đủ Markdown, Bảng, Danh sách, Khối code...)..." spellcheck="false"></textarea>
                 <div class="notion-editor notion-editor-preview markdown-body" id="note-content-editor"></div>
@@ -888,7 +1080,7 @@
                     <div class="shop-balance-val"><span id="shop-xp-balance">0</span> <span class="shop-xp-unit">XP</span></div>
                     <div class="shop-balance-desc" data-i18n="shopDesc">Dùng điểm kỷ luật đã tích lũy để tự thưởng cho bản thân!</div>
                 </div>
-                
+
                 <!-- Add new custom reward -->
                 <div class="shop-add-form">
                     <h4 data-i18n="addCustomReward">Thêm phần thưởng mới</h4>
@@ -1097,7 +1289,11 @@
     <script src="firebase-config.js"></script>
     <script src="marked.min.js"></script>
     <script src="markdown.js?v=2.0"></script>
-    <script src="app.js?v=2.4"></script>
+    <script src="stock/stock-data.js?v=1.0"></script>
+    <script src="stock/stock-api.js?v=1.0"></script>
+    <script src="stock/stock-agent.js?v=1.0"></script>
+    <script src="stock/stock-feature.js?v=1.0"></script>
+    <script src="app.js?v=2.5"></script>
 
     <!-- Register Service Worker for PWA -->
     <script>

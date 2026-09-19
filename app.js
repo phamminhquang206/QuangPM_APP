@@ -413,7 +413,7 @@
     };
 
     // ===== I18N MANAGER =====
-    var currentLang = localStorage.getItem('app_language') || 'vi';
+    var currentLang = 'vi';
 
     function t(key) {
         return (LANG[currentLang] && LANG[currentLang][key]) || LANG['vi'][key] || key;
@@ -433,18 +433,9 @@
         });
     }
 
-    function setLanguage(lang) {
-        currentLang = lang;
-        localStorage.setItem('app_language', lang);
-        var flagEl = document.getElementById('lang-flag');
-        var labelEl = document.getElementById('lang-label');
-        if (lang === 'vi') {
-            flagEl.textContent = '🇻🇳'; labelEl.textContent = 'VI';
-            document.documentElement.lang = 'vi';
-        } else {
-            flagEl.textContent = '🇬🇧'; labelEl.textContent = 'EN';
-            document.documentElement.lang = 'en';
-        }
+    function setLanguage() {
+        currentLang = 'vi';
+        document.documentElement.lang = 'vi';
         applyI18nToDOM();
     }
 
@@ -714,6 +705,9 @@
                     s.style.animation = 'none'; s.offsetHeight; s.style.animation = '';
                 });
                 document.getElementById(tab + '-section').classList.add('active');
+                if (tab === 'prices' && window.FlowHubStockFeature) {
+                    window.FlowHubStockFeature.refresh();
+                }
             });
         });
     }
@@ -4468,141 +4462,6 @@
     };
 
     // =========================================================
-    //  PRICE APP (DOJI)
-    // =========================================================
-    function PriceApp() {
-        this.sjcBuyEl = document.getElementById('price-sjc-buy');
-        this.sjcSellEl = document.getElementById('price-sjc-sell');
-        this.sjcTrendEl = document.getElementById('trend-sjc');
-        
-        this.ringBuyEl = document.getElementById('price-ring-buy');
-        this.ringSellEl = document.getElementById('price-ring-sell');
-        this.ringTrendEl = document.getElementById('trend-ring');
-
-        // Global
-        this.goldPriceEl = document.getElementById('price-gold');
-        this.goldTrendEl = document.getElementById('trend-gold');
-        this.oilPriceEl = document.getElementById('price-oil');
-        this.oilTrendEl = document.getElementById('trend-oil');
-
-
-        this.lastUpdateEl = document.getElementById('prices-last-update');
-        this.refreshBtn = document.getElementById('btn-refresh-prices');
-
-        if (!this.sjcBuyEl) return;
-
-        this.refreshBtn.addEventListener('click', this.fetchPrices.bind(this));
-
-        // PASTE YOUR APPS SCRIPT URL HERE
-        this.appsScriptUrl = "https://script.google.com/macros/s/AKfycbzgehE46dQ-oMGOTRLh71L02VykMBsImfOcu9ePvqZwnO0lV2vc6k5-RQh9FWOXE6C6/exec";
-
-        // Initial fetch
-        this.fetchPrices();
-    }
-
-    PriceApp.prototype.formatPrice = function (value) {
-        if (!value) return '--';
-        return value.toLocaleString('vi-VN') + ' đ';
-    };
-
-    PriceApp.prototype.updateDojiTrend = function(trendEl, changeVal, currentPrice) {
-        if (!trendEl) return;
-        if (!changeVal || changeVal === 0) {
-            trendEl.textContent = '--';
-            trendEl.className = 'trend-badge';
-            return;
-        }
-        var prev = currentPrice - changeVal;
-        var percent = ((changeVal / prev) * 100).toFixed(2) + '%';
-        
-        var changeStr = '';
-        if (Math.abs(changeVal) >= 1000) {
-            changeStr = (changeVal / 1000).toLocaleString('vi-VN') + 'K';
-        } else {
-            changeStr = changeVal.toLocaleString('vi-VN');
-        }
-        
-        var isUp = changeVal > 0;
-        if (isUp) changeStr = '+' + changeStr;
-        
-        trendEl.textContent = (isUp ? '▲ ' : '▼ ') + changeStr + ' (' + percent + ')';
-        trendEl.className = 'trend-badge ' + (isUp ? 'up' : 'down');
-    };
-
-    PriceApp.prototype.fetchPrices = function () {
-        var self = this;
-        this.refreshBtn.classList.add('loading');
-
-        // 1. Fetch DOJI Gold (Vang.today)
-        var p1 = fetch('https://www.vang.today/api/prices').then(function (res) { return res.json(); });
-
-        // 2. Fetch Global Commodities (Google Apps Script)
-        var p2 = Promise.resolve({ success: false }); // Default if no script URL
-        if (this.appsScriptUrl !== "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
-            p2 = fetch(this.appsScriptUrl).then(function (res) { return res.json(); });
-        }
-
-        Promise.all([p1, p2]).then(function (results) {
-            var dojiData = results[0];
-            var globalData = results[1];
-
-            // --- DOJI DATA ---
-            if (dojiData && dojiData.success && dojiData.prices) {
-                var sjc = dojiData.prices['DOHNL'] || dojiData.prices['DOHCML'];
-                if (sjc) {
-                    self.sjcBuyEl.textContent = self.formatPrice(sjc.buy);
-                    self.sjcSellEl.textContent = self.formatPrice(sjc.sell);
-                    self.updateDojiTrend(self.sjcTrendEl, sjc.change_buy, sjc.buy);
-                }
-                var ring = dojiData.prices['DOJINHTV'];
-                if (ring) {
-                    self.ringBuyEl.textContent = self.formatPrice(ring.buy);
-                    self.ringSellEl.textContent = self.formatPrice(ring.sell);
-                    self.updateDojiTrend(self.ringTrendEl, ring.change_buy, ring.buy);
-                }
-                var dateObj = new Date(dojiData.timestamp * 1000);
-                self.lastUpdateEl.textContent = 'Cập nhật: ' + dateObj.toLocaleTimeString('vi-VN') + ' ' + dateObj.toLocaleDateString('vi-VN');
-            }
-
-            // --- GLOBAL COMMODITIES ---
-            if (dojiData && dojiData.success && dojiData.prices && dojiData.prices['XAUUSD']) {
-                var goldData = dojiData.prices['XAUUSD'];
-                var changeStr = (goldData.change_buy > 0 ? '+' : '') + goldData.change_buy.toFixed(2);
-                self.updateGlobalCard(self.goldPriceEl, self.goldTrendEl, {
-                    price: goldData.buy.toFixed(2),
-                    change: changeStr,
-                    percent: (goldData.change_buy / (goldData.buy - goldData.change_buy) * 100).toFixed(2) + '%'
-                }, '$');
-            } else {
-                self.goldPriceEl.textContent = "Lỗi API";
-            }
-
-            if (globalData && globalData.success && globalData.data) {
-                if (globalData.data['Oil']) {
-                    self.updateGlobalCard(self.oilPriceEl, self.oilTrendEl, globalData.data['Oil'], '$');
-                }
-            } else {
-                self.oilPriceEl.textContent = "Chờ API...";
-            }
-        }).catch(function (err) {
-            console.error("Lỗi lấy giá:", err);
-            self.lastUpdateEl.textContent = 'Lỗi cập nhật lúc ' + new Date().toLocaleTimeString('vi-VN');
-        }).finally(function () {
-            self.refreshBtn.classList.remove('loading');
-        });
-    };
-
-    PriceApp.prototype.updateGlobalCard = function (priceEl, trendEl, dataObj, prefix) {
-        if (!dataObj) return;
-        priceEl.textContent = prefix + dataObj.price;
-
-        var isUp = dataObj.change.indexOf('+') !== -1 || parseFloat(dataObj.change) > 0;
-        var changeStr = dataObj.change + ' (' + dataObj.percent + ')';
-        trendEl.textContent = (isUp ? '▲ ' : '▼ ') + changeStr;
-        trendEl.className = 'trend-badge ' + (isUp ? 'up' : 'down');
-    };
-
-    // =========================================================
     //  8. HABIT TRACKER APP (FEATURE 8)
     // =========================================================
     var ALL_HABIT_BADGES = [
@@ -6162,28 +6021,11 @@
     document.addEventListener('DOMContentLoaded', function () {
         initTabs();
         initGardenViewport();
-        setLanguage(currentLang);
+        setLanguage();
         initAuth();
         initConfirmModal();
         initBatteryGuideModal();
         PwaManager.init();
-
-        // Language toggle
-        document.getElementById('lang-toggle').addEventListener('click', function () {
-            setLanguage(currentLang === 'vi' ? 'en' : 'vi');
-            if (window.__pomodoroApp) {
-                window.__pomodoroApp._loadHistory();
-                if (typeof window.__pomodoroApp._onLanguageChange === 'function') {
-                    window.__pomodoroApp._onLanguageChange();
-                }
-            }
-            if (window.__todoApp) window.__todoApp._render();
-            if (window.__noteApp) {
-                window.__noteApp._renderFolders();
-                window.__noteApp._render();
-            }
-            if (window.__habitApp) window.__habitApp._render();
-        });
 
         // App Reload (F5) button
         var reloadBtn = document.getElementById('btn-app-reload');
@@ -6200,7 +6042,6 @@
         window.__pomodoroApp = new PomodoroTimer();
         window.__todoApp = new TodoList();
         window.__noteApp = new NoteApp();
-        window.__priceApp = new PriceApp();
         window.__habitApp = new HabitApp();
     });
 })();
