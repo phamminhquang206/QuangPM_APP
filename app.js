@@ -4677,8 +4677,38 @@
         });
     };
 
+    NoteApp.prototype._getPreviewText = function (content) {
+        if (!content) return '';
+        var rendered = (window.MarkdownRenderer && typeof window.MarkdownRenderer.render === 'function')
+            ? window.MarkdownRenderer.render(content)
+            : legacyToNotionHtml(content);
+        var container = document.createElement('div');
+        container.innerHTML = rendered;
+
+        container.querySelectorAll('.notion-copy-code-btn, script, style, svg, input').forEach(function (el) {
+            el.remove();
+        });
+        container.querySelectorAll('br').forEach(function (br) {
+            br.replaceWith(document.createTextNode(' '));
+        });
+        container.querySelectorAll('img').forEach(function (img) {
+            var alt = (img.getAttribute('alt') || '').trim();
+            img.replaceWith(document.createTextNode(alt ? ' 🖼 ' + alt + ' ' : ' 🖼 '));
+        });
+        container.querySelectorAll('p, div, li, h1, h2, h3, h4, h5, h6, blockquote, pre, td, th').forEach(function (block) {
+            block.appendChild(document.createTextNode(' '));
+        });
+
+        var preview = (container.textContent || '').replace(/\s+/g, ' ').trim();
+        var maxLength = 180;
+        if (preview.length > maxLength) {
+            preview = preview.substring(0, maxLength - 1).replace(/\s+\S*$/, '').trim() + '…';
+        }
+        return preview;
+    };
+
     // =========================================================
-    //  RENDER (FILTER BY FOLDER & NOTION RICH CARDS)
+    //  RENDER (FILTER BY FOLDER & COMPACT TEXT PREVIEW)
     // =========================================================
     NoteApp.prototype._render = function () {
         // Filter notes by activeFolderId
@@ -4720,15 +4750,13 @@
                 folderBadge = '<div class="note-card-folder" data-folder-id="' + note.folderId + '" title="' + escapeHtml(folderMap[note.folderId]) + '">📁 ' + escapeHtml(folderMap[note.folderId]) + '</div>';
             }
 
-            var bodyHtml = (window.MarkdownRenderer && typeof window.MarkdownRenderer.render === 'function')
-                ? window.MarkdownRenderer.render(note.content || '')
-                : legacyToNotionHtml(note.content || '');
+            var previewText = self._getPreviewText(note.content || '');
 
             html += '<div class="note-card' + (checked ? ' selected' : '') + '" data-id="' + note.id + '"' + colorAttr + '>' +
                 '<input type="checkbox" class="note-select" data-note-id="' + note.id + '"' + (checked ? ' checked' : '') + ' />' +
                 folderBadge +
                 (note.title ? '<div class="note-title">' + escapeHtml(note.title) + '</div>' : '') +
-                (bodyHtml ? '<div class="note-body">' + bodyHtml + '</div>' : '') +
+                (previewText ? '<div class="note-body">' + escapeHtml(previewText) + '</div>' : '') +
                 '<div class="note-date">' + dateStr + '</div></div>';
         });
 
