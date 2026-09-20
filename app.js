@@ -54,8 +54,11 @@
             notionEditorPlaceholder: 'Gõ nội dung hoặc dùng phím tắt #, -, [], > ...',
             noteImageUploadTitle: 'Tải ảnh lên',
             noteImageUploading: 'Đang tải {count} ảnh lên...',
+            noteImageUploadingProgress: 'Đang tải {count} ảnh lên Cloudinary... {percent}%',
             noteImageUploadSuccess: 'Đã thêm ảnh vào ghi chú',
             noteImageUploadError: 'Không thể tải ảnh lên. Vui lòng thử lại.',
+            noteImageUploadTimeout: 'Tải ảnh quá lâu. Vui lòng kiểm tra kết nối rồi thử lại.',
+            noteImageUploadConfigError: 'Chưa cấu hình Cloudinary cho Notes.',
             noteImageTooLarge: 'Ảnh phải nhỏ hơn 10 MB.',
             noteImageUploadPending: 'Vui lòng chờ ảnh tải lên xong trước khi lưu.',
             emptyFolderNotes: 'Thư mục này chưa có ghi chú nào',
@@ -263,8 +266,11 @@
             notionEditorPlaceholder: 'Type content or use shortcuts #, -, [], > ...',
             noteImageUploadTitle: 'Upload image',
             noteImageUploading: 'Uploading {count} image(s)...',
+            noteImageUploadingProgress: 'Uploading {count} image(s) to Cloudinary... {percent}%',
             noteImageUploadSuccess: 'Image added to note',
             noteImageUploadError: 'Could not upload the image. Please try again.',
+            noteImageUploadTimeout: 'The image upload timed out. Check your connection and try again.',
+            noteImageUploadConfigError: 'Cloudinary is not configured for Notes.',
             noteImageTooLarge: 'Images must be smaller than 10 MB.',
             noteImageUploadPending: 'Please wait for the image upload to finish before saving.',
             emptyFolderNotes: 'No notes in this folder',
@@ -670,7 +676,6 @@
     firebase.initializeApp(firebaseConfig);
     var auth = firebase.auth();
     var db = firebase.firestore();
-    var storage = firebase.storage();
 
     // Enable offline persistence
     db.enablePersistence({ synchronizeTabs: true }).catch(function () { /* ignore */ });
@@ -3489,6 +3494,8 @@
         this.activeDropdownFolderId = null;
         this.isEditing = false;
         this.pendingImageUploads = 0;
+        this.activeImageUploadXhrs = [];
+        this.imageUploadBatchId = 0;
 
         this._cacheElements();
         this._bindEvents();
@@ -4095,6 +4102,84 @@
         this.imageUploadStatus.classList.toggle('error', !!isError);
     };
 
+    NoteApp.prototype._resetImageUploadUi = function () {
+        this.pendingImageUploads = 0;
+        this.activeImageUploadXhrs = [];
+        if (this.imageUploadBtn) this.imageUploadBtn.disabled = false;
+        if (this.modeToggleBtn) this.modeToggleBtn.disabled = false;
+        if (this.modalSaveBtn) this.modalSaveBtn.disabled = false;
+        if (this.rawTextarea) this.rawTextarea.readOnly = false;
+    };
+
+    NoteApp.prototype._cancelImageUploads = function () {
+        this.imageUploadBatchId++;
+        this.activeImageUploadXhrs.forEach(function (xhr) {
+            if (xhr && xhr.readyState !== 4) {
+                try { xhr.abort(); } catch (e) {}
+            }
+        });
+        this._resetImageUploadUi();
+        this._setImageUploadStatus('', false);
+    };
+
+    NoteApp.prototype._uploadNoteImageToCloudinary = function (file, onProgress) {
+        var self = this;
+        return new Promise(function (resolve, reject) {
+            if (typeof cloudinaryConfig === 'undefined' || !cloudinaryConfig.cloudName || !cloudinaryConfig.uploadPreset) {
+                var configError = new Error('cloudinary-not-configured');
+                configError.code = 'cloudinary-not-configured';
+                reject(configError);
+                return;
+            }
+
+            var xhr = new XMLHttpRequest();
+            var url = 'https://api.cloudinary.com/v1_1/' + encodeURIComponent(cloudinaryConfig.cloudName) + '/image/upload';
+            var formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', cloudinaryConfig.uploadPreset);
+            if (cloudinaryConfig.folder) {
+                formData.append('folder', cloudinaryConfig.folder);
+            }
+
+            self.activeImageUploadXhrs.push(xhr);
+            xhr.timeout = 60000;
+            xhr.upload.addEventListener('progress', function (event) {
+                if (event.lengthComputable && typeof onProgress === 'function') {
+                    onProgress(Math.round((event.loaded / event.total) * 100));
+                }
+            });
+            xhr.onload = function () {
+                var response = null;
+                try { response = JSON.parse(xhr.responseText || '{}'); } catch (e) {}
+                if (xhr.status >= 200 && xhr.status < 300 && response && response.secure_url) {
+                    resolve({
+                        url: response.secure_url,
+                        publicId: response.public_id || null,
+                        alt: (file.name || 'Ảnh ghi chú').replace(/\.[^.]+$/, '')
+                    });
+                    return;
+                }
+                var message = response && response.error && response.error.message
+                    ? response.error.message
+                    : 'cloudinary-upload-failed';
+                reject(new Error(message));
+            };
+            xhr.onerror = function () { reject(new Error('cloudinary-network-error')); };
+            xhr.ontimeout = function () {
+                var timeoutError = new Error('cloudinary-upload-timeout');
+                timeoutError.code = 'cloudinary-upload-timeout';
+                reject(timeoutError);
+            };
+            xhr.onabort = function () {
+                var cancelError = new Error('cloudinary-upload-cancelled');
+                cancelError.code = 'cloudinary-upload-cancelled';
+                reject(cancelError);
+            };
+            xhr.open('POST', url, true);
+            xhr.send(formData);
+        });
+    };
+
     NoteApp.prototype._insertMarkdownAtCursor = function (markdown, start, end) {
         if (!this.rawTextarea) return;
         var textarea = this.rawTextarea;
@@ -4133,6 +4218,7 @@
 
         var insertionStart = this.rawTextarea ? this.rawTextarea.selectionStart : 0;
         var insertionEnd = this.rawTextarea ? this.rawTextarea.selectionEnd : insertionStart;
+        var batchId = ++this.imageUploadBatchId;
         this.pendingImageUploads += validFiles.length;
         if (this.imageUploadBtn) this.imageUploadBtn.disabled = true;
         if (this.modeToggleBtn) this.modeToggleBtn.disabled = true;
@@ -4140,19 +4226,23 @@
         if (this.rawTextarea) this.rawTextarea.readOnly = true;
         this._setImageUploadStatus(t('noteImageUploading').replace('{count}', validFiles.length), false);
 
-        var uploads = validFiles.map(function (file) {
-            var extension = (file.name && file.name.indexOf('.') !== -1) ? file.name.split('.').pop().toLowerCase() : 'png';
-            extension = extension.replace(/[^a-z0-9]/g, '') || 'png';
-            var storagePath = 'users/' + currentUser.uid + '/note-images/' + generateId() + '.' + extension;
-            var imageRef = storage.ref().child(storagePath);
-            return imageRef.put(file, { contentType: file.type }).then(function (snapshot) {
-                return snapshot.ref.getDownloadURL().then(function (url) {
-                    return { url: url, alt: (file.name || 'Ảnh ghi chú').replace(/\.[^.]+$/, '') };
-                });
+        var progressByFile = validFiles.map(function () { return 0; });
+        var uploads = validFiles.map(function (file, index) {
+            return self._uploadNoteImageToCloudinary(file, function (percent) {
+                progressByFile[index] = percent;
+                var total = progressByFile.reduce(function (sum, value) { return sum + value; }, 0);
+                var average = Math.round(total / progressByFile.length);
+                self._setImageUploadStatus(
+                    t('noteImageUploadingProgress')
+                        .replace('{count}', validFiles.length)
+                        .replace('{percent}', average),
+                    false
+                );
             });
         });
 
         Promise.all(uploads).then(function (images) {
+            if (batchId !== self.imageUploadBatchId) return;
             var markdown = images.map(function (image) {
                 var alt = image.alt.replace(/[\[\]]/g, '').trim() || 'Ảnh ghi chú';
                 return '![' + alt + '](' + image.url + ')';
@@ -4163,16 +4253,22 @@
                 if (self.pendingImageUploads === 0) self._setImageUploadStatus('', false);
             }, 2500);
         }).catch(function (error) {
+            if (batchId !== self.imageUploadBatchId) return;
             console.error('Note image upload failed:', error);
-            self._setImageUploadStatus(t('noteImageUploadError'), true);
-        }).then(function () {
-            self.pendingImageUploads = Math.max(0, self.pendingImageUploads - validFiles.length);
-            if (self.pendingImageUploads === 0) {
-                if (self.imageUploadBtn) self.imageUploadBtn.disabled = false;
-                if (self.modeToggleBtn) self.modeToggleBtn.disabled = false;
-                if (self.modalSaveBtn) self.modalSaveBtn.disabled = false;
-                if (self.rawTextarea) self.rawTextarea.readOnly = false;
+            self.activeImageUploadXhrs.forEach(function (xhr) {
+                if (xhr && xhr.readyState !== 4) {
+                    try { xhr.abort(); } catch (e) {}
+                }
+            });
+            var messageKey = 'noteImageUploadError';
+            if (error && error.code === 'cloudinary-upload-timeout') messageKey = 'noteImageUploadTimeout';
+            if (error && error.code === 'cloudinary-not-configured') messageKey = 'noteImageUploadConfigError';
+            if (!error || error.code !== 'cloudinary-upload-cancelled') {
+                self._setImageUploadStatus(t(messageKey), true);
             }
+        }).then(function () {
+            if (batchId !== self.imageUploadBatchId) return;
+            self._resetImageUploadUi();
         });
     };
 
@@ -4281,8 +4377,7 @@
 
     NoteApp.prototype._closeModal = function () {
         if (this.pendingImageUploads > 0) {
-            this._setImageUploadStatus(t('noteImageUploadPending'), true);
-            return;
+            this._cancelImageUploads();
         }
         if (this.overlay) this.overlay.classList.remove('active');
         this.editingNoteId = null;

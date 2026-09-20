@@ -1,4 +1,4 @@
-const CACHE_NAME = 'quangpm-app-v43';
+const CACHE_NAME = 'quangpm-app-v44';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -58,7 +58,8 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const liveDomains = [
     'firestore.googleapis.com',
-    'firebasestorage.googleapis.com',
+    'api.cloudinary.com',
+    'res.cloudinary.com',
     'identitytoolkit.googleapis.com',
     'generativelanguage.googleapis.com',
     'bgapidatafeed.vps.com.vn',
