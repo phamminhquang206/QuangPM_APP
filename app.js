@@ -52,6 +52,12 @@
             confirmDeleteFolderMsg: 'Bạn có chắc muốn xóa thư mục này? Các ghi chú bên trong sẽ được chuyển về "Chưa phân loại".',
             notionShortcutsTip: '💡 Phím tắt: # Tiêu đề, - Danh sách, [] To-do, > Trích dẫn',
             notionEditorPlaceholder: 'Gõ nội dung hoặc dùng phím tắt #, -, [], > ...',
+            noteImageUploadTitle: 'Tải ảnh lên',
+            noteImageUploading: 'Đang tải {count} ảnh lên...',
+            noteImageUploadSuccess: 'Đã thêm ảnh vào ghi chú',
+            noteImageUploadError: 'Không thể tải ảnh lên. Vui lòng thử lại.',
+            noteImageTooLarge: 'Ảnh phải nhỏ hơn 10 MB.',
+            noteImageUploadPending: 'Vui lòng chờ ảnh tải lên xong trước khi lưu.',
             emptyFolderNotes: 'Thư mục này chưa có ghi chú nào',
             addNoteToFolder: '+ Tạo ghi chú vào thư mục này',
             folderCreatedToast: 'Đã tạo thư mục mới! 📁',
@@ -255,6 +261,12 @@
             confirmDeleteFolderMsg: 'Are you sure you want to delete this folder? Notes inside will be moved to "Uncategorized".',
             notionShortcutsTip: '💡 Shortcuts: # Heading, - List, [] To-do, > Quote',
             notionEditorPlaceholder: 'Type content or use shortcuts #, -, [], > ...',
+            noteImageUploadTitle: 'Upload image',
+            noteImageUploading: 'Uploading {count} image(s)...',
+            noteImageUploadSuccess: 'Image added to note',
+            noteImageUploadError: 'Could not upload the image. Please try again.',
+            noteImageTooLarge: 'Images must be smaller than 10 MB.',
+            noteImageUploadPending: 'Please wait for the image upload to finish before saving.',
             emptyFolderNotes: 'No notes in this folder',
             addNoteToFolder: '+ Create note in this folder',
             folderCreatedToast: 'Folder created! 📁',
@@ -658,6 +670,7 @@
     firebase.initializeApp(firebaseConfig);
     var auth = firebase.auth();
     var db = firebase.firestore();
+    var storage = firebase.storage();
 
     // Enable offline persistence
     db.enablePersistence({ synchronizeTabs: true }).catch(function () { /* ignore */ });
@@ -3475,6 +3488,7 @@
         this.editingFolderId = null;
         this.activeDropdownFolderId = null;
         this.isEditing = false;
+        this.pendingImageUploads = 0;
 
         this._cacheElements();
         this._bindEvents();
@@ -3502,6 +3516,10 @@
         this.modeBtnText = document.getElementById('note-mode-btn-text');
         this.modalTip = document.getElementById('notion-modal-tip');
         this.closeViewBtn = document.getElementById('note-modal-close-view');
+        this.imageFileInput = document.getElementById('note-image-file-input');
+        this.imageUploadBtn = document.getElementById('note-image-upload-btn');
+        this.imageUploadStatus = document.getElementById('note-image-upload-status');
+        this.modalSaveBtn = document.getElementById('note-modal-save');
 
         // Folder Modal
         this.folderOverlay = document.getElementById('folder-modal-overlay');
@@ -3703,6 +3721,17 @@
             });
         }
 
+        if (this.imageUploadBtn) {
+            this.imageUploadBtn.title = t('noteImageUploadTitle');
+        }
+        if (this.imageFileInput) {
+            this.imageFileInput.addEventListener('change', function () {
+                var files = Array.from(self.imageFileInput.files || []);
+                self.imageFileInput.value = '';
+                if (files.length) self._uploadAndInsertNoteImages(files);
+            });
+        }
+
         // Notion Editor keydown & auto-markdown conversion
         if (this.contentEditor) {
             this.contentEditor.addEventListener('keydown', function (e) {
@@ -3786,6 +3815,20 @@
                     this.value = val.substring(0, start) + '  ' + val.substring(end);
                     this.selectionStart = this.selectionEnd = start + 2;
                 }
+            });
+            this.rawTextarea.addEventListener('paste', function (e) {
+                var clipboardData = e.clipboardData || window.clipboardData;
+                if (!clipboardData || !clipboardData.items) return;
+                var imageFiles = [];
+                Array.from(clipboardData.items).forEach(function (item) {
+                    if (item.kind === 'file' && item.type && item.type.indexOf('image/') === 0) {
+                        var file = item.getAsFile();
+                        if (file) imageFiles.push(file);
+                    }
+                });
+                if (!imageFiles.length) return;
+                e.preventDefault();
+                self._uploadAndInsertNoteImages(imageFiles);
             });
         }
 
@@ -4039,7 +4082,98 @@
             case 'divider':
                 wrap('\n---\n', '', '');
                 break;
+            case 'image':
+                if (this.imageFileInput) this.imageFileInput.click();
+                break;
         }
+    };
+
+    NoteApp.prototype._setImageUploadStatus = function (message, isError) {
+        if (!this.imageUploadStatus) return;
+        this.imageUploadStatus.hidden = !message;
+        this.imageUploadStatus.textContent = message || '';
+        this.imageUploadStatus.classList.toggle('error', !!isError);
+    };
+
+    NoteApp.prototype._insertMarkdownAtCursor = function (markdown, start, end) {
+        if (!this.rawTextarea) return;
+        var textarea = this.rawTextarea;
+        var value = textarea.value;
+        var insertStart = typeof start === 'number' ? start : textarea.selectionStart;
+        var insertEnd = typeof end === 'number' ? end : textarea.selectionEnd;
+        var prefix = insertStart > 0 && value.charAt(insertStart - 1) !== '\n' ? '\n\n' : '';
+        var suffix = insertEnd < value.length && value.charAt(insertEnd) !== '\n' ? '\n\n' : '\n';
+        var insertion = prefix + markdown + suffix;
+        textarea.value = value.substring(0, insertStart) + insertion + value.substring(insertEnd);
+        var nextCursor = insertStart + insertion.length;
+        textarea.focus();
+        textarea.setSelectionRange(nextCursor, nextCursor);
+        textarea.dispatchEvent(new Event('input', { bubbles: true }));
+    };
+
+    NoteApp.prototype._uploadAndInsertNoteImages = function (files) {
+        var self = this;
+        if (this.pendingImageUploads > 0) {
+            this._setImageUploadStatus(t('noteImageUploadPending'), true);
+            return;
+        }
+        var validFiles = files.filter(function (file) {
+            return file && file.type && file.type.indexOf('image/') === 0;
+        });
+        if (!validFiles.length) return;
+        if (!currentUser) {
+            this._setImageUploadStatus(t('noteImageUploadError'), true);
+            return;
+        }
+        var oversized = validFiles.some(function (file) { return file.size > 10 * 1024 * 1024; });
+        if (oversized) {
+            this._setImageUploadStatus(t('noteImageTooLarge'), true);
+            return;
+        }
+
+        var insertionStart = this.rawTextarea ? this.rawTextarea.selectionStart : 0;
+        var insertionEnd = this.rawTextarea ? this.rawTextarea.selectionEnd : insertionStart;
+        this.pendingImageUploads += validFiles.length;
+        if (this.imageUploadBtn) this.imageUploadBtn.disabled = true;
+        if (this.modeToggleBtn) this.modeToggleBtn.disabled = true;
+        if (this.modalSaveBtn) this.modalSaveBtn.disabled = true;
+        if (this.rawTextarea) this.rawTextarea.readOnly = true;
+        this._setImageUploadStatus(t('noteImageUploading').replace('{count}', validFiles.length), false);
+
+        var uploads = validFiles.map(function (file) {
+            var extension = (file.name && file.name.indexOf('.') !== -1) ? file.name.split('.').pop().toLowerCase() : 'png';
+            extension = extension.replace(/[^a-z0-9]/g, '') || 'png';
+            var storagePath = 'users/' + currentUser.uid + '/note-images/' + generateId() + '.' + extension;
+            var imageRef = storage.ref().child(storagePath);
+            return imageRef.put(file, { contentType: file.type }).then(function (snapshot) {
+                return snapshot.ref.getDownloadURL().then(function (url) {
+                    return { url: url, alt: (file.name || 'Ảnh ghi chú').replace(/\.[^.]+$/, '') };
+                });
+            });
+        });
+
+        Promise.all(uploads).then(function (images) {
+            var markdown = images.map(function (image) {
+                var alt = image.alt.replace(/[\[\]]/g, '').trim() || 'Ảnh ghi chú';
+                return '![' + alt + '](' + image.url + ')';
+            }).join('\n\n');
+            self._insertMarkdownAtCursor(markdown, insertionStart, insertionEnd);
+            self._setImageUploadStatus(t('noteImageUploadSuccess'), false);
+            setTimeout(function () {
+                if (self.pendingImageUploads === 0) self._setImageUploadStatus('', false);
+            }, 2500);
+        }).catch(function (error) {
+            console.error('Note image upload failed:', error);
+            self._setImageUploadStatus(t('noteImageUploadError'), true);
+        }).then(function () {
+            self.pendingImageUploads = Math.max(0, self.pendingImageUploads - validFiles.length);
+            if (self.pendingImageUploads === 0) {
+                if (self.imageUploadBtn) self.imageUploadBtn.disabled = false;
+                if (self.modeToggleBtn) self.modeToggleBtn.disabled = false;
+                if (self.modalSaveBtn) self.modalSaveBtn.disabled = false;
+                if (self.rawTextarea) self.rawTextarea.readOnly = false;
+            }
+        });
     };
 
     // =========================================================
@@ -4067,6 +4201,10 @@
 
     NoteApp.prototype._toggleNoteModalMode = function () {
         var self = this;
+        if (this.pendingImageUploads > 0) {
+            this._setImageUploadStatus(t('noteImageUploadPending'), true);
+            return;
+        }
         if (this.isEditing) {
             // User clicked "✓ Xong" -> Save content and return to safe View Mode!
             this._saveFromModal(true);
@@ -4085,6 +4223,7 @@
 
     NoteApp.prototype._openModal = function (noteId) {
         this.editingNoteId = noteId;
+        if (this.pendingImageUploads === 0) this._setImageUploadStatus('', false);
         if (this.colorDots) {
             this.colorDots.forEach(function (d) { d.classList.remove('active'); });
         }
@@ -4141,12 +4280,20 @@
     };
 
     NoteApp.prototype._closeModal = function () {
+        if (this.pendingImageUploads > 0) {
+            this._setImageUploadStatus(t('noteImageUploadPending'), true);
+            return;
+        }
         if (this.overlay) this.overlay.classList.remove('active');
         this.editingNoteId = null;
         this.isEditing = false;
     };
 
     NoteApp.prototype._saveFromModal = function (keepOpen) {
+        if (this.pendingImageUploads > 0) {
+            this._setImageUploadStatus(t('noteImageUploadPending'), true);
+            return;
+        }
         var title = this.titleInput ? this.titleInput.value.trim() : '';
         var markdownContent = this.rawTextarea ? this.rawTextarea.value.trim() : '';
 

@@ -3056,6 +3056,11 @@ body {
     box-shadow: 0 2px 10px rgba(124, 58, 237, 0.35);
 }
 
+.note-mode-btn:disabled {
+    opacity: 0.55;
+    cursor: wait;
+}
+
 .notion-modal-title {
     font-size: 0.95rem;
     color: var(--text-muted);
@@ -3147,6 +3152,11 @@ body {
     transform: scale(0.95);
 }
 
+.notion-tool-btn:disabled {
+    opacity: 0.5;
+    cursor: wait;
+}
+
 .notion-tool-divider {
     width: 1px;
     height: 18px;
@@ -3200,6 +3210,40 @@ body {
     word-break: break-word;
     min-width: 0;
     max-width: 100%;
+}
+
+.notion-editor img,
+.note-body img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+    object-fit: contain;
+}
+
+.notion-editor img {
+    max-height: 70vh;
+    margin: 12px auto;
+}
+
+.note-body img {
+    max-height: 190px;
+    margin: 6px auto;
+}
+
+.note-image-upload-status {
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: rgba(59, 130, 246, 0.12);
+    color: #93c5fd;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.note-image-upload-status.error {
+    background: rgba(239, 68, 68, 0.12);
+    color: #fca5a5;
 }
 
 .notion-editor[contenteditable="true"]:empty:before {
@@ -6359,6 +6403,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex: 0 0 44px;
 }
 
 .stepper-btn:hover {
@@ -6368,6 +6413,8 @@ body {
 
 .numeric-modal-input {
     flex: 1;
+    min-width: 0;
+    width: 100%;
     padding: 10px 14px;
     border-radius: var(--radius-md);
     background: rgba(255, 255, 255, 0.06);
@@ -6384,6 +6431,11 @@ body {
     color: var(--text-secondary);
     font-weight: 600;
     min-width: 30px;
+    max-width: 70px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .numeric-quick-presets {
@@ -7142,6 +7194,31 @@ html[data-theme="light"] .habit-cell-numeric:hover { background: #f4f0ff; }
 html[data-theme="light"] .habit-cell-numeric.completed { background: #ecfdf5; }
 html[data-theme="light"] .habit-cell-numeric.completed .numeric-val-text { color: #059669; }
 
+html[data-theme="light"] .habit-numeric-container .numeric-modal-input {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    color: #172033;
+}
+
+html[data-theme="light"] .habit-numeric-container .numeric-modal-input:focus {
+    outline: none;
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.14);
+}
+
+html[data-theme="light"] .habit-numeric-container .stepper-btn,
+html[data-theme="light"] .habit-numeric-container .preset-chip {
+    background: #f8fafc;
+    border-color: #d6dee9;
+    color: #172033;
+}
+
+html[data-theme="light"] .habit-numeric-container .stepper-btn:hover,
+html[data-theme="light"] .habit-numeric-container .preset-chip:hover {
+    background: #f1edff;
+    border-color: #a78bfa;
+}
+
 /* Notes use a soft blue-gray canvas in normal mode with explicit text colors.
    Several rich-text styles use fixed colors in dark mode, so they must be
    remapped here instead of relying on inherited variables. */
@@ -7206,6 +7283,16 @@ html[data-theme="light"] .notion-tool-btn { color: #526079; }
 html[data-theme="light"] .notion-tool-btn:hover {
     background: #f8fafc;
     color: #172033;
+}
+
+html[data-theme="light"] .note-image-upload-status {
+    background: #eaf3ff;
+    color: #1d4ed8;
+}
+
+html[data-theme="light"] .note-image-upload-status.error {
+    background: #fff1f2;
+    color: #be123c;
 }
 
 html[data-theme="light"] .notion-tool-divider { background: #cbd5e1; }

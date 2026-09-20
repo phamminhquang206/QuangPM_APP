@@ -18,7 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=2.17">
+    <link rel="stylesheet" href="style.css?v=2.18">
     <link rel="stylesheet" href="stock/stock-feature.css?v=1.3">
 
     <!-- PWA Meta Tags -->
@@ -772,6 +772,11 @@
                     <button type="button" class="notion-tool-btn" data-command="code" title="Khối mã (```)">‹/› Code</button>
                     <button type="button" class="notion-tool-btn" data-command="divider" title="Đường kẻ (---)">— Line</button>
                 </div>
+                <span class="notion-tool-divider"></span>
+                <div class="notion-toolbar-group">
+                    <button type="button" class="notion-tool-btn" data-command="image" id="note-image-upload-btn" title="Tải ảnh lên">🖼 Ảnh</button>
+                    <input type="file" id="note-image-file-input" accept="image/*" multiple hidden />
+                </div>
             </div>
 
             <div class="modal-body notion-modal-body">
@@ -780,6 +785,7 @@
                 <!-- Notion Dual Mode: Raw Markdown Textarea for Editing & Rich Preview for Viewing -->
                 <textarea class="notion-editor-textarea" id="note-content-editor-raw" placeholder="Gõ nội dung ghi chú (hỗ trợ đầy đủ Markdown, Bảng, Danh sách, Khối code...)..." spellcheck="false"></textarea>
                 <div class="notion-editor notion-editor-preview markdown-body" id="note-content-editor"></div>
+                <div class="note-image-upload-status" id="note-image-upload-status" role="status" aria-live="polite" hidden></div>
 
                 <div class="note-color-picker">
                     <span class="color-label" data-i18n="noteColor">Màu thẻ:</span>
@@ -1303,6 +1309,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
     <script src="firebase-config.js"></script>
     <script src="marked.min.js"></script>
     <script src="markdown.js?v=2.0"></script>
@@ -1310,7 +1317,7 @@
     <script src="stock/stock-api.js?v=1.0"></script>
     <script src="stock/stock-agent.js?v=1.0"></script>
     <script src="stock/stock-feature.js?v=1.0"></script>
-    <script src="app.js?v=2.8"></script>
+    <script src="app.js?v=2.9"></script>
 
     <!-- Register Service Worker for PWA -->
     <script>
