@@ -4850,6 +4850,7 @@
                 { id: 'rw3', title: 'Chơi game 1 tiếng', cost: 200, icon: '🎮' }
             ],
             penalties: [],
+            perfectDays: [],
             pledge: '10.000 VNĐ vào heo đất'
         };
 
@@ -5209,6 +5210,7 @@
                 if (p.badges) this.habitProfile.badges = p.badges;
                 if (p.rewards) this.habitProfile.rewards = p.rewards;
                 if (p.penalties) this.habitProfile.penalties = p.penalties;
+                if (p.perfectDays) this.habitProfile.perfectDays = p.perfectDays;
                 if (p.pledge) this.habitProfile.pledge = p.pledge;
             }
         } catch (e) {
@@ -5257,6 +5259,7 @@
                     if (p.badges) self.habitProfile.badges = p.badges;
                     if (p.rewards) self.habitProfile.rewards = p.rewards;
                     if (p.penalties) self.habitProfile.penalties = p.penalties;
+                    if (p.perfectDays) self.habitProfile.perfectDays = p.perfectDays;
                     if (p.pledge) self.habitProfile.pledge = p.pledge;
                     localStorage.setItem('flowhub_habit_profile_' + currentUser.uid, JSON.stringify(self.habitProfile));
                     self._renderStats();
@@ -5551,23 +5554,11 @@
                 PwaManager.showToast(t('habitCompletedToast').replace('{title}', habit.title), '🎉');
             }
 
-            // Check if day is 100% completed
-            var activeHabits = this.habits.filter(function (h) { return h.active !== false; });
-            var dayData = this.habitLogs[mKey].days[dateStr];
-            var allDone = activeHabits.length > 0 && activeHabits.every(function (h) {
-                var entry = dayData[h.id];
-                return entry && (h.type === 'numeric' ? entry.value >= h.target : entry.completed);
-            });
-
-            if (allDone) {
-                this.awardXP(50, 'Ngày hoàn hảo 100%', e);
-                PwaManager.showToast(t('perfectDayToast'), '⭐');
-            }
         } else {
-            // Deduct XP
-            this.habitProfile.xp = Math.max(0, (this.habitProfile.xp || 0) - 10);
-            this._saveProfile();
+            this.deductXP(20, 'Không hoàn thành thói quen', e);
         }
+
+        this._awardPerfectDayBonus(dateStr, e);
 
         this._saveMonthLogs();
         this._calculateStreaks();
@@ -5660,7 +5651,11 @@
             playChime();
             this.awardXP(10, 'Đạt chỉ tiêu thói quen');
             PwaManager.showToast(t('habitCompletedToast').replace('{title}', this.activeNumericCell.name), '🎉');
+        } else if (wasDone && !nowDone) {
+            this.deductXP(20, 'Không đạt chỉ tiêu thói quen');
         }
+
+        this._awardPerfectDayBonus(dateStr);
 
         this._saveMonthLogs();
         this._calculateStreaks();
@@ -5881,6 +5876,40 @@
         }
     };
 
+    HabitApp.prototype.deductXP = function (amount, reason, e) {
+        this.habitProfile.xp = Math.max(0, (this.habitProfile.xp || 0) - amount);
+        this._saveProfile();
+
+        if (e && e.clientX && e.clientY) {
+            this._spawnXpFloat(e.clientX, e.clientY, '-' + amount + ' XP');
+        }
+    };
+
+    HabitApp.prototype._awardPerfectDayBonus = function (dateStr, e) {
+        var activeHabits = this.habits.filter(function (h) { return h.active !== false; });
+        if (activeHabits.length === 0) return;
+
+        var mKey = dateStr.substring(0, 7);
+        var dayData = this.habitLogs[mKey] && this.habitLogs[mKey].days
+            ? this.habitLogs[mKey].days[dateStr]
+            : null;
+        var allDone = dayData && activeHabits.every(function (h) {
+            var entry = dayData[h.id];
+            return entry && (h.type === 'numeric' ? entry.value >= h.target : entry.completed);
+        });
+
+        if (!allDone) return;
+        if (!this.habitProfile.perfectDays) this.habitProfile.perfectDays = [];
+        if (this.habitProfile.perfectDays.includes(dateStr)) return;
+
+        this.habitProfile.perfectDays.push(dateStr);
+        if (!this.habitProfile.badges.includes('perfect_1')) {
+            this.habitProfile.badges.push('perfect_1');
+        }
+        this.awardXP(50, 'Ngày hoàn hảo 100%', e);
+        PwaManager.showToast(t('perfectDayToast'), '⭐');
+    };
+
     HabitApp.prototype._calculateStreaks = function () {
         var activeHabits = this.habits.filter(function (h) { return h.active !== false; });
         if (activeHabits.length === 0) return;
@@ -5925,8 +5954,10 @@
                     this.habitProfile.penalties.unshift({
                         id: generateId(),
                         date: penaltyDate,
-                        note: currentLang === 'vi' ? 'Bỏ lỡ toàn bộ thói quen trong ngày (Đứt chuỗi 🔥)' : 'Missed all daily habits (Streak broken 🔥)'
+                        note: currentLang === 'vi' ? 'Bỏ lỡ toàn bộ thói quen trong ngày (-100 XP, đứt chuỗi 🔥)' : 'Missed all daily habits (-100 XP, streak broken 🔥)'
                     });
+                    this.deductXP(100, 'Không hoàn thành thói quen nào trong ngày');
+                    PwaManager.showToast(currentLang === 'vi' ? 'Không hoàn thành thói quen nào: -100 XP' : 'No habits completed: -100 XP', '⚠️');
                 }
                 break;
             }
