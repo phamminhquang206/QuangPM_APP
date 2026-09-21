@@ -301,10 +301,42 @@
       wrapper.appendChild(pre);
     });
 
-    // 4. Checklist items: Chuyển đổi checkbox sang .notion-todo-row
+    // 4. Keep nested checklist levels as independent editable To-do rows.
+    function flattenTodoList(list, level) {
+      const items = Array.from(list.children);
+      if (!items.length || items.some(li => li.tagName !== 'LI' || !li.querySelector(':scope > input[type="checkbox"]'))) return null;
+      const fragment = document.createDocumentFragment();
+      items.forEach(li => {
+        const checkbox = li.querySelector(':scope > input[type="checkbox"]');
+        const checked = checkbox.checked || checkbox.hasAttribute('checked');
+        const nestedLists = Array.from(li.children).filter(child => child.tagName === 'UL' || child.tagName === 'OL');
+        checkbox.remove();
+        nestedLists.forEach(nested => nested.remove());
+        const row = document.createElement('div');
+        row.className = 'notion-todo-row' + (checked ? ' done' : '');
+        if (level) row.setAttribute('data-level', String(Math.min(level, 6)));
+        row.innerHTML =
+          '<input type="checkbox" class="notion-todo-checkbox"' + (checked ? ' checked' : '') + '>' +
+          '<div class="notion-todo-text">' + li.innerHTML.trim() + '</div>';
+        fragment.appendChild(row);
+        nestedLists.forEach(nested => {
+          const children = flattenTodoList(nested, level + 1);
+          if (children) fragment.appendChild(children);
+          else row.querySelector('.notion-todo-text').appendChild(nested);
+        });
+      });
+      return fragment;
+    }
+    temp.querySelectorAll('ul, ol').forEach(list => {
+      if (!temp.contains(list) || list.closest('.notion-todo-row')) return;
+      const rows = flattenTodoList(list, 0);
+      if (rows) list.replaceWith(rows);
+    });
+
+    // Mixed lists may still contain a checklist item.
     const lis = temp.querySelectorAll('li');
     lis.forEach(li => {
-      const chk = li.querySelector('input[type="checkbox"]');
+      const chk = li.querySelector(':scope > input[type="checkbox"]');
       if (chk) {
         const isChecked = chk.checked || chk.hasAttribute('checked');
         chk.remove();

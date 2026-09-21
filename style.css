@@ -3154,6 +3154,11 @@ body {
     color: var(--text-primary);
 }
 
+.notion-tool-btn[aria-pressed="true"] {
+    background: rgba(124, 58, 237, 0.22);
+    color: var(--text-primary);
+}
+
 .notion-tool-btn:active {
     transform: scale(0.95);
 }
@@ -3304,6 +3309,13 @@ body {
     margin: 6px 0;
 }
 
+.notion-editor .notion-todo-row[data-level="1"] { margin-inline-start: 24px; }
+.notion-editor .notion-todo-row[data-level="2"] { margin-inline-start: 48px; }
+.notion-editor .notion-todo-row[data-level="3"] { margin-inline-start: 72px; }
+.notion-editor .notion-todo-row[data-level="4"] { margin-inline-start: 96px; }
+.notion-editor .notion-todo-row[data-level="5"] { margin-inline-start: 120px; }
+.notion-editor .notion-todo-row[data-level="6"] { margin-inline-start: 144px; }
+
 .notion-editor .notion-todo-checkbox {
     appearance: none;
     -webkit-appearance: none;
@@ -3338,6 +3350,17 @@ body {
 .notion-editor .notion-todo-text {
     flex: 1;
     outline: none;
+    min-height: 1.6em;
+}
+
+html[data-theme="light"] .notion-editor .notion-todo-checkbox {
+    background: #ffffff;
+    border-color: #94a3b8;
+}
+
+html[data-theme="light"] .notion-editor .notion-todo-checkbox:checked {
+    background: #7c3aed;
+    border-color: #7c3aed;
 }
 
 .notion-editor .notion-todo-row.done .notion-todo-text {
@@ -3758,6 +3781,17 @@ body {
     box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.22);
 }
 
+.notion-modal-container.edit-mode .notion-editor-preview {
+    min-height: 320px;
+    overflow-y: auto;
+    cursor: text;
+    user-select: text;
+}
+
+.notion-modal-container.edit-mode .notion-editor-preview a {
+    pointer-events: none;
+}
+
 /* Notion Modal: View Mode vs Edit Mode */
 .notion-modal-container.view-mode .notion-toolbar {
     display: none !important;
@@ -3810,17 +3844,13 @@ body {
     border-color: transparent;
 }
 
-/* Edit Mode: Clean Raw Markdown Editor */
+/* Edit Mode: rich content remains directly editable. */
 .notion-modal-container.edit-mode .notion-toolbar {
     display: flex;
 }
 
-.notion-modal-container.edit-mode .notion-editor-textarea {
-    display: block !important;
-}
-
 .notion-modal-container.edit-mode .notion-editor-preview {
-    display: none !important;
+    display: block !important;
 }
 
 .notion-modal-container.edit-mode .note-color-picker {
@@ -3837,6 +3867,26 @@ body {
 
 .notion-modal-container.edit-mode #note-modal-close-view {
     display: none !important;
+}
+
+.note-unsaved-overlay { z-index: 120; }
+
+.note-unsaved-dialog {
+    padding: 24px;
+    width: min(440px, calc(100vw - 32px));
+}
+
+.note-unsaved-dialog p {
+    color: var(--text-secondary);
+    line-height: 1.55;
+    margin: 12px 0 22px;
+}
+
+.note-unsaved-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
 }
 
 /* ===== FOLDER & MOVE MODALS ===== */
@@ -7312,6 +7362,11 @@ html[data-theme="light"] .notion-tool-btn { color: #526079; }
 html[data-theme="light"] .notion-tool-btn:hover {
     background: #f8fafc;
     color: #172033;
+}
+
+html[data-theme="light"] .notion-tool-btn[aria-pressed="true"] {
+    background: #ede9fe;
+    color: #5b21b6;
 }
 
 html[data-theme="light"] .note-image-upload-status {

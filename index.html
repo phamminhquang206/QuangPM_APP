@@ -18,7 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=2.20">
+    <link rel="stylesheet" href="style.css?v=2.25">
     <link rel="stylesheet" href="stock/stock-feature.css?v=1.3">
 
     <!-- PWA Meta Tags -->
@@ -749,28 +749,30 @@
             <!-- Notion-style formatting toolbar -->
             <div class="notion-toolbar" id="notion-toolbar">
                 <div class="notion-toolbar-group">
-                    <button type="button" class="notion-tool-btn" data-command="h1" title="Tiêu đề 1 (# )">H1</button>
-                    <button type="button" class="notion-tool-btn" data-command="h2" title="Tiêu đề 2 (## )">H2</button>
-                    <button type="button" class="notion-tool-btn" data-command="h3" title="Tiêu đề 3 (### )">H3</button>
+                    <button type="button" class="notion-tool-btn" data-command="h1" title="Tiêu đề 1">H1</button>
+                    <button type="button" class="notion-tool-btn" data-command="h2" title="Tiêu đề 2">H2</button>
+                    <button type="button" class="notion-tool-btn" data-command="h3" title="Tiêu đề 3">H3</button>
                 </div>
                 <span class="notion-tool-divider"></span>
                 <div class="notion-toolbar-group">
-                    <button type="button" class="notion-tool-btn" data-command="bold" title="In đậm (Ctrl+B)"><b>B</b></button>
+                    <button type="button" class="notion-tool-btn" data-command="bold" title="Bật/tắt in đậm (Ctrl+B)" aria-pressed="false"><b>B</b></button>
                     <button type="button" class="notion-tool-btn" data-command="italic" title="In nghiêng (Ctrl+I)"><i>I</i></button>
-                    <button type="button" class="notion-tool-btn" data-command="strike" title="Gạch ngang"><s>S</s></button>
                 </div>
                 <span class="notion-tool-divider"></span>
                 <div class="notion-toolbar-group">
-                    <button type="button" class="notion-tool-btn" data-command="bullet" title="Danh sách (- )">• List</button>
-                    <button type="button" class="notion-tool-btn" data-command="number" title="Danh sách số (1. )">1. List</button>
-                    <button type="button" class="notion-tool-btn" data-command="todo" title="Việc cần làm ([] )">☑ To-do</button>
+                    <button type="button" class="notion-tool-btn" data-command="bullet" title="Danh sách dấu đầu dòng">• List</button>
+                    <button type="button" class="notion-tool-btn" data-command="number" title="Danh sách đánh số">1. List</button>
+                    <button type="button" class="notion-tool-btn" data-command="todo" title="Việc cần làm">☑ To-do</button>
+                    <button type="button" class="notion-tool-btn" data-command="indent" title="Thụt vào (Tab)" aria-label="Thụt vào">→ Thụt</button>
+                    <button type="button" class="notion-tool-btn" data-command="outdent" title="Giảm thụt vào (Shift+Tab)" aria-label="Giảm thụt vào">← Lùi</button>
                 </div>
                 <span class="notion-tool-divider"></span>
                 <div class="notion-toolbar-group">
-                    <button type="button" class="notion-tool-btn" data-command="quote" title="Trích dẫn (> )">“ Quote</button>
+                    <button type="button" class="notion-tool-btn" data-command="quote" title="Trích dẫn">“ Quote</button>
                     <button type="button" class="notion-tool-btn" data-command="table" title="Chèn bảng (Table)">📊 Bảng</button>
+                    <button type="button" class="notion-tool-btn" data-command="table-row" title="Chọn ô trong bảng rồi thêm hàng">+ Hàng</button>
+                    <button type="button" class="notion-tool-btn" data-command="table-column" title="Chọn ô trong bảng rồi thêm cột">+ Cột</button>
                     <button type="button" class="notion-tool-btn" data-command="code" title="Khối mã (```)">‹/› Code</button>
-                    <button type="button" class="notion-tool-btn" data-command="divider" title="Đường kẻ (---)">— Line</button>
                 </div>
                 <span class="notion-tool-divider"></span>
                 <div class="notion-toolbar-group">
@@ -782,9 +784,7 @@
             <div class="modal-body notion-modal-body">
                 <input type="text" class="note-title-input notion-title-input" id="note-title-input" data-i18n-placeholder="noteTitlePlaceholder" placeholder="Tiêu đề ghi chú..." autocomplete="off" />
 
-                <!-- Notion Dual Mode: Raw Markdown Textarea for Editing & Rich Preview for Viewing -->
-                <textarea class="notion-editor-textarea" id="note-content-editor-raw" placeholder="Gõ nội dung ghi chú (hỗ trợ đầy đủ Markdown, Bảng, Danh sách, Khối code...)..." spellcheck="false"></textarea>
-                <div class="notion-editor notion-editor-preview markdown-body" id="note-content-editor"></div>
+                <div class="notion-editor notion-editor-preview markdown-body" id="note-content-editor" data-placeholder="Gõ hoặc dán Markdown tại đây..." role="textbox" aria-label="Nội dung ghi chú" aria-multiline="true"></div>
                 <div class="note-image-upload-status" id="note-image-upload-status" role="status" aria-live="polite" hidden></div>
 
                 <div class="note-color-picker">
@@ -798,12 +798,25 @@
                 </div>
             </div>
             <div class="modal-footer notion-modal-footer">
-                <span class="notion-tip" id="notion-modal-tip" data-i18n="notionShortcutsTip">💡 Phím tắt: # Tiêu đề, - Danh sách, [] To-do, > Trích dẫn</span>
+                <span class="notion-tip" id="notion-modal-tip" data-i18n="notionShortcutsTip">💡 Soạn trực tiếp trên ghi chú; có thể dán Markdown để tự định dạng.</span>
                 <div class="notion-footer-btns">
                     <button class="modal-btn secondary" id="note-modal-cancel" data-i18n="cancel">Hủy</button>
                     <button class="modal-btn primary" id="note-modal-save" data-i18n="saveNote">Lưu</button>
                     <button class="modal-btn secondary" id="note-modal-close-view" data-i18n="close" style="display: none;">Đóng</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== UNSAVED NOTE CONFIRMATION ===== -->
+    <div class="modal-overlay note-unsaved-overlay" id="note-unsaved-overlay" role="dialog" aria-modal="true" aria-labelledby="note-unsaved-title">
+        <div class="modal-container note-unsaved-dialog">
+            <h3 class="modal-title" id="note-unsaved-title">Ghi chú chưa lưu</h3>
+            <p id="note-unsaved-message">Bạn có thay đổi chưa lưu. Bạn muốn lưu ghi chú trước khi thoát không?</p>
+            <div class="note-unsaved-actions">
+                <button type="button" class="modal-btn secondary" id="note-unsaved-continue">Tiếp tục soạn</button>
+                <button type="button" class="modal-btn secondary" id="note-unsaved-discard">Thoát không lưu</button>
+                <button type="button" class="modal-btn primary" id="note-unsaved-save">Lưu và thoát</button>
             </div>
         </div>
     </div>
@@ -1311,12 +1324,12 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <script src="firebase-config.js?v=1.1"></script>
     <script src="marked.min.js"></script>
-    <script src="markdown.js?v=2.0"></script>
+    <script src="markdown.js?v=2.1"></script>
     <script src="stock/stock-data.js?v=1.0"></script>
     <script src="stock/stock-api.js?v=1.0"></script>
     <script src="stock/stock-agent.js?v=1.0"></script>
     <script src="stock/stock-feature.js?v=1.0"></script>
-    <script src="app.js?v=2.11"></script>
+    <script src="app.js?v=2.16"></script>
 
     <!-- Register Service Worker for PWA -->
     <script>
