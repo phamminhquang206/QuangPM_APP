@@ -6920,6 +6920,33 @@ html[data-theme="light"] .notion-editor .notion-todo-checkbox:checked {
     }
 }
 
+/* Keep all five feature names readable on compact tablets (for example iPad mini). */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .tab-nav {
+        gap: 4px;
+        padding: 5px;
+    }
+
+    .tab-btn {
+        min-height: 48px;
+        padding: 10px 6px;
+        gap: 5px;
+        font-size: 0.8125rem;
+    }
+
+    .tab-icon {
+        width: 22px;
+        height: 22px;
+        flex-basis: 22px;
+        border-radius: 7px;
+    }
+
+    .tab-icon svg {
+        width: 17px;
+        height: 17px;
+    }
+}
+
 @media (min-width: 1024px) {
     #pomodoro-section .garden-land-card {
         gap: 16px;
