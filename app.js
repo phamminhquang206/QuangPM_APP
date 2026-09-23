@@ -470,9 +470,6 @@
 
         var isLight = theme === 'light';
         var label = isLight ? 'Chuyển sang chế độ tối' : 'Chuyển sang chế độ sáng';
-        var icon = button.querySelector('.theme-toggle-icon');
-
-        if (icon) icon.textContent = isLight ? '🌙' : '☀️';
         button.title = label;
         button.setAttribute('aria-label', label);
         button.setAttribute('aria-pressed', String(isLight));

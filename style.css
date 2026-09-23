@@ -14,6 +14,7 @@
     --text-muted: #64748b;
 
     --accent-purple: #7c3aed;
+    --accent-purple-light: #a78bfa;
     --accent-blue: #3b82f6;
     --accent-green: #10b981;
     --accent-red: #ef4444;
@@ -190,9 +191,17 @@ button,
 }
 
 .login-logo {
-    font-size: 3.5rem;
+    width: 56px;
+    height: 56px;
+    margin-right: auto;
+    margin-left: auto;
     margin-bottom: 8px;
-    line-height: 1;
+    color: var(--accent-purple-light);
+}
+
+.login-logo .app-shell-icon {
+    width: 100%;
+    height: 100%;
 }
 
 .login-title {
@@ -445,9 +454,27 @@ button,
 
 .brand-group {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     gap: 6px;
     min-width: 0;
+}
+
+.app-shell-icon {
+    display: block;
+    width: 20px;
+    height: 20px;
+}
+
+.brand-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-purple-light);
+}
+
+.brand-mark .app-shell-icon {
+    width: 26px;
+    height: 26px;
 }
 
 .app-title {
@@ -542,6 +569,18 @@ button,
 .theme-toggle-icon {
     display: block;
     line-height: 1;
+}
+
+.theme-icon-moon {
+    display: none;
+}
+
+html[data-theme="light"] .theme-icon-sun {
+    display: none;
+}
+
+html[data-theme="light"] .theme-icon-moon {
+    display: block;
 }
 
 /* Language Toggle */
@@ -2281,13 +2320,6 @@ button,
 
     .app-version {
         font-size: 10.5px;
-    }
-
-    .install-header-btn {
-        height: 34px;
-        padding: 0 8px;
-        font-size: 0.75rem;
-        gap: 4px;
     }
 
     .reload-btn {
@@ -4592,54 +4624,6 @@ html[data-theme="light"] .notion-editor .notion-todo-checkbox:checked {
  *  PWA INSTALLATION COMPONENTS & STYLES
  * ========================================================= */
 
-/* Header Install Button */
-.install-header-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    height: 38px;
-    padding: 0 12px;
-    border: 1px solid rgba(124, 58, 237, 0.45);
-    border-radius: var(--radius-xl);
-    background: linear-gradient(135deg, rgba(124, 58, 237, 0.22), rgba(168, 85, 247, 0.12));
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    cursor: pointer;
-    transition: var(--transition);
-    font-family: var(--font);
-    color: #fff;
-    font-size: 0.82rem;
-    font-weight: 600;
-    box-shadow: 0 2px 10px rgba(124, 58, 237, 0.2);
-    position: relative;
-    overflow: hidden;
-}
-
-.install-header-btn:hover {
-    border-color: rgba(168, 85, 247, 0.85);
-    background: linear-gradient(135deg, rgba(124, 58, 237, 0.38), rgba(168, 85, 247, 0.28));
-    transform: translateY(-1px);
-    box-shadow: 0 4px 16px rgba(124, 58, 237, 0.4);
-}
-
-.install-header-btn:active {
-    transform: translateY(0);
-}
-
-.install-header-icon {
-    font-size: 1rem;
-    line-height: 1;
-    display: inline-block;
-    animation: bounceSubtle 2.5s infinite ease-in-out;
-}
-
-.install-header-btn.installed {
-    border-color: rgba(16, 185, 129, 0.4);
-    background: rgba(16, 185, 129, 0.15);
-    color: var(--accent-green);
-    cursor: default;
-}
-
 /* Login Card Install Option */
 .login-install-wrapper {
     margin-top: 18px;
@@ -4695,7 +4679,9 @@ html[data-theme="light"] .notion-editor .notion-todo-checkbox:checked {
 }
 
 .login-install-btn .install-btn-icon {
-    font-size: 1.15rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Floating Install Banner */
@@ -5056,15 +5042,6 @@ html[data-theme="light"] .notion-editor .notion-todo-checkbox:checked {
     }
     .pwa-banner-desc {
         display: none;
-    }
-}
-
-@media (max-width: 360px) {
-    .install-header-text {
-        display: none;
-    }
-    .install-header-btn {
-        padding: 0 8px;
     }
 }
 
@@ -5619,6 +5596,10 @@ html[data-theme="light"] .notion-editor .notion-todo-checkbox:checked {
    8. HABIT TRACKER (THEO DÕI & XÂY DỰNG THÓI QUEN)
    ========================================================= */
 #habits-section {
+    --habit-type-caption: 0.75rem;
+    --habit-type-label: 0.8125rem;
+    --habit-type-body: 0.875rem;
+    --habit-type-title: 1rem;
     width: 100%;
     max-width: 1100px;
     margin: 0 auto;
@@ -5742,7 +5723,7 @@ html[data-theme="light"] .notion-editor .notion-todo-checkbox:checked {
 }
 
 .xp-display {
-    font-size: 0.8rem;
+    font-size: var(--habit-type-label);
     font-weight: 600;
     color: #a855f7;
     font-variant-numeric: tabular-nums;
@@ -5781,7 +5762,7 @@ html[data-theme="light"] .notion-editor .notion-todo-checkbox:checked {
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
     color: var(--text-primary);
-    font-size: 0.8rem;
+    font-size: var(--habit-type-label);
     font-weight: 600;
     cursor: pointer;
     transition: var(--transition);
@@ -5824,7 +5805,7 @@ html[data-theme="light"] .notion-editor .notion-todo-checkbox:checked {
     background: transparent;
     border: none;
     color: var(--text-secondary);
-    font-size: 0.85rem;
+    font-size: var(--habit-type-label);
     cursor: pointer;
     padding: 6px 10px;
     border-radius: var(--radius-sm);
@@ -5837,7 +5818,7 @@ html[data-theme="light"] .notion-editor .notion-todo-checkbox:checked {
 }
 
 .habit-month-title {
-    font-size: 1rem;
+    font-size: var(--habit-type-title);
     font-weight: 700;
     color: var(--text-primary);
     padding: 0 6px;
@@ -5850,7 +5831,7 @@ html[data-theme="light"] .notion-editor .notion-todo-checkbox:checked {
     background: rgba(124, 58, 237, 0.15);
     border: 1px solid rgba(124, 58, 237, 0.35);
     color: #c084fc;
-    font-size: 0.78rem;
+    font-size: var(--habit-type-caption);
     font-weight: 600;
     padding: 5px 10px;
     border-radius: var(--radius-sm);
@@ -5877,7 +5858,8 @@ html[data-theme="light"] .notion-editor .notion-todo-checkbox:checked {
     gap: 6px;
     padding: 8px 16px;
     border-radius: var(--radius-md);
-    font-size: 0.85rem;
+    font-size: var(--habit-type-label);
+    line-height: 1.25;
     font-weight: 600;
     cursor: pointer;
     transition: var(--transition);
@@ -5995,7 +5977,7 @@ html[data-theme="light"] .notion-editor .notion-todo-checkbox:checked {
     -webkit-backdrop-filter: blur(12px);
     padding: 12px 10px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    font-size: 0.8rem;
+    font-size: var(--habit-type-label);
     color: var(--text-primary);
     font-weight: 600;
     text-align: center;
@@ -6038,7 +6020,7 @@ html[data-theme="light"] .notion-editor .notion-todo-checkbox:checked {
 }
 
 .habit-th-title {
-    font-size: 0.82rem;
+    font-size: var(--habit-type-label);
     font-weight: 700;
     white-space: nowrap;
     overflow: hidden;
@@ -6047,7 +6029,7 @@ html[data-theme="light"] .notion-editor .notion-todo-checkbox:checked {
 }
 
 .habit-th-target {
-    font-size: 0.7rem;
+    font-size: var(--habit-type-caption);
     font-weight: 500;
     color: var(--text-muted);
     padding: 1px 6px;
@@ -6103,13 +6085,13 @@ html[data-theme="light"] .notion-editor .notion-todo-checkbox:checked {
 
 .date-num {
     font-weight: 700;
-    font-size: 0.9rem;
+    font-size: var(--habit-type-body);
     font-variant-numeric: tabular-nums;
     color: var(--text-primary);
 }
 
 .date-weekday {
-    font-size: 0.72rem;
+    font-size: var(--habit-type-caption);
     color: var(--text-secondary);
     margin-left: 6px;
 }
@@ -6187,7 +6169,7 @@ html[data-theme="light"] .notion-editor .notion-todo-checkbox:checked {
 }
 
 .numeric-val-text {
-    font-size: 0.78rem;
+    font-size: var(--habit-type-caption);
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     color: var(--text-primary);
@@ -6248,7 +6230,7 @@ html[data-theme="light"] .notion-editor .notion-todo-checkbox:checked {
 }
 
 .daily-progress-text {
-    font-size: 0.72rem;
+    font-size: var(--habit-type-caption);
     font-weight: 600;
     color: var(--text-secondary);
     font-variant-numeric: tabular-nums;
@@ -7117,6 +7099,13 @@ html[data-theme="light"] .notion-editor .notion-todo-checkbox:checked {
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
+    #habits-section {
+        --habit-type-caption: 0.75rem;
+        --habit-type-label: 0.75rem;
+        --habit-type-body: 0.8125rem;
+        --habit-type-title: 0.875rem;
+    }
+
     .habit-stats-banner {
         grid-template-columns: 1fr;
     }
@@ -7130,17 +7119,45 @@ html[data-theme="light"] .notion-editor .notion-todo-checkbox:checked {
         justify-content: space-between;
     }
 
+    .habit-month-title {
+        min-width: 0;
+        flex: 1;
+        padding: 0 4px;
+        letter-spacing: 0;
+    }
+
+    .month-nav-btn,
+    .btn-today-quick {
+        min-height: 40px;
+    }
+
     .habit-actions-group {
         justify-content: space-between;
+        gap: 6px;
     }
 
     .habit-actions-group .habit-btn {
         flex: 1;
         justify-content: center;
+        min-height: 48px;
+        padding: 8px 6px;
+        line-height: 1.15;
     }
 
     .habit-table thead th.habit-th-col {
-        min-width: 110px;
+        min-width: 104px;
+    }
+
+    .habit-table thead th {
+        padding: 10px 6px;
+    }
+
+    .habit-th-icon {
+        font-size: 1.125rem;
+    }
+
+    .habit-table tbody td {
+        padding: 8px 6px;
     }
 }
 
@@ -7160,7 +7177,6 @@ html[data-theme="light"] .notion-editor .notion-todo-checkbox:checked {
     }
 
     .orb,
-    .install-header-icon,
     .loading-spinner {
         animation: none !important;
     }
