@@ -800,26 +800,223 @@
     function initTabs() {
         var tabBtns = document.querySelectorAll('.tab-btn');
         var sections = document.querySelectorAll('.section');
-        tabBtns.forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                var tab = btn.getAttribute('data-tab');
-                tabBtns.forEach(function (b) { b.classList.remove('active'); });
-                btn.classList.add('active');
-                sections.forEach(function (s) {
-                    s.classList.remove('active');
-                    s.style.animation = 'none'; s.offsetHeight; s.style.animation = '';
-                });
-                document.getElementById(tab + '-section').classList.add('active');
-                // Mobile browsers may keep :hover on the tapped tab until the
-                // next touch. Remove focus so the new active color paints now.
-                if (window.matchMedia && window.matchMedia('(hover: none)').matches) {
-                    btn.blur();
-                }
-                if (tab === 'prices' && window.FlowHubStockFeature) {
-                    window.FlowHubStockFeature.refresh();
+        var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        function activateTab(btn, moveFocus) {
+            var tab = btn.getAttribute('data-tab');
+            var targetSection = document.getElementById(tab + '-section');
+            if (!targetSection) return;
+
+            tabBtns.forEach(function (item) {
+                var isActive = item === btn;
+                item.classList.toggle('active', isActive);
+                item.setAttribute('aria-selected', String(isActive));
+                item.setAttribute('tabindex', isActive ? '0' : '-1');
+            });
+
+            sections.forEach(function (section) {
+                var isActive = section === targetSection;
+                section.classList.toggle('active', isActive);
+                section.hidden = !isActive;
+                if (isActive && !reduceMotion) {
+                    section.style.animation = 'none';
+                    section.offsetHeight;
+                    section.style.animation = '';
                 }
             });
+
+            if (moveFocus) btn.focus({ preventScroll: true });
+
+            if (tab === 'prices' && window.FlowHubStockFeature) {
+                window.FlowHubStockFeature.refresh();
+            }
+        }
+
+        tabBtns.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                activateTab(btn, false);
+            });
+
+            btn.addEventListener('keydown', function (event) {
+                var currentIndex = Array.prototype.indexOf.call(tabBtns, btn);
+                var nextIndex = currentIndex;
+
+                if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+                    nextIndex = (currentIndex + 1) % tabBtns.length;
+                } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+                    nextIndex = (currentIndex - 1 + tabBtns.length) % tabBtns.length;
+                } else if (event.key === 'Home') {
+                    nextIndex = 0;
+                } else if (event.key === 'End') {
+                    nextIndex = tabBtns.length - 1;
+                } else {
+                    return;
+                }
+
+                event.preventDefault();
+                activateTab(tabBtns[nextIndex], true);
+            });
         });
+    }
+
+    // =========================================================
+    //  ACCESSIBLE MODAL MANAGER
+    // =========================================================
+    function initAccessibleModals() {
+        var overlays = Array.from(document.querySelectorAll('.modal-overlay'));
+        var previousFocus = new WeakMap();
+        var activeState = new WeakMap();
+        var generatedTitleId = 0;
+        var focusableSelector = [
+            'a[href]',
+            'button:not([disabled])',
+            'input:not([disabled]):not([type="hidden"])',
+            'select:not([disabled])',
+            'textarea:not([disabled])',
+            '[contenteditable="true"]',
+            '[tabindex]:not([tabindex="-1"])'
+        ].join(',');
+
+        if (!overlays.length) return;
+
+        function isFocusable(element) {
+            if (!element || !element.isConnected) return false;
+            if (element.closest('[hidden], [aria-hidden="true"]')) return false;
+            var style = window.getComputedStyle(element);
+            return style.display !== 'none' && style.visibility !== 'hidden';
+        }
+
+        function getFocusableElements(overlay) {
+            return Array.from(overlay.querySelectorAll(focusableSelector)).filter(isFocusable);
+        }
+
+        function getTopModal() {
+            var active = overlays.filter(function (overlay) {
+                return overlay.classList.contains('active');
+            });
+            return active.length ? active[active.length - 1] : null;
+        }
+
+        function focusModal(overlay) {
+            if (!overlay || !overlay.classList.contains('active')) return;
+            if (overlay.contains(document.activeElement)) return;
+
+            var preferred = overlay.querySelector('[autofocus]');
+            var focusable = getFocusableElements(overlay);
+            var target = isFocusable(preferred) ? preferred : focusable[0];
+            if (!target) {
+                target = overlay.querySelector('.modal-container, .modal-card') || overlay;
+                target.setAttribute('tabindex', '-1');
+            }
+            target.focus({ preventScroll: true });
+        }
+
+        function syncBodyLock() {
+            document.body.classList.toggle('modal-open', Boolean(getTopModal()));
+        }
+
+        function handleStateChange(overlay) {
+            var isActive = overlay.classList.contains('active');
+            var wasActive = activeState.get(overlay);
+            if (isActive === wasActive) return;
+            activeState.set(overlay, isActive);
+            overlay.setAttribute('aria-hidden', String(!isActive));
+
+            if (isActive) {
+                if (!overlay.contains(document.activeElement)) {
+                    previousFocus.set(overlay, document.activeElement);
+                }
+                syncBodyLock();
+                focusModal(overlay);
+                requestAnimationFrame(function () { focusModal(overlay); });
+                return;
+            }
+
+            syncBodyLock();
+            requestAnimationFrame(function () {
+                var topModal = getTopModal();
+                if (topModal) {
+                    focusModal(topModal);
+                    return;
+                }
+
+                var target = previousFocus.get(overlay);
+                if (isFocusable(target)) target.focus({ preventScroll: true });
+            });
+        }
+
+        overlays.forEach(function (overlay) {
+            overlay.setAttribute('role', overlay.getAttribute('role') || 'dialog');
+            overlay.setAttribute('aria-modal', 'true');
+
+            var title = overlay.querySelector('.modal-title, .confirm-modal-title, .reminder-alert-title, h3');
+            if (title) {
+                if (!title.id) {
+                    generatedTitleId += 1;
+                    title.id = 'modal-title-' + generatedTitleId;
+                }
+                if (!overlay.hasAttribute('aria-labelledby')) {
+                    overlay.setAttribute('aria-labelledby', title.id);
+                }
+            } else if (!overlay.hasAttribute('aria-label')) {
+                overlay.setAttribute('aria-label', 'Hộp thoại');
+            }
+
+            overlay.querySelectorAll('.modal-close').forEach(function (button) {
+                if (!button.hasAttribute('type')) button.setAttribute('type', 'button');
+                if (!button.hasAttribute('aria-label') && !button.hasAttribute('title')) {
+                    button.setAttribute('aria-label', 'Đóng hộp thoại');
+                }
+            });
+
+            activeState.set(overlay, overlay.classList.contains('active'));
+            overlay.setAttribute('aria-hidden', String(!overlay.classList.contains('active')));
+
+            new MutationObserver(function () {
+                handleStateChange(overlay);
+            }).observe(overlay, { attributes: true, attributeFilter: ['class'] });
+        });
+
+        document.addEventListener('keydown', function (event) {
+            var topModal = getTopModal();
+            if (!topModal) return;
+
+            if (event.key === 'Tab') {
+                var focusable = getFocusableElements(topModal);
+                if (!focusable.length) {
+                    event.preventDefault();
+                    focusModal(topModal);
+                    return;
+                }
+
+                var first = focusable[0];
+                var last = focusable[focusable.length - 1];
+                if (!topModal.contains(document.activeElement)) {
+                    event.preventDefault();
+                    (event.shiftKey ? last : first).focus();
+                } else if (event.shiftKey && document.activeElement === first) {
+                    event.preventDefault();
+                    last.focus();
+                } else if (!event.shiftKey && document.activeElement === last) {
+                    event.preventDefault();
+                    first.focus();
+                }
+                return;
+            }
+
+            if (event.key !== 'Escape') return;
+
+            var dismissButton = topModal.querySelector(
+                '.modal-close, [id$="-cancel"], [id$="-dismiss"], [id$="-done"], [id$="-continue"], [data-modal-dismiss]'
+            );
+            if (dismissButton && isFocusable(dismissButton)) {
+                event.preventDefault();
+                event.stopPropagation();
+                dismissButton.click();
+            }
+        }, true);
+
+        syncBodyLock();
     }
 
     // =========================================================
@@ -6764,6 +6961,7 @@
 
     document.addEventListener('DOMContentLoaded', function () {
         initTabs();
+        initAccessibleModals();
         initGardenViewport();
         setLanguage();
         initThemeToggle();

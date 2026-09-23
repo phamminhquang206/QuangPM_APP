@@ -18,7 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=2.25">
+    <link rel="stylesheet" href="style.css?v=2.27">
     <link rel="stylesheet" href="stock/stock-feature.css?v=1.3">
 
     <!-- PWA Meta Tags -->
@@ -122,27 +122,32 @@
                     </div>
                 </div>
             </div>
-            <nav class="tab-nav" role="tablist">
-                <button class="tab-btn active" data-tab="pomodoro" role="tab" id="tab-pomodoro">
-                    🌱 MyGarden
+            <nav class="tab-nav" role="tablist" aria-label="Khu vực chính">
+                <button class="tab-btn active" data-tab="pomodoro" role="tab" id="tab-pomodoro" aria-selected="true" aria-controls="pomodoro-section" tabindex="0">
+                    <span class="tab-icon" aria-hidden="true">🌱</span>
+                    <span class="tab-label">MyGarden</span>
                 </button>
-                <button class="tab-btn" data-tab="todo" role="tab" id="tab-todo">
-                    ✅ To-do
+                <button class="tab-btn" data-tab="todo" role="tab" id="tab-todo" aria-selected="false" aria-controls="todo-section" tabindex="-1">
+                    <span class="tab-icon" aria-hidden="true">✓</span>
+                    <span class="tab-label">To-do</span>
                 </button>
-                <button class="tab-btn" data-tab="notes" role="tab" id="tab-notes">
-                    📝 Notes
+                <button class="tab-btn" data-tab="notes" role="tab" id="tab-notes" aria-selected="false" aria-controls="notes-section" tabindex="-1">
+                    <span class="tab-icon" aria-hidden="true">✎</span>
+                    <span class="tab-label">Notes</span>
                 </button>
-                <button class="tab-btn" data-tab="prices" role="tab" id="tab-prices">
-                    📈 Chứng khoán
+                <button class="tab-btn" data-tab="prices" role="tab" id="tab-prices" aria-selected="false" aria-controls="prices-section" tabindex="-1">
+                    <span class="tab-icon" aria-hidden="true">↗</span>
+                    <span class="tab-label">Chứng khoán</span>
                 </button>
-                <button class="tab-btn" data-tab="habits" role="tab" id="tab-habits">
-                    🎯 <span data-i18n="habitsTab">Habits</span>
+                <button class="tab-btn" data-tab="habits" role="tab" id="tab-habits" aria-selected="false" aria-controls="habits-section" tabindex="-1">
+                    <span class="tab-icon" aria-hidden="true">◎</span>
+                    <span class="tab-label" data-i18n="habitsTab">Habits</span>
                 </button>
             </nav>
         </header>
 
         <!-- ===== MYGARDEN (POMODORO) SECTION ===== -->
-        <section id="pomodoro-section" class="section active" role="tabpanel">
+        <section id="pomodoro-section" class="section active" role="tabpanel" aria-labelledby="tab-pomodoro" tabindex="0">
             <!-- Garden Sub-navigation -->
             <div class="garden-subnav">
                 <button class="garden-subnav-btn active" id="garden-subnav-focus" data-view="focus">
@@ -286,7 +291,7 @@
         </section>
 
         <!-- ===== TODO SECTION ===== -->
-        <section id="todo-section" class="section" role="tabpanel">
+        <section id="todo-section" class="section" role="tabpanel" aria-labelledby="tab-todo" tabindex="0" hidden>
             <div class="card todo-input-card">
                 <div class="todo-input-group">
                     <input type="text" id="todo-input" class="todo-input" data-i18n-placeholder="addTaskPlaceholder" placeholder="Thêm task mới..." autocomplete="off" />
@@ -324,7 +329,7 @@
         </section>
 
         <!-- ===== NOTES SECTION ===== -->
-        <section id="notes-section" class="section" role="tabpanel">
+        <section id="notes-section" class="section" role="tabpanel" aria-labelledby="tab-notes" tabindex="0" hidden>
             <div class="notes-toolbar">
                 <div class="notes-batch-actions">
                     <button class="note-delete-selected" id="note-delete-selected" data-i18n="deleteSelected">🗑 Xóa đã chọn</button>
@@ -352,7 +357,7 @@
         </section>
 
         <!-- ===== STOCKS SECTION ===== -->
-        <section id="prices-section" class="section stock-section" role="tabpanel">
+        <section id="prices-section" class="section stock-section" role="tabpanel" aria-labelledby="tab-prices" tabindex="0" hidden>
             <div class="flowhub-stock" id="flowhub-stock" data-active-tab="market">
                 <div class="stock-feature-header">
                     <div>
@@ -635,7 +640,7 @@
         </section>
 
         <!-- ===== HABIT TRACKER SECTION ===== -->
-        <section id="habits-section" class="section" role="tabpanel">
+        <section id="habits-section" class="section" role="tabpanel" aria-labelledby="tab-habits" tabindex="0" hidden>
             <!-- Gamification & Stats Banner -->
             <div class="habit-stats-banner">
                 <div class="habit-stat-card streak-card">
@@ -1329,7 +1334,7 @@
     <script src="stock/stock-api.js?v=1.0"></script>
     <script src="stock/stock-agent.js?v=1.0"></script>
     <script src="stock/stock-feature.js?v=1.0"></script>
-    <script src="app.js?v=2.16"></script>
+    <script src="app.js?v=2.18"></script>
 
     <!-- Register Service Worker for PWA -->
     <script>
