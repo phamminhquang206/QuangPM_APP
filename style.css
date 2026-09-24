@@ -19,6 +19,9 @@
     --accent-green: #10b981;
     --accent-red: #ef4444;
     --accent-orange: #f59e0b;
+    --brand-mark-color: #d9ccff;
+    --brand-mark-node: #7ee0b6;
+    --brand-wordmark: #a97cff;
 
     --gradient-primary: linear-gradient(135deg, #7c3aed, #3b82f6);
     --gradient-work: linear-gradient(135deg, #7c3aed, #a855f7);
@@ -54,6 +57,9 @@ html[data-theme="light"] {
     --text-primary: #172033;
     --text-secondary: #526079;
     --text-muted: #7a869c;
+    --brand-mark-color: #633fb0;
+    --brand-mark-node: #56c99a;
+    --brand-wordmark: #6242b3;
 
     --shadow-glow: 0 0 30px rgba(124, 58, 237, 0.1);
     --shadow-card: 0 8px 28px rgba(15, 23, 42, 0.09);
@@ -196,7 +202,7 @@ button,
     margin-right: auto;
     margin-left: auto;
     margin-bottom: 8px;
-    color: var(--accent-purple-light);
+    color: var(--brand-mark-color);
 }
 
 .login-logo .app-shell-icon {
@@ -469,24 +475,41 @@ button,
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: var(--accent-purple-light);
+    color: var(--brand-mark-color);
 }
 
 .brand-mark .app-shell-icon {
-    width: 26px;
-    height: 26px;
+    width: 30px;
+    height: 30px;
+}
+
+.brand-symbol-flow {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.35;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.brand-symbol-node {
+    fill: var(--brand-mark-node);
+    stroke: var(--surface-raised);
+    stroke-width: 0.65;
 }
 
 .app-title {
     font-size: 1.65rem;
     font-weight: 800;
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    background: none;
+    color: var(--brand-wordmark);
+    -webkit-text-fill-color: currentColor;
     margin-bottom: 0;
     letter-spacing: -0.03em;
     white-space: nowrap;
+}
+
+html[data-theme="light"] .header-top {
+    background: #ffffff;
 }
 
 .app-version {
@@ -751,13 +774,61 @@ html[data-theme="light"] .theme-icon-moon {
 
 /* ===== MYGARDEN SECTION (Forest Pomodoro) ===== */
 :root {
-    --garden-mint: #d5e9a7;
-    --garden-mint-hover: #e2edb5;
-    --garden-muted: #a3c4b5;
-    --garden-dark: #245f54;
-    --garden-base: #377d70;
-    --garden-card-bg: #225148;
+    --garden-mint: #6ee7b7;
+    --garden-mint-hover: #a7f3d0;
+    --garden-muted: var(--text-secondary);
+    --garden-dark: #12122a;
+    --garden-base: #10b981;
+    --garden-card-bg: #12122a;
     --garden-soil: #2c6356;
+    --garden-surface: linear-gradient(165deg, #12342f 0%, var(--surface-raised) 72%);
+    --garden-subnav-bg: var(--surface-raised);
+    --garden-control-bg: rgba(16, 185, 129, 0.09);
+    --garden-control-hover: rgba(16, 185, 129, 0.16);
+    --garden-accent-soft: rgba(16, 185, 129, 0.14);
+    --garden-action-bg: #34d399;
+    --garden-action-hover: #6ee7b7;
+    --garden-border: rgba(52, 211, 153, 0.22);
+    --garden-on-surface: var(--text-primary);
+    --garden-on-accent: #052e25;
+    --garden-card-shadow: var(--shadow-card);
+    --garden-dialog-bg: var(--surface-strong);
+    --garden-dialog-soft: rgba(16, 185, 129, 0.09);
+    --garden-land-surface: rgba(18, 18, 42, 0.54);
+    --garden-land-shadow: 0 14px 30px rgba(0, 0, 0, 0.22);
+    --garden-plot-bg: linear-gradient(145deg, rgba(52, 211, 153, 0.34), rgba(16, 185, 129, 0.22));
+    --garden-plot-empty-bg: linear-gradient(145deg, rgba(148, 163, 184, 0.1), rgba(16, 185, 129, 0.08));
+    --garden-plot-border: rgba(52, 211, 153, 0.24);
+    --garden-plot-mark: rgba(167, 243, 208, 0.58);
+    --garden-plot-shadow: inset 0 -4px rgba(0, 0, 0, 0.14);
+    --garden-plot-selected: #6ee7b7;
+    --garden-plot-reserved: rgba(52, 211, 153, 0.22);
+}
+
+html[data-theme="light"] {
+    --garden-mint: #047857;
+    --garden-mint-hover: #065f46;
+    --garden-surface: linear-gradient(165deg, #e8f8f2 0%, var(--surface-strong) 72%);
+    --garden-subnav-bg: var(--surface-raised);
+    --garden-control-bg: rgba(16, 185, 129, 0.08);
+    --garden-control-hover: rgba(16, 185, 129, 0.14);
+    --garden-accent-soft: rgba(16, 185, 129, 0.12);
+    --garden-action-bg: #34d399;
+    --garden-action-hover: #6ee7b7;
+    --garden-border: rgba(5, 150, 105, 0.22);
+    --garden-on-surface: var(--text-primary);
+    --garden-card-shadow: var(--shadow-card);
+    --garden-dialog-bg: var(--surface-strong);
+    --garden-dialog-soft: rgba(16, 185, 129, 0.08);
+    --garden-land-surface: rgba(16, 185, 129, 0.055);
+    --garden-land-shadow: 0 12px 28px rgba(15, 23, 42, 0.1);
+    --garden-plot-bg: linear-gradient(145deg, #d1fae5, #a7f3d0);
+    --garden-plot-empty-bg: linear-gradient(145deg, #edf7f2, #dfeee7);
+    --garden-plot-border: rgba(5, 150, 105, 0.22);
+    --garden-plot-mark: #5b8f73;
+    --garden-plot-shadow: inset 0 -4px rgba(5, 150, 105, 0.08);
+    --garden-plot-selected: #059669;
+    --garden-plot-reserved: #bbf7d0;
 }
 
 #pomodoro-section {
@@ -779,8 +850,8 @@ html[data-theme="light"] .theme-icon-moon {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    background: rgba(36, 95, 84, 0.45);
-    border: 1px solid rgba(213, 233, 167, 0.25);
+    background: var(--garden-subnav-bg);
+    border: 1px solid var(--garden-border);
     border-radius: 18px;
     padding: 6px;
     width: 100%;
@@ -797,7 +868,7 @@ html[data-theme="light"] .theme-icon-moon {
     gap: 6px;
     border: none;
     background: transparent;
-    color: #c5dace;
+    color: var(--text-secondary);
     border-radius: 12px;
     padding: 10px 14px;
     font-size: 0.92rem;
@@ -807,16 +878,22 @@ html[data-theme="light"] .theme-icon-moon {
     font-family: var(--font);
 }
 
+.garden-subnav-icon {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+}
+
 .garden-subnav-btn:hover {
-    color: #fff;
-    background: rgba(255, 255, 255, 0.08);
+    color: var(--garden-on-surface);
+    background: var(--garden-control-hover);
 }
 
 .garden-subnav-btn.active {
-    background: #377d70;
+    background: var(--garden-accent-soft);
     color: var(--garden-mint);
     font-weight: 600;
-    box-shadow: 0 4px 14px rgba(36, 95, 84, 0.5);
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.12);
 }
 
 /* Common Garden Card */
@@ -827,11 +904,11 @@ html[data-theme="light"] .theme-icon-moon {
 }
 
 .garden-card {
-    background: linear-gradient(165deg, #2b6155, #1e4a41);
-    border: 1px solid rgba(213, 233, 167, 0.25);
+    background: var(--garden-surface);
+    border: 1px solid var(--garden-border);
     border-radius: 28px;
-    box-shadow: 0 20px 60px rgba(7, 30, 25, 0.45);
-    color: #f1f6ea;
+    box-shadow: var(--garden-card-shadow);
+    color: var(--garden-on-surface);
     width: 100%;
     max-width: 480px;
     padding: 24px 20px;
@@ -847,7 +924,7 @@ html[data-theme="light"] .theme-icon-moon {
     font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.15em;
-    color: #c0dbc8;
+    color: var(--garden-muted);
     text-transform: uppercase;
     margin-bottom: 6px;
 }
@@ -870,7 +947,7 @@ html[data-theme="light"] .theme-icon-moon {
     top: 50%;
     transform: translate(-50%, -50%);
     border-radius: 50%;
-    background: rgba(224, 239, 192, 0.04);
+    background: var(--garden-control-bg);
 }
 
 #duration-dial {
@@ -918,7 +995,7 @@ html[data-theme="light"] .theme-icon-moon {
 }
 
 .dial-track {
-    stroke: rgba(219, 233, 182, 0.25);
+    stroke: var(--garden-border);
 }
 
 .dial-progress {
@@ -931,11 +1008,11 @@ html[data-theme="light"] .theme-icon-moon {
     position: absolute;
     width: 22px;
     height: 22px;
-    background: #e2edb5;
-    border: 3px solid #377d70;
+    background: var(--garden-mint-hover);
+    border: 3px solid var(--garden-base);
     border-radius: 50%;
     transform: translate(-50%, -50%);
-    box-shadow: 0 0 0 1px #d5e9a7, 0 4px 10px rgba(0,0,0,0.3);
+    box-shadow: 0 0 0 1px var(--garden-mint), 0 4px 10px rgba(0,0,0,0.3);
     pointer-events: none;
     transition: transform 0.05s ease;
 }
@@ -944,7 +1021,7 @@ html[data-theme="light"] .theme-icon-moon {
     position: absolute;
     top: 87%;
     font-size: 11px;
-    color: #d4e5ce;
+    color: var(--garden-muted);
     pointer-events: none;
 }
 
@@ -994,7 +1071,7 @@ html[data-theme="light"] .theme-icon-moon {
     width: 100%;
     text-align: center;
     font-size: 12px;
-    color: #d3e5cc;
+    color: var(--garden-muted);
     line-height: 1.5;
 }
 
@@ -1005,7 +1082,7 @@ html[data-theme="light"] .theme-icon-moon {
     line-height: 1.1;
     letter-spacing: 2px;
     font-variant-numeric: tabular-nums;
-    color: #fff;
+    color: var(--garden-on-surface);
     margin-top: 4px;
     text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
@@ -1032,9 +1109,9 @@ html[data-theme="light"] .theme-icon-moon {
     min-height: 44px;
     min-width: 180px;
     padding: 10px 18px;
-    background: rgba(36, 95, 84, 0.4);
-    color: #eef4dc;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: var(--garden-control-bg);
+    color: var(--garden-on-surface);
+    border: 1px solid var(--garden-border);
     border-radius: 14px;
     text-align: center;
     font-size: 14px;
@@ -1048,8 +1125,8 @@ html[data-theme="light"] .theme-icon-moon {
 }
 
 .garden-species-btn:hover {
-    background: rgba(36, 95, 84, 0.6);
-    border-color: rgba(213, 233, 167, 0.4);
+    background: var(--garden-control-hover);
+    border-color: var(--garden-mint);
     transform: translateY(-1px);
 }
 
@@ -1060,12 +1137,12 @@ html[data-theme="light"] .theme-icon-moon {
 
 #dial-hint {
     font-size: 11px;
-    color: #d1e1ce;
+    color: var(--garden-muted);
 }
 
 .garden-primary-btn {
-    background: var(--garden-mint);
-    color: #2b5744;
+    background: var(--garden-action-bg);
+    color: var(--garden-on-accent);
     border: none;
     border-radius: 14px;
     padding: 13px 24px;
@@ -1076,13 +1153,13 @@ html[data-theme="light"] .theme-icon-moon {
     cursor: pointer;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     font-family: var(--font);
-    box-shadow: 0 6px 18px rgba(36, 95, 84, 0.4);
+    box-shadow: 0 6px 18px rgba(16, 185, 129, 0.24);
 }
 
 .garden-primary-btn:hover:not(:disabled) {
-    background: var(--garden-mint-hover);
+    background: var(--garden-action-hover);
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(36, 95, 84, 0.5);
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
 }
 
 .garden-primary-btn:disabled {
@@ -1091,9 +1168,9 @@ html[data-theme="light"] .theme-icon-moon {
 }
 
 .garden-primary-btn.running {
-    background: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    color: #edf2df;
+    background: var(--garden-control-bg);
+    border: 1px solid var(--garden-border);
+    color: var(--garden-on-surface);
     box-shadow: none;
 }
 
@@ -1110,13 +1187,13 @@ html[data-theme="light"] .theme-icon-moon {
     justify-content: center;
     gap: 10px;
     margin-top: 14px;
-    color: #d4e3d4;
+    color: var(--garden-muted);
     max-width: 100%;
 }
 
 .garden-sound-bar button {
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--garden-border);
+    background: var(--garden-control-bg);
     border-radius: 50%;
     width: 40px;
     height: 40px;
@@ -1131,19 +1208,19 @@ html[data-theme="light"] .theme-icon-moon {
 }
 
 .garden-sound-bar button:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--garden-control-hover);
 }
 
 .garden-sound-bar button[aria-pressed="true"] {
-    background: var(--garden-mint);
-    color: #2b5744;
-    border-color: var(--garden-mint);
-    box-shadow: 0 0 12px rgba(213, 233, 167, 0.4);
+    background: var(--garden-action-bg);
+    color: var(--garden-on-accent);
+    border-color: var(--garden-action-bg);
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.28);
 }
 
 .garden-sound-bar select {
-    background: rgba(36, 95, 84, 0.35);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: var(--garden-control-bg);
+    border: 1px solid var(--garden-border);
     border-radius: 10px;
     color: inherit;
     font-size: 12px;
@@ -1197,14 +1274,14 @@ html[data-theme="light"] .theme-icon-moon {
     font-size: clamp(20px, 3vw, 26px);
     margin: 2px 0 0;
     line-height: 1.3;
-    color: #fff;
+    color: var(--garden-on-surface);
     text-align: left;
 }
 
 .garden-badge {
-    background: rgba(213, 233, 167, 0.15);
+    background: var(--garden-accent-soft);
     color: var(--garden-mint);
-    border: 1px solid rgba(213, 233, 167, 0.3);
+    border: 1px solid var(--garden-border);
     border-radius: 12px;
     padding: 6px 14px;
     font-size: 13px;
@@ -1223,10 +1300,10 @@ html[data-theme="light"] .theme-icon-moon {
 .garden-land {
     width: min(100%, 420px);
     padding: clamp(12px, 3vw, 18px);
-    background: #2c6356;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: var(--garden-land-surface);
+    border: 1px solid var(--garden-border);
     border-radius: 26px;
-    box-shadow: 0 10px 0 #235344, 0 18px 30px rgba(25, 70, 61, 0.4);
+    box-shadow: var(--garden-land-shadow);
     margin: 4px 0 8px;
 }
 
@@ -1242,14 +1319,14 @@ html[data-theme="light"] .theme-icon-moon {
     min-height: 0;
     padding: 0;
     border-radius: 13px;
-    border: 1px solid rgba(201, 219, 158, 0.3);
-    background: linear-gradient(145deg, #9aaf6a, #819c5c);
-    box-shadow: inset 0 -5px rgba(87, 108, 65, 0.3);
+    border: 1px solid var(--garden-plot-border);
+    background: var(--garden-plot-bg);
+    box-shadow: var(--garden-plot-shadow);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: clamp(26px, 7vw, 44px);
-    color: #dfe7b9;
+    color: var(--garden-plot-mark);
     cursor: pointer;
     transition: transform 0.15s ease, filter 0.15s ease;
 }
@@ -1260,19 +1337,19 @@ html[data-theme="light"] .theme-icon-moon {
 }
 
 .plot.empty {
-    background: linear-gradient(145deg, #708f5b, #628353);
+    background: var(--garden-plot-empty-bg);
     font-size: 26px;
-    color: rgba(212, 227, 181, 0.45);
+    color: var(--garden-plot-mark);
 }
 
 .plot.selected {
-    outline: 3px solid #ecdfa5;
+    outline: 3px solid var(--garden-plot-selected);
     outline-offset: 1px;
-    filter: brightness(1.15);
+    box-shadow: var(--garden-plot-shadow), 0 0 0 4px var(--garden-accent-soft);
 }
 
 .plot.reserved {
-    background: #a4b579;
+    background: var(--garden-plot-reserved);
     animation: plot-pulse 2s ease-in-out infinite;
 }
 
@@ -1286,15 +1363,15 @@ html[data-theme="light"] .theme-icon-moon {
     gap: 18px;
     align-items: center;
     font-size: 13px;
-    color: #d4e3ce;
+    color: var(--garden-muted);
     margin: 4px 0;
 }
 
 .garden-pages button {
     width: 40px;
     height: 36px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: var(--garden-control-bg);
+    border: 1px solid var(--garden-border);
     border-radius: 10px;
     color: inherit;
     cursor: pointer;
@@ -1302,7 +1379,7 @@ html[data-theme="light"] .theme-icon-moon {
 }
 
 .garden-pages button:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--garden-control-hover);
 }
 
 .garden-pages button:disabled {
@@ -1320,8 +1397,8 @@ html[data-theme="light"] .theme-icon-moon {
 
 .garden-stat-box {
     text-align: center;
-    background: rgba(36, 95, 84, 0.35);
-    border: 1px solid rgba(213, 233, 167, 0.15);
+    background: var(--garden-control-bg);
+    border: 1px solid var(--garden-border);
     border-radius: 14px;
     padding: 10px 6px;
 }
@@ -1360,16 +1437,16 @@ html[data-theme="light"] .theme-icon-moon {
    GARDEN DIALOGS (Species Selector & Cancel Confirmation)
    ========================================================= */
 .garden-dialog {
-    background: #f3f4e7;
-    color: #315c49;
-    border: none;
+    background: var(--garden-dialog-bg);
+    color: var(--garden-on-surface);
+    border: 1px solid var(--garden-border);
     border-radius: 24px;
     padding: 24px;
     width: calc(100% - 32px);
     max-width: 440px;
     max-height: calc(100dvh - 48px);
     overflow-y: auto;
-    box-shadow: 0 20px 80px rgba(18, 60, 53, 0.6);
+    box-shadow: 0 20px 80px rgba(0, 0, 0, 0.38);
     font-family: var(--font);
     position: fixed;
     top: 50%;
@@ -1379,7 +1456,7 @@ html[data-theme="light"] .theme-icon-moon {
 }
 
 .garden-dialog::backdrop {
-    background: rgba(18, 59, 52, 0.7);
+    background: rgba(10, 10, 26, 0.68);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
 }
@@ -1388,12 +1465,12 @@ html[data-theme="light"] .theme-icon-moon {
     font-size: 20px;
     font-weight: 600;
     margin: 0;
-    color: #245f54;
+    color: var(--garden-on-surface);
 }
 
 .garden-dialog p {
     font-size: 13px;
-    color: #6d8273;
+    color: var(--garden-muted);
     line-height: 1.6;
     margin: 8px 0 14px;
 }
@@ -1409,7 +1486,7 @@ html[data-theme="light"] .theme-icon-moon {
     background: none;
     border: none;
     font-size: 22px;
-    color: #527560;
+    color: var(--garden-muted);
     min-width: 40px;
     min-height: 40px;
     cursor: pointer;
@@ -1420,15 +1497,15 @@ html[data-theme="light"] .theme-icon-moon {
 }
 
 .dialog-top button:hover {
-    background: rgba(0, 0, 0, 0.05);
+    background: var(--garden-control-hover);
 }
 
 .unlock-progress {
-    background: #e4ead6;
+    background: var(--garden-dialog-soft);
     border-radius: 12px;
     padding: 10px 14px;
     font-size: 12px;
-    color: #3f674f;
+    color: var(--garden-mint);
     font-weight: 500;
 }
 
@@ -1440,11 +1517,11 @@ html[data-theme="light"] .theme-icon-moon {
 }
 
 .species {
-    background: #e5ead6;
-    border: 1px solid #cfdbc0;
+    background: var(--garden-dialog-soft);
+    border: 1px solid var(--garden-border);
     border-radius: 14px;
     padding: 14px 4px;
-    color: #375e48;
+    color: var(--garden-on-surface);
     font-size: 12px;
     font-weight: 500;
     cursor: pointer;
@@ -1457,7 +1534,7 @@ html[data-theme="light"] .theme-icon-moon {
 }
 
 .species:hover:not(:disabled) {
-    background: #dce8c8;
+    background: var(--garden-control-hover);
     transform: translateY(-2px);
 }
 
@@ -1468,16 +1545,16 @@ html[data-theme="light"] .theme-icon-moon {
 }
 
 .species.chosen {
-    border: 2px solid #598d60;
-    background: #dce8c8;
-    box-shadow: 0 4px 12px rgba(89, 141, 96, 0.2);
+    border: 2px solid var(--garden-mint);
+    background: var(--garden-accent-soft);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.18);
 }
 
 .species small {
     display: block;
     font-size: 10px;
     margin-top: 6px;
-    color: #68795f;
+    color: var(--garden-muted);
 }
 
 .species.locked {
@@ -1509,22 +1586,22 @@ html[data-theme="light"] .theme-icon-moon {
 }
 
 .garden-dialog-btn.primary {
-    background: #377d70;
-    color: #f3f4e7;
+    background: var(--garden-action-bg);
+    color: var(--garden-on-accent);
 }
 
 .garden-dialog-btn.primary:hover {
-    background: #2b6356;
+    background: var(--garden-action-hover);
 }
 
 .garden-dialog-btn.secondary {
-    background: #e3e9d7;
-    border: 1px solid #ccd8c6;
-    color: #52705b;
+    background: var(--garden-dialog-soft);
+    border: 1px solid var(--garden-border);
+    color: var(--garden-muted);
 }
 
 .garden-dialog-btn.secondary:hover {
-    background: #d6e0ca;
+    background: var(--garden-control-hover);
 }
 
 /* ===== HISTORY ===== */

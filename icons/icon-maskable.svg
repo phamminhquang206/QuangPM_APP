@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+    <defs>
+        <linearGradient id="flowhub-mask-bg" x1="48" y1="40" x2="470" y2="480" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#2D235F" />
+            <stop offset="1" stop-color="#6E35A8" />
+        </linearGradient>
+    </defs>
+    <rect width="512" height="512" fill="url(#flowhub-mask-bg)" />
+    <path d="M256 256C208 256 175 235 153 196M256 256C278 214 312 191 360 189M256 256C286 295 294 337 273 380" stroke="#F8F7FF" stroke-width="32" stroke-linecap="round" stroke-linejoin="round" />
+    <circle cx="256" cy="256" r="24" fill="#92E6C2" stroke="#F8F7FF" stroke-width="9" />
+</svg>
