@@ -3,7 +3,7 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    const STOCK_VERSION = 'FlowHub Stocks 1.0';
+    const STOCK_VERSION = 'FlowHub Stocks 1.1';
     console.log(`[QPM Stock AI] Version: ${STOCK_VERSION}`);
 
     // 1. Initialize Components
@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const apiStatusDot = document.getElementById('api-status-dot');
     const apiStatusText = document.getElementById('api-status-text');
     const testResult = document.getElementById('test-result');
+    const btnFireAntLaunch = document.getElementById('btn-fireant-launch');
 
     // Inspector Elements
     const heroSymbol = document.getElementById('hero-symbol');
@@ -93,8 +94,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Default tab on every refresh is 'market' (Thị trường)
     switchMobileTab('market');
 
-    let currentSelectedTicker = 'FPT';
-    window.currentStockTicker = 'FPT';
+    let currentSelectedTicker = null;
+    let inspectorRequestId = 0;
+    window.currentStockTicker = null;
     function getSavedWatchlist() {
         return watchlistState.slice();
     }
@@ -361,8 +363,8 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadStockAccount(user) {
         currentStockUser = user || null;
         watchlistState = [];
-        currentSelectedTicker = 'FPT';
-        window.currentStockTicker = currentSelectedTicker;
+        resetInspectorState();
+        resetChatSession();
         agent.setApiKey('');
         agent.setModel('gemini-3.6-flash');
 
@@ -383,8 +385,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const settings = settingsDoc.exists ? settingsDoc.data() : {};
             const gemini = geminiDoc.exists ? geminiDoc.data() : {};
             watchlistState = Array.isArray(settings.watchlist) ? settings.watchlist : [];
-            currentSelectedTicker = String(settings.selectedTicker || 'FPT').toUpperCase();
-            window.currentStockTicker = currentSelectedTicker;
             agent.setApiKey(gemini.geminiApiKey || '');
             agent.setModel(gemini.geminiModel || 'gemini-3.6-flash');
         } catch (error) {
@@ -393,7 +393,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         updateApiKeyStatusUI();
-        await loadChatHistory();
         await refreshAllMarketData(true);
     }
 
@@ -589,20 +588,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 7. Stock Inspector Loader
     async function loadTickerToInspector(symbol, switchTab = false) {
+        const requestedTicker = String(symbol || '').trim().toUpperCase();
+        if (!requestedTicker) return false;
+
         if (switchTab) {
             switchMobileTab('market');
         }
-        currentSelectedTicker = symbol.toUpperCase();
-        saveStockSettings({ selectedTicker: currentSelectedTicker }).catch((error) => {
-            console.warn('[QPM Stock] Không thể lưu mã đang xem:', error);
-        });
-        heroSymbol.textContent = currentSelectedTicker;
+
+        const requestId = ++inspectorRequestId;
+        currentSelectedTicker = requestedTicker;
+        // FireAnt must receive the new ticker immediately, even while quote data is loading.
+        updateFireAntLinks(requestedTicker);
+        heroSymbol.textContent = requestedTicker;
         heroName.textContent = 'Đang tải dữ liệu...';
         heroPrice.textContent = '--';
+        heroPrice.className = 'hero-price';
         heroChange.textContent = '--';
+        heroChange.style.color = '';
 
         try {
-            const quote = await window.StockAPI.getStockQuote(currentSelectedTicker);
+            const quote = await window.StockAPI.getStockQuote(requestedTicker);
+
+            // Ignore a slow response when the user has already selected another ticker.
+            if (requestId !== inspectorRequestId || currentSelectedTicker !== requestedTicker) {
+                return true;
+            }
 
             heroName.textContent = `${quote.name} · Nguồn ${quote.dataSource || 'thị trường'}`;
             heroPrice.textContent = window.StockAPI.formatNumber(quote.currentPrice);
@@ -627,21 +637,42 @@ document.addEventListener('DOMContentLoaded', () => {
                 metricHighLow.innerHTML = `<span style="color:var(--color-down, #ff4d4f);">${window.StockAPI.formatNumber(low)}</span> - <span style="color:var(--color-up, #00d084);">${window.StockAPI.formatNumber(high)}</span>`;
             }
             
-            // Update FireAnt dynamic target links
-            updateFireAntLinks(currentSelectedTicker);
             return true;
         } catch (e) {
-            console.error(`Failed to load ticker ${symbol}:`, e);
+            console.error(`Failed to load ticker ${requestedTicker}:`, e);
+            if (requestId !== inspectorRequestId || currentSelectedTicker !== requestedTicker) return true;
             heroName.textContent = 'Không tìm thấy dữ liệu';
             return false;
         }
     }
 
+    function resetInspectorState() {
+        inspectorRequestId += 1;
+        currentSelectedTicker = null;
+        updateFireAntLinks(null);
+        heroSymbol.textContent = 'Chưa chọn mã';
+        heroName.textContent = 'Tìm kiếm hoặc chọn mã từ danh mục';
+        heroPrice.textContent = '--';
+        heroPrice.className = 'hero-price';
+        heroChange.textContent = '--';
+        heroChange.style.color = '';
+        [metricOpen, metricRef, metricCeilFloor, metricVol, metricForeignBuySell, metricHighLow]
+            .forEach((element) => {
+                if (element) element.textContent = '--';
+            });
+    }
+
     function updateFireAntLinks(symbol) {
-        const sym = (symbol || 'FPT').toUpperCase();
-        window.currentStockTicker = sym;
+        const sym = String(symbol || '').trim().toUpperCase();
+        window.currentStockTicker = sym || null;
         const faTargetSymbol = document.getElementById('fa-target-symbol');
-        if (faTargetSymbol) faTargetSymbol.textContent = sym;
+        if (faTargetSymbol) faTargetSymbol.textContent = sym || '--';
+        if (btnFireAntLaunch) {
+            btnFireAntLaunch.disabled = !sym;
+            btnFireAntLaunch.title = sym
+                ? `Mở ${sym} trên FireAnt`
+                : 'Hãy chọn mã chứng khoán trước';
+        }
     }
 
     // Search bar listener
@@ -694,18 +725,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadTickerToInspector(symbol);
     };
 
-    async function saveChatMessage(role, content) {
-        if (!firestore || !currentStockUser || !content) return;
-        await firestore.collection('users').doc(currentStockUser.uid)
-            .collection('stock_chat').doc('default')
-            .collection('messages').add({
-                role: role,
-                content: content,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-    }
-
-    async function loadChatHistory() {
+    function resetChatSession() {
         if (!chatMessages) return;
         agent.clearHistory();
         chatMessages.innerHTML = `
@@ -713,25 +733,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="message-avatar">⚡</div>
                 <div class="message-content">Xin chào! Tôi là <strong>QPM Stock AI</strong>.</div>
             </div>`;
-        if (!firestore || !currentStockUser) return;
-        try {
-            const snapshot = await firestore.collection('users').doc(currentStockUser.uid)
-                .collection('stock_chat').doc('default')
-                .collection('messages')
-                .orderBy('createdAt', 'desc').limit(50).get();
-            snapshot.docs.reverse().forEach((messageDoc) => {
-                const data = messageDoc.data() || {};
-                if (data.role && data.content) {
-                    appendMessage(data.role, data.content);
-                    agent.conversationHistory.push({
-                        role: data.role === 'model' ? 'model' : 'user',
-                        parts: [{ text: data.content }]
-                    });
-                }
-            });
-        } catch (error) {
-            console.warn('[QPM Stock] Không thể tải lịch sử chat:', error);
-        }
     }
 
     async function handleSendMessage() {
@@ -745,9 +746,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Render User Message
         appendMessage('user', messageText);
-        saveChatMessage('user', messageText).catch((error) => {
-            console.warn('[QPM Stock] Không thể lưu tin nhắn:', error);
-        });
         chatInput.value = '';
         btnSend.disabled = true;
 
@@ -784,9 +782,6 @@ document.addEventListener('DOMContentLoaded', () => {
             textDiv.className = 'markdown-body';
             textDiv.innerHTML = formatMarkdown(result.text);
             contentDiv.appendChild(textDiv);
-            saveChatMessage('model', result.text).catch((error) => {
-                console.warn('[QPM Stock] Không thể lưu phản hồi AI:', error);
-            });
 
         } catch (err) {
             if (currentToolPill) currentToolPill.remove();
@@ -869,7 +864,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Global FireAnt Launcher
     window.openFireAnt = (ticker) => {
-        const symbol = (ticker || window.currentStockTicker || currentSelectedTicker || 'FPT').toUpperCase();
+        const symbol = String(ticker || currentSelectedTicker || '').trim().toUpperCase();
+        if (!symbol) return;
         const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 
         if (isMobile) {

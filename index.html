@@ -19,7 +19,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=2.32">
-    <link rel="stylesheet" href="stock/stock-feature.css?v=1.3">
+    <link rel="stylesheet" href="stock/stock-feature.css?v=1.4">
 
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="manifest.json">
@@ -504,8 +504,8 @@
 
                             <div class="stock-hero">
                                 <div>
-                                    <div class="hero-symbol" id="hero-symbol">FPT</div>
-                                    <div class="hero-name" id="hero-name">Công ty Cổ phần FPT</div>
+                                    <div class="hero-symbol" id="hero-symbol">Chưa chọn mã</div>
+                                    <div class="hero-name" id="hero-name">Tìm kiếm hoặc chọn mã từ danh mục</div>
                                 </div>
                                 <div class="hero-price-box">
                                     <div class="hero-price up" id="hero-price">--</div>
@@ -519,7 +519,7 @@
                                     <div class="fa-brand-info">
                                         <div class="fa-flame-icon">🔥</div>
                                         <div>
-                                            <div class="fa-title">Biểu đồ & Bảng giá <span class="fa-ticker-tag" id="fa-target-symbol">FPT</span></div>
+                                            <div class="fa-title">Biểu đồ & Bảng giá <span class="fa-ticker-tag" id="fa-target-symbol">--</span></div>
                                             <div class="fa-subtitle">Nền tảng chứng khoán FireAnt (Web & App)</div>
                                         </div>
                                     </div>
@@ -527,7 +527,7 @@
                                 </div>
 
                                 <div class="fa-action-buttons">
-                                    <button type="button" class="btn-fireant-main" id="btn-fireant-launch" onclick="window.openFireAnt(window.currentStockTicker || 'FPT')">
+                                    <button type="button" class="btn-fireant-main" id="btn-fireant-launch" onclick="window.openFireAnt()" disabled title="Hãy chọn mã chứng khoán trước">
                                         <span class="fa-btn-icon">🚀</span>
                                         <span>Mở Biểu Đồ & Dữ Liệu FireAnt</span>
                                         <span class="fa-arrow">↗</span>
@@ -1396,7 +1396,7 @@
     <script src="stock/stock-data.js?v=1.0"></script>
     <script src="stock/stock-api.js?v=1.0"></script>
     <script src="stock/stock-agent.js?v=1.0"></script>
-    <script src="stock/stock-feature.js?v=1.0"></script>
+    <script src="stock/stock-feature.js?v=1.1"></script>
     <script src="app.js?v=2.19"></script>
 
     <!-- Register Service Worker for PWA -->

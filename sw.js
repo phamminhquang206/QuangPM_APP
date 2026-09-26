@@ -1,4 +1,4 @@
-const CACHE_NAME = 'quangpm-app-v58';
+const CACHE_NAME = 'quangpm-app-v59';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -12,11 +12,11 @@ const ASSETS_TO_CACHE = [
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',
-  './stock/stock-feature.css',
+  './stock/stock-feature.css?v=1.4',
   './stock/stock-data.js',
   './stock/stock-api.js',
   './stock/stock-agent.js',
-  './stock/stock-feature.js',
+  './stock/stock-feature.js?v=1.1',
   './sound/liecio-calming-rain.mp3',
   './sound/alex_jauk-calm-zen-river-flowing-228223.mp3',
   './sound/focus.mp3'
