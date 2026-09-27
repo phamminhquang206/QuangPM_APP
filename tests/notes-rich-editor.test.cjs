@@ -5,7 +5,7 @@ const vm = require('node:vm');
 const marked = require('../marked.min.js');
 
 const source = fs.readFileSync(path.join(__dirname, '..', 'app.js'), 'utf8');
-const methods = ['_renderNoteMarkdown', '_renderNoteContent', '_restoreEditorSelection', '_runEditorCommand', '_updateInlineToolbarState', '_handleToolbarCommand', '_insertTodoRow', '_insertList', '_getTodoLevel', '_setTodoLevel', '_getLastTodoBranchRow', '_adjustEditorIndent', '_insertNextTodoRow', '_addTableRow', '_addTableColumn', '_openModal', '_captureNoteDraft', '_hasUnsavedChanges', '_hideUnsavedDialog', '_closeModal', '_saveFromModal'].map((name) => {
+const methods = ['_renderNoteMarkdown', '_renderNoteContent', '_restoreEditorSelection', '_runEditorCommand', '_updateInlineToolbarState', '_handleToolbarCommand', '_insertTodoRow', '_insertList', '_getTodoLevel', '_setTodoLevel', '_getLastTodoBranchRow', '_adjustEditorIndent', '_insertNextTodoRow', '_getActiveTable', '_getActiveTableCell', '_addTableRow', '_addTableColumn', '_deleteTableRow', '_deleteTableColumn', '_sortNotesByRecent', '_openModal', '_captureNoteDraft', '_hasUnsavedChanges', '_hideUnsavedDialog', '_closeModal', '_saveFromModal'].map((name) => {
     const start = source.indexOf(`NoteApp.prototype.${name} = function`);
     assert.notEqual(start, -1, `Missing ${name}`);
     const end = source.indexOf('\n    };', start);
@@ -129,32 +129,98 @@ assert.equal(app._saveFromModal(true), true, 'Saving a draft must succeed');
 assert.equal(app._hasUnsavedChanges(), false, 'Saved content must no longer trigger the warning');
 assert.equal(app._closeModal(), true, 'Saved note must close without a warning');
 
+const makeCell = (tagName) => {
+    const cell = { tagName: tagName.toUpperCase(), innerHTML: '', parentElement: null };
+    cell.closest = (selector) => selector === 'tr' ? cell.parentElement : null;
+    cell.remove = () => cell.parentElement.children.splice(cell.parentElement.children.indexOf(cell), 1);
+    return cell;
+};
 const makeRow = (parent) => ({
     parentElement: parent, children: [],
-    appendChild(cell) { this.children.push(cell); return cell; },
+    appendChild(cell) { cell.parentElement = this; this.children.push(cell); return cell; },
+    insertBefore(cell, reference) {
+        cell.parentElement = this;
+        const index = reference ? this.children.indexOf(reference) : -1;
+        if (index === -1) this.children.push(cell);
+        else this.children.splice(index, 0, cell);
+        return cell;
+    },
+    after(row) {
+        row.parentElement = this.parentElement;
+        table.rows.splice(table.rows.indexOf(this) + 1, 0, row);
+    },
+    remove() { table.rows.splice(table.rows.indexOf(this), 1); },
     get firstElementChild() { return this.children[0]; }
 });
 const head = { tagName: 'THEAD' };
-const body = { tagName: 'TBODY', appendChild(row) { row.parentElement = this; table.rows.push(row); return row; } };
+const body = {
+    tagName: 'TBODY',
+    appendChild(row) { row.parentElement = this; table.rows.push(row); return row; },
+    insertBefore(row, reference) {
+        row.parentElement = this;
+        const index = reference ? table.rows.indexOf(reference) : -1;
+        if (index === -1) table.rows.push(row);
+        else table.rows.splice(index, 0, row);
+        return row;
+    },
+    get firstChild() { return table.rows.find((row) => row.parentElement === this) || null; }
+};
 const table = {
     rows: [], tBodies: [body],
     querySelector: (selector) => selector === 'tr' ? table.rows[0] : null,
-    querySelectorAll: (selector) => selector === 'tr' ? table.rows : []
+    querySelectorAll: (selector) => selector === 'tr' ? table.rows : [],
+    contains: (node) => node === table || table.rows.includes(node) || table.rows.some((row) => row.children.includes(node)),
+    closest: () => null
 };
 const headerRow = makeRow(head);
 const contentRow = makeRow(body);
-headerRow.appendChild({ tagName: 'TH' }); headerRow.appendChild({ tagName: 'TH' });
-contentRow.appendChild({ tagName: 'TD' }); contentRow.appendChild({ tagName: 'TD' });
-table.rows.push(headerRow, contentRow);
-context.document = { createElement: (tagName) => tagName === 'tr' ? makeRow(body) : { tagName: tagName.toUpperCase(), innerHTML: '' } };
+const trailingRow = makeRow(body);
+headerRow.appendChild(makeCell('th')); headerRow.appendChild(makeCell('th'));
+contentRow.appendChild(makeCell('td')); contentRow.appendChild(makeCell('td'));
+trailingRow.appendChild(makeCell('td')); trailingRow.appendChild(makeCell('td'));
+table.rows.push(headerRow, contentRow, trailingRow);
+context.document = { createElement: (tagName) => tagName === 'tr' ? makeRow(body) : makeCell(tagName) };
 app._getActiveTable = () => table;
 app._focusEditorNode = () => {};
+app.activeTable = table;
+app.activeTableCell = contentRow.children[0];
 app._addTableRow();
-assert.equal(table.rows.length, 3, 'Add-row must append a body row');
+assert.equal(table.rows.length, 4, 'Add-row must add one body row');
 assert.equal(table.rows[2].children.length, 2, 'New row must match the current column count');
+assert.equal(table.rows[3], trailingRow, 'New row must be inserted directly below the row containing the cursor');
+const originalSecondCell = contentRow.children[1];
+app.activeTableCell = contentRow.children[0];
 app._addTableColumn();
-assert.deepEqual(table.rows.map((row) => row.children.length), [3, 3, 3], 'Add-column must expand every table row');
-assert.equal(headerRow.children.at(-1).tagName, 'TH', 'Header column must remain a header cell');
+assert.deepEqual(table.rows.map((row) => row.children.length), [3, 3, 3, 3], 'Add-column must expand every table row');
+assert.equal(contentRow.children[2], originalSecondCell, 'New column must be inserted directly to the right of the cursor column');
+assert.equal(headerRow.children[1].tagName, 'TH', 'Inserted header column must remain a header cell');
+
+for (const row of table.rows) {
+    row.children.forEach((cell) => {
+        cell.parentElement = row;
+        cell.closest = (selector) => selector === 'tr' ? row : null;
+        cell.remove = () => row.children.splice(row.children.indexOf(cell), 1);
+    });
+}
+app.activeTable = table;
+app.activeTableCell = contentRow.children[1];
+app._getActiveTable = () => table;
+app._deleteTableColumn();
+assert.deepEqual(table.rows.map((row) => row.children.length), [2, 2, 2, 2], 'Delete-column must remove the selected column from every row');
+
+const rowToDelete = table.rows[2];
+rowToDelete.remove = () => table.rows.splice(table.rows.indexOf(rowToDelete), 1);
+rowToDelete.children.forEach((cell) => { cell.closest = (selector) => selector === 'tr' ? rowToDelete : null; });
+app.activeTableCell = rowToDelete.children[0];
+app._deleteTableRow();
+assert.equal(table.rows.length, 3, 'Delete-row must remove the row containing the selected cell');
+
+const sorted = app._sortNotesByRecent([
+    { id: 'older', updatedAt: '2026-01-01T00:00:00.000Z' },
+    { id: 'newest', updatedAt: '2026-03-01T00:00:00.000Z' },
+    { id: 'middle', createdAt: '2026-02-01T00:00:00.000Z' }
+]);
+assert.deepEqual(Array.from(sorted, (note) => note.id), ['newest', 'middle', 'older'], 'Notes must render with the most recently edited note first');
 
 const insertedBlocks = [];
 const todoBlock = {

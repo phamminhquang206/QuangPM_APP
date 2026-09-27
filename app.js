@@ -3732,6 +3732,8 @@
         this.pendingImageUploads = 0;
         this.activeImageUploadXhrs = [];
         this.imageUploadBatchId = 0;
+        this.activeTable = null;
+        this.activeTableCell = null;
 
         this._cacheElements();
         this._bindEvents();
@@ -4512,16 +4514,29 @@
         if (selection && selection.anchorNode && this.contentEditor.contains(selection.anchorNode)) {
             var node = selection.anchorNode.nodeType === 1 ? selection.anchorNode : selection.anchorNode.parentElement;
             var table = node && node.closest('table');
-            if (table && this.contentEditor.contains(table)) this.activeTable = table;
+            var cell = node && node.closest('th, td');
+            if (table && this.contentEditor.contains(table)) {
+                this.activeTable = table;
+                if (cell && table.contains(cell)) this.activeTableCell = cell;
+            }
         }
         return this.activeTable && this.contentEditor.contains(this.activeTable) ? this.activeTable : null;
     };
 
-    NoteApp.prototype._addTableRow = function () {
+    NoteApp.prototype._getActiveTableCell = function () {
         var table = this._getActiveTable();
+        if (!table) return null;
+        return this.activeTableCell && table.contains(this.activeTableCell) ? this.activeTableCell : null;
+    };
+
+    NoteApp.prototype._addTableRow = function () {
+        var activeCell = this._getActiveTableCell();
+        var table = activeCell ? this.activeTable : this._getActiveTable();
         if (!table) return;
-        var firstRow = table.querySelector('tr');
-        var columnCount = firstRow ? firstRow.children.length : 2;
+        var activeRow = activeCell && activeCell.closest('tr');
+        var referenceRow = activeRow || table.querySelector('tr');
+        var columnCount = referenceRow ? referenceRow.children.length : 2;
+        var activeColumnIndex = activeRow ? Array.prototype.indexOf.call(activeRow.children, activeCell) : 0;
         var row = document.createElement('tr');
         for (var i = 0; i < columnCount; i++) {
             var cell = document.createElement('td');
@@ -4529,20 +4544,92 @@
             row.appendChild(cell);
         }
         var body = table.tBodies[0] || table.appendChild(document.createElement('tbody'));
-        body.appendChild(row);
+        if (activeRow && activeRow.parentElement && activeRow.parentElement.tagName === 'THEAD') {
+            body.insertBefore(row, body.firstChild);
+        } else if (activeRow && typeof activeRow.after === 'function') {
+            activeRow.after(row);
+        } else {
+            body.appendChild(row);
+        }
         this.editorDirty = true;
-        this._focusEditorNode(row.firstElementChild);
+        this.activeTableCell = row.children[Math.max(0, activeColumnIndex)] || row.firstElementChild;
+        this._focusEditorNode(this.activeTableCell);
     };
 
     NoteApp.prototype._addTableColumn = function () {
-        var table = this._getActiveTable();
+        var activeCell = this._getActiveTableCell();
+        var table = activeCell ? this.activeTable : this._getActiveTable();
         if (!table) return;
+        var activeRow = activeCell && activeCell.closest('tr');
+        var activeColumnIndex = activeRow ? Array.prototype.indexOf.call(activeRow.children, activeCell) : -1;
+        var insertedActiveCell = null;
         table.querySelectorAll('tr').forEach(function (row) {
             var cell = document.createElement(row.parentElement.tagName === 'THEAD' ? 'th' : 'td');
             cell.innerHTML = '<br>';
-            row.appendChild(cell);
+            var insertionPoint = activeColumnIndex >= 0 ? row.children[activeColumnIndex + 1] : null;
+            row.insertBefore(cell, insertionPoint || null);
+            if (row === activeRow) insertedActiveCell = cell;
         });
         this.editorDirty = true;
+        if (insertedActiveCell) {
+            this.activeTableCell = insertedActiveCell;
+            this._focusEditorNode(insertedActiveCell);
+        }
+    };
+
+    NoteApp.prototype._deleteTableRow = function () {
+        var cell = this._getActiveTableCell();
+        if (!cell) return;
+        var table = this.activeTable;
+        var row = cell.closest('tr');
+        if (!row) return;
+        var rows = Array.from(table.querySelectorAll('tr'));
+        if (rows.length <= 1) {
+            var tableContainer = table.closest('.notion-table-container');
+            (tableContainer || table).remove();
+            this.activeTable = null;
+            this.activeTableCell = null;
+            this.editorDirty = true;
+            if (this.contentEditor) this.contentEditor.focus();
+            return;
+        }
+        var rowIndex = rows.indexOf(row);
+        var columnIndex = Array.prototype.indexOf.call(row.children, cell);
+        var nextRow = rows[rowIndex + 1] || rows[rowIndex - 1];
+        row.remove();
+        var nextCell = nextRow && nextRow.children[Math.min(columnIndex, nextRow.children.length - 1)];
+        this.activeTableCell = nextCell || null;
+        this.editorDirty = true;
+        if (nextCell) this._focusEditorNode(nextCell);
+    };
+
+    NoteApp.prototype._deleteTableColumn = function () {
+        var cell = this._getActiveTableCell();
+        if (!cell) return;
+        var table = this.activeTable;
+        var activeRow = cell.closest('tr');
+        if (!activeRow) return;
+        var columnIndex = Array.prototype.indexOf.call(activeRow.children, cell);
+        var rows = Array.from(table.querySelectorAll('tr'));
+        var widestColumnCount = rows.reduce(function (max, row) {
+            return Math.max(max, row.children.length);
+        }, 0);
+        if (widestColumnCount <= 1) {
+            var tableContainer = table.closest('.notion-table-container');
+            (tableContainer || table).remove();
+            this.activeTable = null;
+            this.activeTableCell = null;
+            this.editorDirty = true;
+            if (this.contentEditor) this.contentEditor.focus();
+            return;
+        }
+        rows.forEach(function (row) {
+            if (row.children[columnIndex]) row.children[columnIndex].remove();
+        });
+        var nextCell = activeRow.children[Math.min(columnIndex, activeRow.children.length - 1)];
+        this.activeTableCell = nextCell || null;
+        this.editorDirty = true;
+        if (nextCell) this._focusEditorNode(nextCell);
     };
 
     NoteApp.prototype._handleToolbarCommand = function (cmd) {
@@ -4575,6 +4662,8 @@
                 break;
             case 'table-row': this._addTableRow(); break;
             case 'table-column': this._addTableColumn(); break;
+            case 'table-delete-row': this._deleteTableRow(); break;
+            case 'table-delete-column': this._deleteTableColumn(); break;
             case 'code':
                 this._insertHtml(this._renderNoteMarkdown('```javascript\n' + (selected || '// code...') + '\n```'));
                 break;
@@ -4920,6 +5009,7 @@
         this.isEditing = false;
         this.editorSelection = null;
         this.activeTable = null;
+        this.activeTableCell = null;
         this.savedDraft = null;
         return true;
     };
@@ -4972,6 +5062,7 @@
         if (this.contentEditor) this.contentEditor.innerHTML = htmlContent;
         this.editorDirty = false;
         this.activeTable = null;
+        this.activeTableCell = null;
         this._captureNoteDraft();
 
         this._saveNotes();
@@ -5255,6 +5346,17 @@
     // =========================================================
     //  RENDER (FILTER BY FOLDER & COMPACT TEXT PREVIEW)
     // =========================================================
+    NoteApp.prototype._sortNotesByRecent = function (notes) {
+        return notes.map(function (note, index) {
+            var timestamp = Date.parse(note.updatedAt || note.createdAt || '') || 0;
+            return { note: note, timestamp: timestamp, index: index };
+        }).sort(function (a, b) {
+            return b.timestamp - a.timestamp || a.index - b.index;
+        }).map(function (entry) {
+            return entry.note;
+        });
+    };
+
     NoteApp.prototype._render = function () {
         // Filter notes by activeFolderId
         var self = this;
@@ -5263,6 +5365,7 @@
             if (self.activeFolderId === 'uncategorized') return !n.folderId;
             return n.folderId === self.activeFolderId;
         });
+        filtered = this._sortNotesByRecent(filtered);
 
         if (filtered.length === 0) {
             if (this.activeFolderId !== 'all') {
