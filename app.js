@@ -174,17 +174,17 @@
             iconLabel: 'Biểu tượng',
             colorTagLabel: 'Màu nhận diện',
             confirmDeleteHabit: 'Bạn có chắc chắn muốn xóa thói quen này?',
-            yourXpBalance: 'Điểm XP hiện có',
-            shopDesc: 'Dùng điểm kỷ luật đã tích lũy để tự thưởng cho bản thân!',
+            yourXpBalance: 'Điểm đổi thưởng hiện có',
+            shopDesc: 'Tự thêm phần thưởng bạn muốn, rồi dùng điểm tích lũy để đổi quà!',
             addCustomReward: 'Thêm phần thưởng mới',
             rewardTitlePlaceholder: 'ví dụ: 1 cốc trà sữa, Xem 1 tập phim...',
             disciplineIntro: 'Tự cam kết kỷ luật: Khi bỏ lỡ thói quen trong ngày, bạn có thể ghi nhận tiền phạt vào quỹ tiết kiệm hoặc làm một thử thách rèn luyện!',
             disciplinePledgeLabel: 'Mức phạt cam kết mỗi lần vi phạm',
             penaltyHistory: 'Lịch sử vi phạm kỷ luật',
             clearHistory: 'Xóa lịch sử',
-            perfectDayToast: '🎉 Ngày hoàn hảo! Bạn đã hoàn thành 100% thói quen hôm nay (+50 XP Bonus)!',
-            habitCompletedToast: '+10 XP! Hoàn thành thói quen: {title}',
-            notEnoughXp: 'Bạn chưa đủ điểm XP để đổi phần thưởng này!',
+            perfectDayToast: '🎉 Ngày hoàn hảo! Bạn đã hoàn thành 100% thói quen hôm nay (+20 XP Bonus)!',
+            habitCompletedToast: 'Hoàn thành: {title} (+10 XP tạm tính)',
+            notEnoughXp: 'Bạn chưa đủ điểm đổi thưởng để đổi phần thưởng này!',
             // MyGarden
             gardenTab: 'MyGarden',
             gardenFocusTab: 'Tập trung',
@@ -382,17 +382,17 @@
             iconLabel: 'Icon',
             colorTagLabel: 'Color Tag',
             confirmDeleteHabit: 'Are you sure you want to delete this habit?',
-            yourXpBalance: 'Current XP Balance',
-            shopDesc: 'Spend earned discipline XP to reward yourself!',
+            yourXpBalance: 'Reward points balance',
+            shopDesc: 'Create your own rewards and spend earned points to redeem them!',
             addCustomReward: 'Add New Reward',
             rewardTitlePlaceholder: 'e.g., 1 Boba Tea, 1 Netflix episode...',
             disciplineIntro: 'Self-discipline commitment: When missing habits, pledge penalty money to savings or do a workout challenge!',
             disciplinePledgeLabel: 'Pledged penalty per missed habit',
             penaltyHistory: 'Penalty History',
             clearHistory: 'Clear History',
-            perfectDayToast: '🎉 Perfect Day! You completed 100% of habits today (+50 XP Bonus)!',
-            habitCompletedToast: '+10 XP! Completed habit: {title}',
-            notEnoughXp: 'Not enough XP to redeem this reward!',
+            perfectDayToast: '🎉 Perfect Day! You completed 100% of habits today (+20 XP Bonus)!',
+            habitCompletedToast: 'Completed: {title} (+10 provisional XP)',
+            notEnoughXp: 'Not enough reward points to redeem this reward!',
             // MyGarden
             gardenTab: 'MyGarden',
             gardenFocusTab: 'Focus',
@@ -5492,16 +5492,13 @@
             currentStreak: 0,
             longestStreak: 0,
             badges: [],
-            rewards: [
-                { id: 'rw1', title: '1 cốc trà sữa', cost: 100, icon: '🧋' },
-                { id: 'rw2', title: 'Xem 1 tập phim Netflix', cost: 150, icon: '🎬' },
-                { id: 'rw3', title: 'Chơi game 1 tiếng', cost: 200, icon: '🎮' }
-            ],
+            rewards: [],
             penalties: [],
             perfectDays: [],
             pledge: '10.000 VNĐ vào heo đất'
         };
 
+        this._initialProfile = JSON.parse(JSON.stringify(this.habitProfile));
         var now = new Date();
         this.viewYear = now.getFullYear();
         this.viewMonth = now.getMonth() + 1; // 1-indexed (1..12)
@@ -5516,7 +5513,13 @@
         this._cacheElements();
         this._bindEvents();
         this._loadLocalData();
+        this._calculateStreaks();
         this._render();
+        var self = this;
+        this._dayTimer = setInterval(function () { self._calculateStreaks(); }, 60000);
+        document.addEventListener('visibilitychange', function () {
+            if (!document.hidden) self._calculateStreaks();
+        });
     }
 
     HabitApp.prototype._cacheElements = function () {
@@ -5765,7 +5768,7 @@
                 var cost = parseInt(self.shopRewardCost.value, 10);
                 var icon = self.shopRewardIcon.value || '🎁';
                 if (!title || !cost || cost < 10) {
-                    alert(currentLang === 'vi' ? 'Vui lòng nhập tên phần thưởng và chi phí XP hợp lệ!' : 'Please enter valid reward title and XP cost!');
+                    alert(currentLang === 'vi' ? 'Vui lòng nhập tên phần thưởng và chi phí điểm hợp lệ!' : 'Please enter valid reward title and points cost!');
                     return;
                 }
                 self.habitProfile.rewards.push({
@@ -5797,6 +5800,7 @@
         }
         if (this.btnClearPenalties) {
             this.btnClearPenalties.addEventListener('click', function () {
+                self.habitProfile.scoring.hiddenPenalties = self.habitProfile.scoring.hiddenPenalties.concat(self.habitProfile.penalties.map(function (p) { return p.date; }));
                 self.habitProfile.penalties = [];
                 self._saveProfile();
                 self._renderDiscipline();
@@ -5846,12 +5850,19 @@
                 ];
             }
 
+            for (var i = 0; i < localStorage.length; i++) {
+                var logKey = localStorage.key(i);
+                var prefix = 'flowhub_habit_logs_' + keySuffix + '_';
+                if (logKey.indexOf(prefix) === 0) this.habitLogs[logKey.slice(prefix.length)] = JSON.parse(localStorage.getItem(logKey));
+            }
             var rawLogs = localStorage.getItem('flowhub_habit_logs_' + keySuffix + '_' + this._getMonthKey());
             if (rawLogs) this.habitLogs[this._getMonthKey()] = JSON.parse(rawLogs);
 
             var rawProfile = localStorage.getItem('flowhub_habit_profile_' + keySuffix);
             if (rawProfile) {
                 var p = JSON.parse(rawProfile);
+                this.habitProfile = Object.assign(this.habitProfile, p);
+                if (!p.scoring) delete this.habitProfile.scoring;
                 this.habitProfile.xp = p.xp || 0;
                 this.habitProfile.currentStreak = p.currentStreak || 0;
                 this.habitProfile.longestStreak = p.longestStreak || 0;
@@ -5874,6 +5885,17 @@
             return;
         }
 
+        if (this._accountUid !== currentUser.uid) {
+            this._accountUid = currentUser.uid;
+            this.habitProfile = JSON.parse(JSON.stringify(this._initialProfile));
+            this.habitLogs = {};
+            this.habits = [];
+            this._loadLocalData();
+        }
+        this._habitsReady = false;
+        this._profileReady = false;
+        this._logsReady = false;
+        this._logsUid = null;
         // Firestore Realtime Listeners
         // 1. Habits list
         try {
@@ -5884,13 +5906,20 @@
                     data.id = doc.id;
                     items.push(data);
                 });
+                self._habitsReady = true;
                 if (items.length > 0) {
                     self.habits = items;
                     localStorage.setItem('flowhub_habits_' + currentUser.uid, JSON.stringify(items));
+                    self._calculateStreaks();
                     self._render();
                 } else {
                     // Initialize default habits to firestore if brand new user
-                    self._seedDefaultHabits();
+                    var knownProfile = localStorage.getItem('flowhub_habit_profile_' + currentUser.uid);
+                    if (knownProfile) {
+                        self.habits = [];
+                        self._calculateStreaks();
+                        self._render();
+                    } else self._seedDefaultHabits();
                 }
             }, function () {
                 self._loadLocalData();
@@ -5899,8 +5928,11 @@
 
             // 2. Profile & stats
             userDocRef('habit_profile').doc('stats').onSnapshot(function (doc) {
+                self._profileReady = true;
                 if (doc.exists) {
                     var p = doc.data();
+                    self.habitProfile = Object.assign(self.habitProfile, p);
+                    if (!p.scoring) delete self.habitProfile.scoring;
                     self.habitProfile.xp = p.xp || 0;
                     self.habitProfile.currentStreak = p.currentStreak || 0;
                     self.habitProfile.longestStreak = p.longestStreak || 0;
@@ -5910,9 +5942,10 @@
                     if (p.perfectDays) self.habitProfile.perfectDays = p.perfectDays;
                     if (p.pledge) self.habitProfile.pledge = p.pledge;
                     localStorage.setItem('flowhub_habit_profile_' + currentUser.uid, JSON.stringify(self.habitProfile));
+                    self._calculateStreaks();
                     self._renderStats();
                 } else {
-                    self._saveProfile();
+                    self._calculateStreaks();
                 }
             });
 
@@ -5939,22 +5972,23 @@
 
     HabitApp.prototype._loadMonthLogs = function () {
         var self = this;
-        var mKey = this._getMonthKey();
         if (!currentUser) {
+            this._loadLocalData();
+            this._calculateStreaks();
             this._renderMatrix();
             return;
         }
-
-        userDocRef('habit_logs').doc(mKey).onSnapshot(function (doc) {
-            if (doc.exists) {
-                self.habitLogs[mKey] = doc.data();
-            } else {
-                if (!self.habitLogs[mKey]) self.habitLogs[mKey] = { month: mKey, days: {} };
-            }
-            localStorage.setItem('flowhub_habit_logs_' + currentUser.uid + '_' + mKey, JSON.stringify(self.habitLogs[mKey]));
+        if (this._logsUid === currentUser.uid) return;
+        if (this._logsUnsubscribe) this._logsUnsubscribe();
+        this._logsUid = currentUser.uid;
+        this._logsUnsubscribe = userDocRef('habit_logs').onSnapshot(function (snapshot) {
+            self._logsReady = true;
+            self.habitLogs = {};
+            snapshot.forEach(function (doc) {
+                self.habitLogs[doc.id] = doc.data();
+                localStorage.setItem('flowhub_habit_logs_' + currentUser.uid + '_' + doc.id, JSON.stringify(doc.data()));
+            });
             self._calculateStreaks();
-            self._renderMatrix();
-        }, function () {
             self._renderMatrix();
         });
     };
@@ -5975,6 +6009,7 @@
     };
 
     HabitApp.prototype._deleteHabitFromDb = function (habitId) {
+        this._calculateStreaks();
         var keySuffix = currentUser ? currentUser.uid : 'local';
         this.habits = this.habits.filter(function (h) { return h.id !== habitId; });
         localStorage.setItem('flowhub_habits_' + keySuffix, JSON.stringify(this.habits));
@@ -5982,6 +6017,8 @@
         if (currentUser) {
             userDocRef('habits').doc(habitId).delete().catch(function () {});
         }
+        this._recordHabitSchedule();
+        this._calculateStreaks();
         this._render();
     };
 
@@ -6065,6 +6102,14 @@
         if (this.currentXpEl) this.currentXpEl.textContent = xp;
         if (this.nextXpEl) this.nextXpEl.textContent = nextLevelXp;
 
+        var info = document.getElementById('habit-scoring-info');
+        if (info) {
+            var day = this._dailyScores && this._dailyScores[HabitScoring.dateKey(new Date())];
+            info.textContent = currentLang === 'vi'
+                ? 'Streak: hoàn thành ít nhất 50% thói quen/ngày. +10 XP và điểm/thói quen; +20 ngày hoàn hảo. Chuỗi 7/30 ngày: +30/+100. Bỏ lỡ: −5 điểm/thói quen, tối đa −20/ngày. Chốt sau khi hết ngày. Đổi thưởng không trừ XP.'
+                : 'Streak: complete at least 50% daily habits. +10 XP and points per habit; +20 for a perfect day. 7/30-day streak: +30/+100. Missed habits: −5 points each, capped at −20/day. Settled after midnight. Rewards do not spend XP.';
+            if (day) info.textContent += currentLang === 'vi' ? ' Hôm nay tạm tính: +' + day.earned + ' XP; phạt nếu giữ nguyên: −' + day.penalty + ' điểm.' : ' Today: +' + day.earned + ' provisional XP; pending penalty: −' + day.penalty + ' points.';
+        }
         if (this.xpBarEl) {
             var pct = Math.min(100, Math.max(0, Math.round(((xp - currentLevelFloor) / (nextLevelXp - currentLevelFloor)) * 100)));
             this.xpBarEl.style.width = pct + '%';
@@ -6074,6 +6119,13 @@
     HabitApp.prototype._renderMatrix = function () {
         var self = this;
         var activeHabits = this.habits.filter(function (h) { return h.active !== false; });
+        if (this.habitProfile.scoring) {
+            this.habitProfile.scoring.schedules.forEach(function (v) {
+                if (v.date.slice(0, 7) <= self._getMonthKey()) v.habits.forEach(function (h) {
+                    if (!activeHabits.some(function (item) { return item.id === h.id; })) activeHabits.push(h);
+                });
+            });
+        }
 
         if (activeHabits.length === 0) {
             if (this.emptyStateEl) this.emptyStateEl.style.display = 'flex';
@@ -6129,7 +6181,10 @@
             var completedHabitsCount = 0;
 
             var cellsHtml = '';
-            activeHabits.forEach(function (h) {
+            var dueHabits = self.habitProfile.scoring && dateStr >= self.habitProfile.scoring.startDate ? HabitScoring.dueOn(self.habitProfile, dateStr) : activeHabits;
+            activeHabits.forEach(function (columnHabit) {
+                var h = dueHabits.find(function (item) { return item.id === columnHabit.id; });
+                if (!h) { cellsHtml += '<td>—</td>'; return; }
                 var cellData = (logs[dateStr] && logs[dateStr][h.id]) || { completed: false, value: 0 };
                 var isDone = false;
                 if (h.type === 'numeric') {
@@ -6154,8 +6209,8 @@
                 }
             });
 
-            var dailyPercent = activeHabits.length > 0 ? Math.round((completedHabitsCount / activeHabits.length) * 100) : 0;
-            var isPerfect = activeHabits.length > 0 && completedHabitsCount === activeHabits.length;
+            var dailyPercent = dueHabits.length > 0 ? Math.round((completedHabitsCount / dueHabits.length) * 100) : 0;
+            var isPerfect = dueHabits.length > 0 && completedHabitsCount === dueHabits.length;
 
             bodyHtml += '<tr class="' + rowClasses.join(' ') + '">';
             bodyHtml += '  <td class="col-date">';
@@ -6169,7 +6224,7 @@
             bodyHtml += '      <div class="daily-progress-bar-bg">';
             bodyHtml += '        <div class="daily-progress-bar-fill" style="width: ' + dailyPercent + '%;"></div>';
             bodyHtml += '      </div>';
-            bodyHtml += '      <span class="daily-progress-text">' + completedHabitsCount + '/' + activeHabits.length + ' (' + dailyPercent + '%)</span>';
+            bodyHtml += '      <span class="daily-progress-text">' + completedHabitsCount + '/' + dueHabits.length + ' (' + dailyPercent + '%)</span>';
             if (isPerfect) bodyHtml += '      <span class="daily-perfect-badge">⭐ 100%</span>';
             bodyHtml += '    </div>';
             bodyHtml += '  </td>';
@@ -6197,16 +6252,8 @@
 
         if (willComplete) {
             playChime();
-            this.awardXP(10, 'Hoàn thành thói quen', e);
-            if (habit) {
-                PwaManager.showToast(t('habitCompletedToast').replace('{title}', habit.title), '🎉');
-            }
-
-        } else {
-            this.deductXP(20, 'Không hoàn thành thói quen', e);
+            if (habit) PwaManager.showToast(t('habitCompletedToast').replace('{title}', habit.title), '🎉');
         }
-
-        this._awardPerfectDayBonus(dateStr, e);
 
         this._saveMonthLogs();
         this._calculateStreaks();
@@ -6214,7 +6261,7 @@
     };
 
     HabitApp.prototype._openNumericModal = function (dateStr, habitId) {
-        var habit = this.habits.find(function (h) { return h.id === habitId; });
+        var habit = (this.habitProfile.scoring && dateStr >= this.habitProfile.scoring.startDate ? HabitScoring.dueOn(this.habitProfile, dateStr) : this.habits).find(function (h) { return h.id === habitId; });
         if (!habit) return;
 
         var mKey = this._getMonthKey();
@@ -6297,13 +6344,8 @@
 
         if (!wasDone && nowDone) {
             playChime();
-            this.awardXP(10, 'Đạt chỉ tiêu thói quen');
             PwaManager.showToast(t('habitCompletedToast').replace('{title}', this.activeNumericCell.name), '🎉');
-        } else if (wasDone && !nowDone) {
-            this.deductXP(20, 'Không đạt chỉ tiêu thói quen');
         }
-
-        this._awardPerfectDayBonus(dateStr);
 
         this._saveMonthLogs();
         this._calculateStreaks();
@@ -6386,6 +6428,7 @@
             return;
         }
 
+        this._calculateStreaks();
         var target = 1;
         var unit = '';
         if (this.selectedType === 'numeric') {
@@ -6421,6 +6464,8 @@
             this._saveHabitToDb(newHabit);
         }
 
+        this._recordHabitSchedule();
+        this._calculateStreaks();
         this._closeHabitModal();
         this._render();
         PwaManager.showToast(currentLang === 'vi' ? 'Đã lưu thói quen thành công!' : 'Habit saved successfully!', '✨');
@@ -6504,138 +6549,49 @@
     };
 
     // --- Gamification, XP & Streaks ---
-    HabitApp.prototype.awardXP = function (amount, reason, e) {
-        this.habitProfile.xp = (this.habitProfile.xp || 0) + amount;
-        this._saveProfile();
-        this._renderStats();
-
-        if (e && e.clientX && e.clientY) {
-            this._spawnXpFloat(e.clientX, e.clientY, '+' + amount + ' XP');
-        }
-
-        // Check milestones
-        if (this.habitProfile.xp >= 500 && !this.habitProfile.badges.includes('xp_500')) {
-            this.habitProfile.badges.push('xp_500');
-            PwaManager.showToast('🏆 Mở khóa danh hiệu: Tia Chớp Năng Lượng (+500 XP)!', '⚡');
-        }
-        if (this.habitProfile.xp >= 1000 && !this.habitProfile.badges.includes('xp_1000')) {
-            this.habitProfile.badges.push('xp_1000');
-            PwaManager.showToast('👑 Mở khóa danh hiệu: Đại Sư Kỷ Luật (+1000 XP)!', '👑');
-        }
-    };
-
-    HabitApp.prototype.deductXP = function (amount, reason, e) {
-        this.habitProfile.xp = Math.max(0, (this.habitProfile.xp || 0) - amount);
-        this._saveProfile();
-
-        if (e && e.clientX && e.clientY) {
-            this._spawnXpFloat(e.clientX, e.clientY, '-' + amount + ' XP');
-        }
-    };
-
-    HabitApp.prototype._awardPerfectDayBonus = function (dateStr, e) {
-        var activeHabits = this.habits.filter(function (h) { return h.active !== false; });
-        if (activeHabits.length === 0) return;
-
-        var mKey = dateStr.substring(0, 7);
-        var dayData = this.habitLogs[mKey] && this.habitLogs[mKey].days
-            ? this.habitLogs[mKey].days[dateStr]
-            : null;
-        var allDone = dayData && activeHabits.every(function (h) {
-            var entry = dayData[h.id];
-            return entry && (h.type === 'numeric' ? entry.value >= h.target : entry.completed);
+    HabitApp.prototype._recordHabitSchedule = function () {
+        var today = HabitScoring.dateKey(new Date());
+        var config = this.habitProfile.scoring;
+        if (!config) return;
+        var habits = this.habits.filter(function (h) { return h.active !== false; }).map(function (h) {
+            return { id: h.id, title: h.title, icon: h.icon, color: h.color, unit: h.unit || '', type: h.type, target: h.target || 1, startDate: h.startDate || (h.createdAt ? HabitScoring.dateKey(new Date(h.createdAt)) : config.startDate) };
         });
-
-        if (!allDone) return;
-        if (!this.habitProfile.perfectDays) this.habitProfile.perfectDays = [];
-        if (this.habitProfile.perfectDays.includes(dateStr)) return;
-
-        this.habitProfile.perfectDays.push(dateStr);
-        if (!this.habitProfile.badges.includes('perfect_1')) {
-            this.habitProfile.badges.push('perfect_1');
-        }
-        this.awardXP(50, 'Ngày hoàn hảo 100%', e);
-        PwaManager.showToast(t('perfectDayToast'), '⭐');
+        var last = config.schedules[config.schedules.length - 1];
+        if (last && JSON.stringify(last.habits) === JSON.stringify(habits)) return;
+        if (last && last.date === today) last.habits = habits;
+        else config.schedules.push({ date: today, habits: habits });
     };
 
     HabitApp.prototype._calculateStreaks = function () {
-        var activeHabits = this.habits.filter(function (h) { return h.active !== false; });
-        if (activeHabits.length === 0) return;
-
-        var mKey = this._getMonthKey();
-        var logs = (this.habitLogs[mKey] && this.habitLogs[mKey].days) || {};
-
-        var streak = 0;
-        var today = new Date();
-        var currentDayNum = today.getDate();
-        if (this.viewYear !== today.getFullYear() || this.viewMonth !== (today.getMonth() + 1)) {
-            // Viewing another month, just calculate from logs
-            currentDayNum = new Date(this.viewYear, this.viewMonth, 0).getDate();
+        if (currentUser && (!this._habitsReady || !this._profileReady || !this._logsReady)) return;
+        var today = HabitScoring.dateKey(new Date());
+        var before = JSON.stringify(this.habitProfile);
+        if (!this.habitProfile.scoring) {
+            var oldXP = this.habitProfile.xp || 0;
+            var entries = ((this.habitLogs[today.slice(0, 7)] || {}).days || {})[today] || {};
+            this.habitProfile.scoring = {
+                version: 2, startDate: today, baseXP: oldXP, basePoints: oldXP,
+                migrationCredit: oldXP ? HabitScoring.dayResult(this.habits.filter(function (h) { return h.active !== false; }), entries).earned : 0,
+                schedules: [], redemptions: [], hiddenPenalties: [], legacyPenalties: this.habitProfile.penalties || []
+            };
         }
-
-        // Count streak backwards from today
-        for (var d = currentDayNum; d >= 1; d--) {
-            var dPad = String(d).padStart(2, '0');
-            var mPad = String(this.viewMonth).padStart(2, '0');
-            var dateStr = this.viewYear + '-' + mPad + '-' + dPad;
-
-            var dayEntry = logs[dateStr];
-            if (!dayEntry) break;
-
-            var doneCount = 0;
-            activeHabits.forEach(function (h) {
-                var entry = dayEntry[h.id];
-                if (entry && (h.type === 'numeric' ? entry.value >= h.target : entry.completed)) {
-                    doneCount++;
-                }
-            });
-
-            // Count streak if at least 1 habit was completed
-            if (doneCount > 0) {
-                streak++;
-            } else if (d < currentDayNum) {
-                // broken streak in the past -> ghi nhận vào lịch sử Quỹ kỷ luật nếu chưa có
-                var penaltyDate = dPad + '/' + mPad + '/' + this.viewYear;
-                if (!this.habitProfile.penalties) this.habitProfile.penalties = [];
-                var alreadyLogged = this.habitProfile.penalties.some(function (p) { return p.date === penaltyDate; });
-                if (!alreadyLogged && activeHabits.length > 0) {
-                    this.habitProfile.penalties.unshift({
-                        id: generateId(),
-                        date: penaltyDate,
-                        note: currentLang === 'vi' ? 'Bỏ lỡ toàn bộ thói quen trong ngày (-100 XP, đứt chuỗi 🔥)' : 'Missed all daily habits (-100 XP, streak broken 🔥)'
-                    });
-                    this.deductXP(100, 'Không hoàn thành thói quen nào trong ngày');
-                    PwaManager.showToast(currentLang === 'vi' ? 'Không hoàn thành thói quen nào: -100 XP' : 'No habits completed: -100 XP', '⚠️');
-                }
-                break;
+        this._recordHabitSchedule();
+        var result = HabitScoring.calculate(this.habitProfile, this.habitLogs, today);
+        this.habitProfile.xp = result.xp;
+        this.habitProfile.points = result.points;
+        this.habitProfile.currentStreak = result.currentStreak;
+        this.habitProfile.longestStreak = Math.max(this.habitProfile.longestStreak || 0, result.longestStreak);
+        this.habitProfile.perfectDays = result.perfectDays;
+        this.habitProfile.penalties = result.penalties.concat((this.habitProfile.scoring.legacyPenalties || []).filter(function (p) { return !this.habitProfile.scoring.hiddenPenalties.includes(p.date); }.bind(this)));
+        this._dailyScores = result.days;
+        var badges = this.habitProfile.badges || (this.habitProfile.badges = []);
+        ALL_HABIT_BADGES.forEach(function (b) {
+            if ((b.reqStreak && result.longestStreak >= b.reqStreak) || (b.reqXp && result.xp >= b.reqXp) || (b.reqPerfect && result.perfectDays.length >= b.reqPerfect)) {
+                if (!badges.includes(b.id)) badges.push(b.id);
             }
-        }
-
-        this.habitProfile.currentStreak = streak;
-        this.habitProfile.longestStreak = Math.max(this.habitProfile.longestStreak || 0, streak);
-
-        // Check badge unlocks
-        if (streak >= 3 && !this.habitProfile.badges.includes('streak_3')) {
-            this.habitProfile.badges.push('streak_3');
-            PwaManager.showToast('🌱 Mở khóa danh hiệu: Mầm Xanh Kỷ Luật (Chuỗi 3 ngày)!', '🌱');
-        }
-        if (streak >= 7 && !this.habitProfile.badges.includes('streak_7')) {
-            this.habitProfile.badges.push('streak_7');
-            this.awardXP(100, 'Chuỗi 7 ngày');
-            PwaManager.showToast('🥉 Mở khóa danh hiệu: Đà Tiến Tới (Chuỗi 7 ngày)! +100 XP', '🥉');
-        }
-        if (streak >= 21 && !this.habitProfile.badges.includes('streak_21')) {
-            this.habitProfile.badges.push('streak_21');
-            this.awardXP(300, 'Chuỗi 21 ngày');
-            PwaManager.showToast('🥈 Mở khóa danh hiệu: Kỷ Luật Thép (Chuỗi 21 ngày)! +300 XP', '🥈');
-        }
-        if (streak >= 30 && !this.habitProfile.badges.includes('streak_30')) {
-            this.habitProfile.badges.push('streak_30');
-            this.awardXP(500, 'Chuỗi 30 ngày');
-            PwaManager.showToast('🥇 Mở khóa danh hiệu: Bậc Thầy Thói Quen (Chuỗi 30 ngày)! +500 XP', '🥇');
-        }
-
-        this._saveProfile();
+        });
+        if (JSON.stringify(this.habitProfile) !== before) this._saveProfile();
+        this._renderStats();
     };
 
     HabitApp.prototype._spawnXpFloat = function (x, y, text) {
@@ -6652,20 +6608,21 @@
 
     // --- Reward Shop Modal ---
     HabitApp.prototype._openShopModal = function () {
+        this._calculateStreaks();
         this._renderShop();
         if (this.shopModal) this.shopModal.classList.add('active');
     };
 
     HabitApp.prototype._renderShop = function () {
         var self = this;
-        var xp = this.habitProfile.xp || 0;
+        var xp = this.habitProfile.points || 0;
         if (this.shopXpBalance) this.shopXpBalance.textContent = xp;
 
         if (!this.shopItemsList) return;
         var rewards = this.habitProfile.rewards || [];
 
         if (rewards.length === 0) {
-            this.shopItemsList.innerHTML = '<p style="text-align: center; color: var(--text-muted);">' + (currentLang === 'vi' ? 'Chưa có phần thưởng nào.' : 'No rewards yet.') + '</p>';
+            this.shopItemsList.innerHTML = '<p style="text-align: center; color: var(--text-muted);">' + (currentLang === 'vi' ? 'Chưa có phần thưởng. Hãy thêm món quà bạn muốn tự thưởng ở phía trên.' : 'No rewards yet. Add something you would like to reward yourself with above.') + '</p>';
             return;
         }
 
@@ -6677,30 +6634,54 @@
             html += '    <span class="shop-item-icon">' + (rw.icon || '🎁') + '</span>';
             html += '    <div>';
             html += '      <div class="shop-item-title">' + escapeHtml(rw.title) + '</div>';
-            html += '      <div class="shop-item-cost">' + rw.cost + ' XP</div>';
+            html += '      <div class="shop-item-cost">' + rw.cost + (currentLang === 'vi' ? ' điểm</div>' : ' points</div>');
             html += '    </div>';
             html += '  </div>';
+            html += '  <div class="shop-item-actions">';
             html += '  <button type="button" class="shop-redeem-btn" data-id="' + rw.id + '" ' + (canAfford ? '' : 'disabled') + '>';
             html += currentLang === 'vi' ? 'Đổi quà' : 'Redeem';
             html += '  </button>';
+            html += '  <button type="button" class="habit-btn danger-outline shop-delete-btn" data-id="' + escapeHtml(rw.id) + '" aria-label="' + escapeHtml((currentLang === 'vi' ? 'Xóa phần thưởng: ' : 'Delete reward: ') + rw.title) + '">' + (currentLang === 'vi' ? 'Xóa' : 'Delete') + '</button>';
+            html += '  </div>';
             html += '</div>';
         });
         this.shopItemsList.innerHTML = html;
+
+        this.shopItemsList.querySelectorAll('.shop-delete-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var rewardId = btn.getAttribute('data-id');
+                var reward = (self.habitProfile.rewards || []).find(function (item) { return item.id === rewardId; });
+                if (!reward) return;
+                showConfirmModal({
+                    title: currentLang === 'vi' ? 'Xóa phần thưởng' : 'Delete reward',
+                    message: (currentLang === 'vi' ? 'Xóa phần thưởng “' : 'Delete reward “') + reward.title + '”?',
+                    confirmText: t('confirmDelete'),
+                    onConfirm: function () {
+                        self.habitProfile.rewards = (self.habitProfile.rewards || []).filter(function (item) { return item.id !== rewardId; });
+                        self._saveProfile();
+                        self._renderShop();
+                        PwaManager.showToast(currentLang === 'vi' ? 'Đã xóa phần thưởng' : 'Reward deleted', '✓');
+                    }
+                });
+            });
+        });
 
         this.shopItemsList.querySelectorAll('.shop-redeem-btn').forEach(function (btn) {
             btn.addEventListener('click', function () {
                 var rwId = btn.getAttribute('data-id');
                 var rw = rewards.find(function (r) { return r.id === rwId; });
                 if (!rw) return;
-                if ((self.habitProfile.xp || 0) < rw.cost) {
+                self._calculateStreaks();
+                if ((self.habitProfile.points || 0) < rw.cost) {
                     alert(t('notEnoughXp'));
                     return;
                 }
-                self.habitProfile.xp -= rw.cost;
+                self.habitProfile.scoring.redemptions.push({ id: generateId(), date: HabitScoring.dateKey(new Date()), cost: rw.cost, title: rw.title });
+                self._calculateStreaks();
                 playChime();
                 self._saveProfile();
                 self._renderShop();
-                PwaManager.showToast(t('redeemSuccess').replace('{title}', rw.title).replace('{xp}', rw.cost), rw.icon || '🎁');
+                PwaManager.showToast((currentLang === 'vi' ? 'Đã đổi: ' : 'Redeemed: ') + rw.title + ' (−' + rw.cost + (currentLang === 'vi' ? ' điểm)' : ' points)'), rw.icon || '🎁');
             });
         });
     };
@@ -6755,7 +6736,7 @@
         penalties.forEach(function (p) {
             html += '<div class="penalty-log-item">';
             html += '  <span class="penalty-log-date">' + p.date + '</span>';
-            html += '  <span class="penalty-log-note">' + escapeHtml(p.note || 'Bỏ lỡ thói quen') + '</span>';
+            html += '  <span class="penalty-log-note">' + escapeHtml(p.note || (currentLang === 'vi' ? 'Bỏ lỡ ' + p.missed + ' thói quen (−' + p.points + ' điểm)' : 'Missed ' + p.missed + ' habits (−' + p.points + ' points)')) + '</span>';
             html += '</div>';
         });
         this.disciplineLogsList.innerHTML = html;

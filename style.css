@@ -7900,3 +7900,12 @@ html[data-theme="light"] .modal-container > .modal-footer {
         min-height: 48px;
     }
 }
+
+/* User-managed habit rewards */
+.shop-item-card { gap: 12px; flex-wrap: wrap; }
+.shop-item-info { flex: 1 1 160px; min-width: 0; }
+.shop-item-info > div { min-width: 0; }
+.shop-item-title { overflow-wrap: anywhere; }
+.shop-item-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.shop-item-actions button { min-height: 44px; min-width: 44px; }
+.shop-item-actions button:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 3px; }

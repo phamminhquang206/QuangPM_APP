@@ -743,6 +743,7 @@
             </div>
 
             <!-- Month Navigation & Controls Toolbar -->
+            <p id="habit-scoring-info" class="shop-balance-desc">Streak: hoàn thành ít nhất 50% thói quen/ngày. +10 XP và điểm/thói quen; +20 khi hoàn thành tất cả. Bỏ lỡ: −5 điểm/thói quen, tối đa −20/ngày. Điểm chốt sau khi hết ngày; đổi thưởng không trừ XP.</p>
             <div class="habit-toolbar">
                 <div class="habit-month-nav">
                     <button type="button" class="month-nav-btn" id="btn-habit-prev-month" title="Tháng trước">◀</button>
@@ -1182,9 +1183,9 @@
             </div>
             <div class="modal-body">
                 <div class="shop-balance-card">
-                    <div class="shop-balance-label" data-i18n="yourXpBalance">Điểm XP hiện có</div>
-                    <div class="shop-balance-val"><span id="shop-xp-balance">0</span> <span class="shop-xp-unit">XP</span></div>
-                    <div class="shop-balance-desc" data-i18n="shopDesc">Dùng điểm kỷ luật đã tích lũy để tự thưởng cho bản thân!</div>
+                    <div class="shop-balance-label" data-i18n="yourXpBalance">Điểm đổi thưởng hiện có</div>
+                    <div class="shop-balance-val"><span id="shop-xp-balance">0</span> <span class="shop-xp-unit">điểm</span></div>
+                    <div class="shop-balance-desc" data-i18n="shopDesc">Tự thêm phần thưởng bạn muốn, rồi dùng điểm tích lũy để đổi quà!</div>
                 </div>
 
                 <!-- Add new custom reward -->
@@ -1193,7 +1194,7 @@
                     <div class="shop-add-fields">
                         <input type="text" id="shop-reward-title" class="habit-form-input" placeholder="ví dụ: 1 cốc trà sữa, Xem 1 tập phim..." data-i18n-placeholder="rewardTitlePlaceholder" />
                         <div class="shop-add-row">
-                            <input type="number" id="shop-reward-cost" class="habit-form-input" placeholder="Chi phí XP (vd: 100)" min="10" step="10" />
+                            <input type="number" id="shop-reward-cost" class="habit-form-input" placeholder="Chi phí điểm (vd: 100)" min="10" step="10" />
                             <select id="shop-reward-icon" class="habit-form-input" style="width: 80px;">
                                 <option value="🧋">🧋</option>
                                 <option value="🎬">🎬</option>
@@ -1399,7 +1400,8 @@
     <script src="stock/stock-api.js?v=1.0"></script>
     <script src="stock/stock-agent.js?v=1.0"></script>
     <script src="stock/stock-feature.js?v=1.1"></script>
-    <script src="app.js?v=2.19"></script>
+    <script src="habit-scoring.js"></script>
+    <script src="app.js?v=2.21"></script>
 
     <!-- Register Service Worker for PWA -->
     <script>
