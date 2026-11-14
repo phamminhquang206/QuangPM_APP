@@ -13,11 +13,11 @@
         versions.forEach(function (v) { if (v.date <= date) selected = v.habits; });
         return selected.filter(function (h) { return (!h.startDate || h.startDate <= date) && h.active !== false; });
     }
+    function isComplete(habit, entry) {
+        return !!entry && (habit.type === 'numeric' ? Number(entry.value) >= habit.target : entry.completed === true);
+    }
     function dayResult(habits, entries) {
-        var done = habits.filter(function (h) {
-            var entry = entries[h.id];
-            return entry && (h.type === 'numeric' ? Number(entry.value) >= h.target : entry.completed === true);
-        }).length;
+        var done = habits.filter(function (habit) { return isComplete(habit, entries[habit.id]); }).length;
         return { total: habits.length, done: done, earned: done * 10 + (habits.length && done === habits.length ? 20 : 0), penalty: Math.min(20, (habits.length - done) * 5), qualifies: habits.length > 0 && done * 2 >= habits.length };
     }
     function calculate(profile, logs, today) {
@@ -57,7 +57,7 @@
         longest = Math.max(longest, streak);
         return { xp: xp, points: points, currentStreak: streak, longestStreak: longest, penalties: penalties.reverse(), perfectDays: perfect, days: days };
     }
-    var api = { dateKey: dateKey, nextDate: nextDate, dueOn: dueOn, dayResult: dayResult, calculate: calculate };
+    var api = { dateKey: dateKey, nextDate: nextDate, dueOn: dueOn, isComplete: isComplete, dayResult: dayResult, calculate: calculate };
     if (typeof module !== 'undefined' && module.exports) module.exports = api;
     else root.HabitScoring = api;
 })(typeof window !== 'undefined' ? window : globalThis);

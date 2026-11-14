@@ -7,6 +7,9 @@ assert.equal(scoring.dayResult(habits, entries(3)).qualifies, true);
 assert.equal(scoring.dayResult(habits.slice(0,4), entries(2)).qualifies, true);
 assert.deepEqual([0,1,3,5].map(n => {let r=scoring.dayResult(habits, entries(n)); return [r.earned,r.penalty];}), [[0,20],[10,20],[30,10],[70,0]]);
 assert.equal(scoring.dayResult([{id:'n',type:'numeric',target:20}], {n:{value:40}}).earned, 30);
+assert.equal(scoring.isComplete({type:'numeric',target:20}, {value:12,completed:true}), false);
+assert.equal(scoring.isComplete({type:'numeric',target:20}, {value:20,completed:false}), true);
+assert.equal(scoring.isComplete({type:'checkbox'}, undefined), false);
 function profile(start='2026-09-28', base=100) {
  return {scoring:{startDate:start, baseXP:base, basePoints:base, schedules:[{date:start,habits}], redemptions:[], hiddenPenalties:[]}};
 }

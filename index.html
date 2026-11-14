@@ -20,7 +20,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=2.32">
     <link rel="stylesheet" href="stock/stock-feature.css?v=1.5">
-    <link rel="stylesheet" href="assistant.css">
+    <link rel="stylesheet" href="assistant.css?v=3">
 
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="manifest.json">
@@ -776,6 +776,13 @@
                     </div>
                     <div id="assistant-tasks"></div>
                 </section>
+                <section class="assistant-card" aria-labelledby="assistant-habits-title">
+                    <div class="assistant-row">
+                        <h3 id="assistant-habits-title">Thói quen chưa hoàn thành</h3>
+                        <button type="button" id="assistant-open-habits">Mở Habits</button>
+                    </div>
+                    <div id="assistant-habits" role="status"></div>
+                </section>
                 <section class="assistant-card" aria-labelledby="assistant-checkin-title">
                     <h3 id="assistant-checkin-title">Check-in</h3>
                     <form class="assistant-form" id="assistant-checkin-form">
@@ -1494,9 +1501,9 @@
     <script src="stock/stock-agent.js?v=1.1"></script>
     <script src="gemini-settings.js"></script>
     <script src="stock/stock-feature.js?v=1.2"></script>
-    <script src="habit-scoring.js"></script>
-    <script src="assistant.js"></script>
-    <script src="app.js?v=2.22"></script>
+    <script src="habit-scoring.js?v=2"></script>
+    <script src="assistant.js?v=3"></script>
+    <script src="app.js?v=2.24"></script>
 
     <!-- Register Service Worker for PWA -->
     <script>

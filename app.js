@@ -2305,6 +2305,19 @@
         this.closeDateModal();
     };
 
+    function createTodoTask(id, text, startDate, endDate, subtasks) {
+        return {
+            id: id,
+            text: text,
+            completed: false,
+            startDate: startDate,
+            endDate: endDate,
+            reminder: null,
+            subtasks: subtasks,
+            createdAt: new Date().toISOString()
+        };
+    }
+
     TodoList.prototype._addTask = function () {
         var text = this.inputEl.value.trim();
         if (!text || !currentUser) return;
@@ -2312,16 +2325,7 @@
         var startDate = this.startDateEl ? this.startDateEl.value : '';
         var endDate = this.endDateEl ? this.endDateEl.value : '';
 
-        var task = {
-            id: generateId(),
-            text: text,
-            completed: false,
-            startDate: startDate,
-            endDate: endDate,
-            reminder: null,
-            subtasks: [],
-            createdAt: new Date().toISOString()
-        };
+        var task = createTodoTask(generateId(), text, startDate, endDate, []);
 
         this.tasks.unshift(task);
         this.inputEl.value = '';
@@ -2339,6 +2343,32 @@
         if (task.endDate || task.startDate) {
             this._notifyDateSet(task);
         }
+    };
+
+    TodoList.prototype.hasPlanTask = function (turnId) {
+        return this.tasks.some(function (task) { return task.id === 'assistant-' + turnId; });
+    };
+
+    TodoList.prototype.addPlanTask = async function (turnId, plan) {
+        var user = currentUser;
+        if (!user) throw new Error('Authentication required');
+        var ref = userDocRef('data').doc('todos');
+        var task = createTodoTask('assistant-' + turnId, plan.title, '', '', plan.steps.map(function (step) {
+            return { id: generateId(), text: step, completed: false };
+        }));
+        var saved = await db.runTransaction(async function (transaction) {
+            var doc = await transaction.get(ref);
+            if (currentUser !== user) throw new Error('Account changed');
+            var items = doc.data()?.items || [];
+            var existing = items.find(function (item) { return item.id === task.id; });
+            if (existing) return existing;
+            transaction.set(ref, { items: [task].concat(items) }, { merge: true });
+            return task;
+        });
+        if (currentUser !== user) return;
+        if (!this.hasPlanTask(turnId)) this.tasks.unshift(saved);
+        this.expandedTaskIds.add(saved.id);
+        this._render();
     };
 
     TodoList.prototype.toggleTask = function (id) {
@@ -2565,7 +2595,7 @@
             var textOrInputHtml = '';
             if (isEditing) {
                 textOrInputHtml = '<div class="todo-edit-row">' +
-                    '<input type="text" class="todo-edit-input" id="todo-edit-input-' + task.id + '" data-task-id="' + task.id + '" value="' + escapeHtml(task.text) + '" placeholder="' + t('taskTitlePlaceholder') + '" autocomplete="off" />' +
+                    '<input type="text" class="todo-edit-input" id="todo-edit-input-' + task.id + '" data-task-id="' + task.id + '" value="' + escapeHtml(task.text).replace(/"/g, '&quot;') + '" placeholder="' + t('taskTitlePlaceholder') + '" autocomplete="off" />' +
                     '<div class="todo-edit-actions">' +
                     '<button type="button" class="todo-edit-save-btn" data-action="save-edit-task" data-task-id="' + task.id + '" title="' + t('save') + '">✓</button>' +
                     '<button type="button" class="todo-edit-cancel-btn" data-action="cancel-edit-task" data-task-id="' + task.id + '" title="' + t('cancel') + '">✕</button>' +
@@ -3087,7 +3117,10 @@
             self._render();
             self._checkReminders();
             self._syncRemindersToWorker();
-            if (window.__assistantApp) window.__assistantApp.refreshTasks();
+            if (window.__assistantApp) {
+                window.__assistantApp.refreshTasks();
+                window.__assistantApp.refreshPlans();
+            }
         }).catch(function () {
             if (currentUser === user) self._render();
         });
@@ -6226,11 +6259,10 @@
                 var h = dueHabits.find(function (item) { return item.id === columnHabit.id; });
                 if (!h) { cellsHtml += '<td>—</td>'; return; }
                 var cellData = (logs[dateStr] && logs[dateStr][h.id]) || { completed: false, value: 0 };
-                var isDone = false;
+                var isDone = HabitScoring.isComplete(h, cellData);
+                if (isDone) completedHabitsCount++;
                 if (h.type === 'numeric') {
                     var val = cellData.value || 0;
-                    isDone = val >= h.target;
-                    if (isDone) completedHabitsCount++;
                     var pct = Math.min(100, Math.round((val / h.target) * 100));
                     cellsHtml += '<td>';
                     cellsHtml += '  <button type="button" class="habit-cell-numeric ' + (isDone ? 'completed' : '') + '" data-date="' + dateStr + '" data-id="' + h.id + '">';
@@ -6239,8 +6271,6 @@
                     cellsHtml += '  </button>';
                     cellsHtml += '</td>';
                 } else {
-                    isDone = !!cellData.completed;
-                    if (isDone) completedHabitsCount++;
                     cellsHtml += '<td>';
                     cellsHtml += '  <button type="button" class="habit-cell-checkbox ' + (isDone ? 'checked' : '') + '" data-date="' + dateStr + '" data-id="' + h.id + '">';
                     cellsHtml += isDone ? '✓' : '';
@@ -6632,6 +6662,7 @@
         });
         if (JSON.stringify(this.habitProfile) !== before) this._saveProfile();
         this._renderStats();
+        if (typeof window !== 'undefined' && window.__assistantApp) window.__assistantApp.refreshHabits();
     };
 
     HabitApp.prototype._spawnXpFloat = function (x, y, text) {
@@ -7110,6 +7141,8 @@
         window.__assistantApp = new window.FlowHubAssistant({
             db: db,
             getTasks: function () { return window.__todoApp.tasks; },
+            hasPlanTask: function (id) { return window.__todoApp.hasPlanTask(id); },
+            addPlanTask: function (id, plan) { return window.__todoApp.addPlanTask(id, plan); },
             getReminderTime: function (task) { return window.__todoApp._getTaskTargetMs(task); },
             getNotes: function () { return window.__noteApp.notes; },
             getNoteText: function (note) {
@@ -7123,6 +7156,31 @@
                 return template.content.textContent.trim();
             },
             getHabits: function () { return window.__habitApp.habits; },
+            getTodayHabits: function () {
+                var habits = window.__habitApp;
+                if (!habits._habitsReady || !habits._profileReady || !habits._logsReady) return null;
+                var today = getTodayStr();
+                var entries = habits.habitLogs[today.slice(0, 7)]?.days?.[today] || {};
+                var profile = habits.habitProfile;
+                var due = profile.scoring && today >= profile.scoring.startDate
+                    ? HabitScoring.dueOn(profile, today)
+                    : habits.habits.filter(function (habit) {
+                        return habit.active !== false && (!habit.startDate || habit.startDate <= today);
+                    });
+                return due.filter(function (habit) {
+                    return !HabitScoring.isComplete(habit, entries[habit.id]);
+                }).map(function (habit) {
+                    return { title: habit.title, progress: habit.type === 'numeric'
+                        ? (entries[habit.id]?.value || 0) + ' / ' + habit.target + (habit.unit ? ' ' + habit.unit : '')
+                        : '' };
+                });
+            },
+            openTodayHabits: function () {
+                var tab = document.getElementById('tab-habits');
+                tab.click();
+                tab.focus({ preventScroll: true });
+                document.getElementById('btn-habit-today').click();
+            },
             getHabitLogs: function () { return window.__habitApp.habitLogs; },
             openReminder: function (id) { window.__todoApp.openDateModal(id); },
             openNote: function (text) {

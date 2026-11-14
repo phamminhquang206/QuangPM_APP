@@ -1,6 +1,6 @@
 const assert = require('node:assert/strict');
 const { test } = require('node:test');
-const { todayTasks, promptContents } = require('../assistant.js');
+const { todayTasks, promptContents, parseGeminiReply } = require('../assistant.js');
 
 test('Today groups unfinished tasks once and orders their local dates', () => {
     const now = new Date(2026, 10, 14, 12);
@@ -31,4 +31,13 @@ test('Gemini gets a bounded dialogue and only the current preview as an attachme
         role: 'user', parts: [{ text: 'New question' }, { text: excerpt }]
     });
     assert.equal(JSON.stringify(payload).includes('Previous private attachment'), false);
+});
+
+test('Only usable Gemini plans become task suggestions', () => {
+    const reply = 'Bắt đầu theo các bước này.';
+    assert.deepEqual(parseGeminiReply(JSON.stringify({
+        reply, plan: { title: '  Làm website  ', steps: ['Chọn nội dung', '', 4, 'Chọn nội dung', 'Dựng trang'] }
+    })), { reply, plan: { title: 'Làm website', steps: ['Chọn nội dung', 'Dựng trang'] } });
+    assert.deepEqual(parseGeminiReply(JSON.stringify({ reply, plan: { title: 'Làm website', steps: [] } })), { reply });
+    assert.deepEqual(parseGeminiReply('Câu trả lời thông thường'), { reply: 'Câu trả lời thông thường' });
 });
