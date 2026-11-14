@@ -1,7 +1,7 @@
 /* ==========================================================================
    QPM Stock AI Terminal - High-End Dark Trading Theme
    ========================================================================== */
-.flowhub-stock{
+.flowhub-stock, .gemini-settings{
     --bg-main: #080c14;
     --bg-card: #0f172a;
     --bg-card-hover: #17223b;
@@ -1016,7 +1016,7 @@ html[data-theme="light"] .flowhub-stock ::-webkit-scrollbar-thumb {
 }/* ==========================================================================
    Modal Dialogs (API Key / Settings)
    ========================================================================== */
-.flowhub-stock .modal-overlay{
+.gemini-settings.modal-overlay{
     position: fixed;
     top: 0;
     left: 0;
@@ -1029,44 +1029,47 @@ html[data-theme="light"] .flowhub-stock ::-webkit-scrollbar-thumb {
     justify-content: center;
     z-index: 1000;
     animation: fadeIn 0.2s ease;
-}.flowhub-stock .modal-overlay.active{
+}.gemini-settings.modal-overlay.active{
     display: flex;
-}.flowhub-stock .modal-card{
+}.gemini-settings .modal-card{
     background: var(--bg-card);
+    color: var(--text-primary);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     width: 90%;
     max-width: 500px;
+    max-height: 100%;
+    overflow-y: auto;
     padding: 24px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-}.flowhub-stock .modal-header{
+}.gemini-settings .modal-header{
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 18px;
-}.flowhub-stock .modal-title{
+}.gemini-settings .modal-title{
     font-size: 1.2rem;
     font-weight: 700;
-}.flowhub-stock .modal-close{
+}.gemini-settings .modal-close{
     background: transparent;
     border: none;
     color: var(--text-muted);
     font-size: 1.2rem;
     cursor: pointer;
-}.flowhub-stock .modal-body{
+}.gemini-settings .modal-body{
     display: flex;
     flex-direction: column;
     gap: 16px;
-}.flowhub-stock .form-group{
+}.gemini-settings .form-group{
     display: flex;
     flex-direction: column;
     gap: 6px;
-}.flowhub-stock .form-label{
+}.gemini-settings .form-label{
     font-size: 0.85rem;
     font-weight: 600;
     color: var(--text-secondary);
-}.flowhub-stock .form-input,
-.flowhub-stock .form-select{
+}.gemini-settings .form-input,
+.gemini-settings .form-select{
     background: var(--bg-input);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
@@ -1074,19 +1077,19 @@ html[data-theme="light"] .flowhub-stock ::-webkit-scrollbar-thumb {
     color: var(--text-primary);
     font-size: 0.9rem;
     outline: none;
-}.flowhub-stock .form-input:focus,
-.flowhub-stock .form-select:focus{
+}.gemini-settings .form-input:focus,
+.gemini-settings .form-select:focus{
     border-color: var(--accent-primary);
-}.flowhub-stock .form-help{
+}.gemini-settings .form-help{
     font-size: 0.78rem;
     color: var(--text-muted);
     line-height: 1.4;
-}.flowhub-stock .modal-footer{
+}.gemini-settings .modal-footer{
     display: flex;
     justify-content: flex-end;
     gap: 10px;
     margin-top: 20px;
-}.flowhub-stock .btn-secondary{
+}.gemini-settings .btn-secondary{
     background: var(--bg-elevated);
     border: 1px solid var(--border-color);
     color: var(--text-primary);
@@ -1094,7 +1097,7 @@ html[data-theme="light"] .flowhub-stock ::-webkit-scrollbar-thumb {
     border-radius: var(--radius-sm);
     cursor: pointer;
     font-weight: 500;
-}.flowhub-stock .btn-primary{
+}.gemini-settings .btn-primary{
     background: var(--accent-gradient);
     border: none;
     color: white;

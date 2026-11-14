@@ -19,7 +19,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=2.32">
-    <link rel="stylesheet" href="stock/stock-feature.css?v=1.4">
+    <link rel="stylesheet" href="stock/stock-feature.css?v=1.5">
+    <link rel="stylesheet" href="assistant.css">
 
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="manifest.json">
@@ -114,6 +115,12 @@
                     <span class="app-version">v1.5</span>
                 </div>
                 <div class="header-actions">
+                    <button class="assistant-launch" id="assistant-open" type="button" aria-haspopup="dialog" aria-controls="assistant-overlay" aria-expanded="false" aria-label="Trợ lý">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M12 3 14.4 9.6 21 12l-6.6 2.4L12 21l-2.4-6.6L3 12l6.6-2.4L12 3Z" />
+                        </svg>
+                        <span>Trợ lý</span>
+                    </button>
                     <button class="theme-toggle" id="btn-theme-toggle" type="button" title="Chuyển sang chế độ sáng" aria-label="Chuyển sang chế độ sáng" aria-pressed="false">
                         <span class="theme-toggle-icon" aria-hidden="true">
                             <svg class="app-shell-icon theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -656,49 +663,6 @@
 
                 </main>
 
-                <!-- ===== SETTINGS / API KEY MODAL ===== -->
-                <div class="modal-overlay" id="api-key-modal">
-                    <div class="modal-card">
-                        <div class="modal-header">
-                            <h3 class="modal-title">🔑 Cấu Hình Google Gemini API</h3>
-                            <button class="modal-close" id="btn-close-modal">✕</button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="form-group">
-                                <label class="form-label" for="input-api-key">Gemini API Key</label>
-                                <input type="password" class="form-input" id="input-api-key" placeholder="AIzaSy..." />
-                                <p class="form-help">
-                                    API Key được lưu trong vùng dữ liệu riêng của tài khoản FlowHub trên Firestore.
-                                    <br/>Nhận miễn phí tại <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: #c084fc; text-decoration: underline;">Google AI Studio</a>.
-                                </p>
-                            </div>
-
-                            <div class="form-group">
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <label class="form-label" for="select-model">Mô hình AI</label>
-                                    <button type="button" id="btn-fetch-models" style="background: none; border: none; color: #38bdf8; font-size: 0.78rem; cursor: pointer; text-decoration: underline;">🔄 Tự động dò danh sách Model</button>
-                                </div>
-                                <select class="form-select" id="select-model">
-                                    <option value="gemini-2.5-flash">gemini-2.5-flash (Khuyên dùng - Nhanh & Chuẩn xác)</option>
-                                    <option value="gemini-3.6-flash">gemini-3.6-flash (Mới nhất)</option>
-                                    <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite (Siêu tốc & Tiết kiệm)</option>
-                                    <option value="gemini-3.1-pro">gemini-3.1-pro (Phân tích chuyên sâu)</option>
-                                    <option value="gemini-2.0-flash">gemini-2.0-flash (Thế hệ 2.0)</option>
-                                    <option value="gemini-1.5-flash">gemini-1.5-flash (Thế hệ 1.5 Legacy)</option>
-                                </select>
-                            </div>
-
-                            <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
-                                <button class="btn-secondary" id="btn-test-api" type="button">⚡ Kiểm tra kết nối</button>
-                                <span id="test-result" style="font-size: 0.82rem; font-weight: 500;"></span>
-                            </div>
-                        </div>
-                        <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">FlowHub Stocks</span>
-                            <button class="btn-primary" id="btn-save-settings">Lưu Cấu Hình</button>
-                        </div>
-                    </div>
-                </div>
             </div>
         </section>
 
@@ -792,6 +756,135 @@
                 </div>
             </div>
         </section>
+    </div>
+
+    <div class="modal-overlay assistant-overlay" id="assistant-overlay" aria-labelledby="assistant-title">
+        <div class="assistant-panel">
+            <header class="assistant-header">
+                <h2 id="assistant-title">Trợ lý</h2>
+                <button class="modal-close assistant-close" id="assistant-close" type="button" aria-label="Đóng trợ lý">×</button>
+            </header>
+            <div class="assistant-nav" role="group" aria-label="Chế độ trợ lý">
+                <button type="button" data-assistant-view="today" aria-pressed="true">Hôm nay</button>
+                <button type="button" data-assistant-view="chat" aria-pressed="false">Trò chuyện</button>
+            </div>
+            <div class="assistant-content" id="assistant-today">
+                <section class="assistant-card" aria-labelledby="assistant-tasks-title">
+                    <div class="assistant-row">
+                        <h3 id="assistant-tasks-title">Việc cần làm</h3>
+                        <button type="button" id="assistant-quick-note">Ghi nhanh</button>
+                    </div>
+                    <div id="assistant-tasks"></div>
+                </section>
+                <section class="assistant-card" aria-labelledby="assistant-checkin-title">
+                    <h3 id="assistant-checkin-title">Check-in</h3>
+                    <form class="assistant-form" id="assistant-checkin-form">
+                        <label for="assistant-energy">Năng lượng của bạn lúc này</label>
+                        <select id="assistant-energy" required>
+                            <option value="">Chọn mức năng lượng</option>
+                            <option value="low">Thấp</option>
+                            <option value="medium">Vừa</option>
+                            <option value="high">Cao</option>
+                        </select>
+                        <label for="assistant-feeling">Bạn đang nghĩ gì? <span>(không bắt buộc)</span></label>
+                        <textarea id="assistant-feeling" rows="2" maxlength="1000"></textarea>
+                        <div class="assistant-actions">
+                            <button class="assistant-primary" id="assistant-save-checkin" type="submit">Lưu check-in</button>
+                            <button id="assistant-checkin-chat" type="button">Gửi vào chat</button>
+                        </div>
+                    </form>
+                    <div class="assistant-next" id="assistant-next" hidden>
+                        <p id="assistant-next-text"></p>
+                        <button id="assistant-next-note" type="button">Ghi bước này vào Notes</button>
+                    </div>
+                    <p class="assistant-status" id="assistant-checkin-status" role="status"></p>
+                    <details>
+                        <summary>Lịch sử check-in</summary>
+                        <div class="assistant-history" id="assistant-checkins"></div>
+                    </details>
+                </section>
+            </div>
+            <div class="assistant-chat" id="assistant-chat" hidden>
+                <div class="assistant-row assistant-chat-tools">
+                    <button id="assistant-settings" type="button">Cấu hình Gemini</button>
+                    <button id="assistant-clear-chat" type="button" disabled>Xóa hội thoại</button>
+                </div>
+                <div class="assistant-messages" id="assistant-messages" role="log" aria-label="Hội thoại" tabindex="0"></div>
+                <form class="assistant-form assistant-compose" id="assistant-chat-form">
+                    <details id="assistant-attach">
+                        <summary>Đính kèm từ FlowHub</summary>
+                        <div class="assistant-picker">
+                            <label for="assistant-source">Nguồn</label>
+                            <select id="assistant-source">
+                                <option value="">Chọn nguồn</option>
+                                <option value="task">To-do</option>
+                                <option value="note">Notes</option>
+                                <option value="habit">Habits · 7 ngày</option>
+                                <option value="checkin">Check-in</option>
+                            </select>
+                            <label for="assistant-item" id="assistant-item-label" hidden>Mục đính kèm</label>
+                            <select id="assistant-item" hidden></select>
+                            <p class="assistant-status" id="assistant-attach-status" role="status"></p>
+                        </div>
+                    </details>
+                    <div class="assistant-preview" id="assistant-attachment" hidden>
+                        <div class="assistant-row">
+                            <label for="assistant-excerpt">Văn bản sẽ gửi kèm</label>
+                            <button id="assistant-remove-attachment" type="button">Gỡ</button>
+                        </div>
+                        <textarea id="assistant-excerpt" rows="3" maxlength="1800"></textarea>
+                    </div>
+                    <label for="assistant-prompt">Tin nhắn</label>
+                    <div class="assistant-compose-row">
+                        <textarea id="assistant-prompt" rows="2" maxlength="2000" placeholder="Bạn muốn trợ lý giúp gì?"></textarea>
+                        <button class="assistant-primary" id="assistant-send" type="submit" disabled>Gửi</button>
+                    </div>
+                    <p class="assistant-status" id="assistant-chat-status" role="status"></p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay gemini-settings" id="api-key-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 class="modal-title">🔑 Cấu Hình Google Gemini API</h3>
+                <button class="modal-close" id="btn-close-modal">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" for="input-api-key">Gemini API Key</label>
+                    <input type="password" class="form-input" id="input-api-key" autocomplete="off" placeholder="AIzaSy..." />
+                    <p class="form-help">
+                        API Key được lưu trong vùng dữ liệu riêng của tài khoản FlowHub trên Firestore.
+                        <br/>Nhận miễn phí tại <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: #c084fc; text-decoration: underline;">Google AI Studio</a>.
+                    </p>
+                </div>
+
+                <div class="form-group">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <label class="form-label" for="select-model">Mô hình AI</label>
+                        <button type="button" id="btn-fetch-models" style="background: none; border: none; color: #38bdf8; font-size: 0.78rem; cursor: pointer; text-decoration: underline;">🔄 Tự động dò danh sách Model</button>
+                    </div>
+                    <select class="form-select" id="select-model">
+                        <option value="gemini-2.5-flash">gemini-2.5-flash (Khuyên dùng - Nhanh & Chuẩn xác)</option>
+                        <option value="gemini-3.6-flash">gemini-3.6-flash (Mới nhất)</option>
+                        <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite (Siêu tốc & Tiết kiệm)</option>
+                        <option value="gemini-3.1-pro">gemini-3.1-pro (Phân tích chuyên sâu)</option>
+                        <option value="gemini-2.0-flash">gemini-2.0-flash (Thế hệ 2.0)</option>
+                        <option value="gemini-1.5-flash">gemini-1.5-flash (Thế hệ 1.5 Legacy)</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                    <button class="btn-secondary" id="btn-test-api" type="button">⚡ Kiểm tra kết nối</button>
+                    <span id="test-result" style="font-size: 0.82rem; font-weight: 500;"></span>
+                </div>
+            </div>
+            <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+                <button class="btn-primary" id="btn-save-settings">Lưu Cấu Hình</button>
+            </div>
+        </div>
     </div>
 
     <!-- ===== NOTE MODAL OVERLAY (NOTION-STYLE) ===== -->
@@ -1398,10 +1491,12 @@
     <script src="markdown.js?v=2.1"></script>
     <script src="stock/stock-data.js?v=1.0"></script>
     <script src="stock/stock-api.js?v=1.0"></script>
-    <script src="stock/stock-agent.js?v=1.0"></script>
-    <script src="stock/stock-feature.js?v=1.1"></script>
+    <script src="stock/stock-agent.js?v=1.1"></script>
+    <script src="gemini-settings.js"></script>
+    <script src="stock/stock-feature.js?v=1.2"></script>
     <script src="habit-scoring.js"></script>
-    <script src="app.js?v=2.21"></script>
+    <script src="assistant.js"></script>
+    <script src="app.js?v=2.22"></script>
 
     <!-- Register Service Worker for PWA -->
     <script>

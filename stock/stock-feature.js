@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const stockRefreshStatus = document.getElementById('stock-refresh-status');
     const firestore = window.firebase && firebase.firestore ? firebase.firestore() : null;
     let currentStockUser = null;
+    let stopGeminiSettings;
+    let stockChatRequest;
     let watchlistState = [];
     let resumeRefreshPromise = null;
     let lastResumeRefreshAt = 0;
@@ -105,15 +107,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!firestore || !currentStockUser) return;
         await firestore.collection('users').doc(currentStockUser.uid)
             .collection('stock').doc('settings')
-            .set(Object.assign({}, fields, {
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }), { merge: true });
-    }
-
-    async function saveGeminiSettings(fields) {
-        if (!firestore || !currentStockUser) return;
-        await firestore.collection('users').doc(currentStockUser.uid)
-            .collection('stock_private').doc('gemini')
             .set(Object.assign({}, fields, {
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             }), { merge: true });
@@ -273,31 +266,39 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. API Key & Settings Event Handlers
     btnOpenSettings.addEventListener('click', () => {
         inputApiKey.value = agent.getApiKey();
+        if (!Array.from(selectModel.options).some(option => option.value === agent.selectedModel)) {
+            selectModel.add(new Option(agent.selectedModel, agent.selectedModel));
+        }
         selectModel.value = agent.selectedModel;
         testResult.textContent = '';
         apiKeyModal.classList.add('active');
     });
 
-    btnCloseModal.addEventListener('click', () => {
+    function closeGeminiSettings() {
+        inputApiKey.value = '';
         apiKeyModal.classList.remove('active');
-    });
+    }
+
+    btnCloseModal.addEventListener('click', closeGeminiSettings);
 
     apiKeyModal.addEventListener('click', (e) => {
-        if (e.target === apiKeyModal) apiKeyModal.classList.remove('active');
+        if (e.target === apiKeyModal) closeGeminiSettings();
     });
 
     btnSaveSettings.addEventListener('click', async () => {
+        if (!currentStockUser) return;
+        const user = currentStockUser;
         const key = inputApiKey.value.trim();
-        agent.setApiKey(key);
-        agent.setModel(selectModel.value);
-        await saveGeminiSettings({
-            geminiApiKey: key,
-            geminiModel: agent.selectedModel
-        }).catch((error) => {
-            console.warn('[QPM Stock] Không thể lưu cấu hình Gemini:', error);
-        });
-        updateApiKeyStatusUI();
-        apiKeyModal.classList.remove('active');
+        const model = selectModel.value || window.FlowHubGemini.defaultModel;
+        btnSaveSettings.disabled = true;
+        try {
+            await window.FlowHubGemini.save(firestore, user.uid, { key, model });
+            if (user === currentStockUser) closeGeminiSettings();
+        } catch {
+            if (user === currentStockUser) testResult.textContent = 'Không thể lưu cấu hình Gemini. Hãy thử lại.';
+        } finally {
+            btnSaveSettings.disabled = false;
+        }
     });
 
     btnFetchModels.addEventListener('click', async () => {
@@ -361,12 +362,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function loadStockAccount(user) {
+        if (stopGeminiSettings) stopGeminiSettings();
+        stopGeminiSettings = null;
         currentStockUser = user || null;
+        apiKeyModal.classList.remove('active');
+        inputApiKey.value = '';
+        testResult.textContent = '';
         watchlistState = [];
         resetInspectorState();
         resetChatSession();
         agent.setApiKey('');
-        agent.setModel('gemini-3.6-flash');
+        agent.setModel(window.FlowHubGemini.defaultModel);
+        updateApiKeyStatusUI();
 
         if (!currentStockUser || !firestore) {
             loadWatchlist();
@@ -375,19 +382,23 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        stopGeminiSettings = window.FlowHubGemini.listen(firestore, user.uid, ({ key, model }) => {
+            if (user !== currentStockUser) return;
+            agent.setApiKey(key);
+            agent.setModel(model);
+            updateApiKeyStatusUI();
+        }, () => {
+            if (user === currentStockUser) apiStatusText.textContent = 'Không thể tải cấu hình Gemini';
+        });
         if (stockRefreshStatus) stockRefreshStatus.textContent = 'Đang tải dữ liệu tài khoản từ FlowHub...';
         try {
             const userRef = firestore.collection('users').doc(currentStockUser.uid);
-            const [settingsDoc, geminiDoc] = await Promise.all([
-                userRef.collection('stock').doc('settings').get(),
-                userRef.collection('stock_private').doc('gemini').get()
-            ]);
+            const settingsDoc = await userRef.collection('stock').doc('settings').get();
+            if (user !== currentStockUser) return;
             const settings = settingsDoc.exists ? settingsDoc.data() : {};
-            const gemini = geminiDoc.exists ? geminiDoc.data() : {};
             watchlistState = Array.isArray(settings.watchlist) ? settings.watchlist : [];
-            agent.setApiKey(gemini.geminiApiKey || '');
-            agent.setModel(gemini.geminiModel || 'gemini-3.6-flash');
         } catch (error) {
+            if (user !== currentStockUser) return;
             console.warn('[QPM Stock] Không thể tải dữ liệu Firestore:', error);
             if (stockRefreshStatus) stockRefreshStatus.textContent = 'Không thể tải cấu hình tài khoản.';
         }
@@ -727,6 +738,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function resetChatSession() {
         if (!chatMessages) return;
+        stockChatRequest?.abort();
+        stockChatRequest = null;
+        currentToolPill = null;
+        chatInput.value = '';
+        btnSend.disabled = false;
         agent.clearHistory();
         chatMessages.innerHTML = `
             <div class="message ai">
@@ -737,7 +753,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function handleSendMessage() {
         const messageText = chatInput.value.trim();
-        if (!messageText) return;
+        if (!messageText || stockChatRequest) return;
 
         if (!agent.getApiKey()) {
             apiKeyModal.classList.add('active');
@@ -748,6 +764,8 @@ document.addEventListener('DOMContentLoaded', () => {
         appendMessage('user', messageText);
         chatInput.value = '';
         btnSend.disabled = true;
+        const request = new AbortController();
+        stockChatRequest = request;
 
         // Create AI response container
         const aiMsgWrapper = createAiMessagePlaceholder();
@@ -759,7 +777,8 @@ document.addEventListener('DOMContentLoaded', () => {
         contentDiv.appendChild(currentToolPill);
 
         try {
-            const result = await agent.sendMessage(messageText);
+            const result = await agent.sendMessage(messageText, request.signal);
+            if (stockChatRequest !== request) return;
             
             // Remove tool loading pill
             if (currentToolPill) {
@@ -784,14 +803,18 @@ document.addEventListener('DOMContentLoaded', () => {
             contentDiv.appendChild(textDiv);
 
         } catch (err) {
+            if (stockChatRequest !== request) return;
             if (currentToolPill) currentToolPill.remove();
             const errDiv = document.createElement('div');
             errDiv.style.color = '#ff4d4f';
             errDiv.textContent = `❌ ${err.message}`;
             contentDiv.appendChild(errDiv);
         } finally {
-            btnSend.disabled = false;
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+            if (stockChatRequest === request) {
+                stockChatRequest = null;
+                btnSend.disabled = false;
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
         }
     }
 

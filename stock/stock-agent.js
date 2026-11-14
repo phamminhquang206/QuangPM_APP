@@ -180,7 +180,7 @@ Khi phân tích một mã cổ phiếu (khi có đầy đủ dữ liệu nến r
     /**
      * Send message to Gemini and resolve function calls
      */
-    async sendMessage(userMessage) {
+    async sendMessage(userMessage, signal) {
         if (!this.apiKey) {
             throw new Error("Vui lòng nhập Google Gemini API Key trong phần Cài đặt (Settings) để bắt đầu trò chuyện!");
         }
@@ -196,8 +196,10 @@ Khi phân tích một mã cổ phiếu (khi có đầy đủ dữ liệu nến r
         let finalResponseText = "";
         let toolResultsGathered = [];
         let modelToUse = this.selectedModel.replace(/^models\//, '');
+        const key = this.apiKey;
 
         while (maxIterations-- > 0) {
+            signal?.throwIfAborted();
             const requestBody = {
                 contents: this.conversationHistory,
                 tools: this.getToolDeclarations(),
@@ -209,10 +211,11 @@ Khi phân tích một mã cổ phiếu (khi có đầy đủ dữ liệu nến r
                 }
             };
 
-            let endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelToUse}:generateContent?key=${this.apiKey}`;
+            let endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelToUse}:generateContent?key=${key}`;
             
             let response = await fetch(endpoint, {
                 method: 'POST',
+                signal,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestBody)
             });
@@ -221,9 +224,10 @@ Khi phân tích một mã cổ phiếu (khi có đầy đủ dữ liệu nến r
             if (!response.ok && modelToUse !== 'gemini-3.6-flash') {
                 console.warn(`Model ${modelToUse} failed with status ${response.status}, attempting fallback to gemini-3.6-flash`);
                 modelToUse = 'gemini-3.6-flash';
-                endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${this.apiKey}`;
+                endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${key}`;
                 response = await fetch(endpoint, {
                     method: 'POST',
+                    signal,
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(requestBody)
                 });
@@ -236,6 +240,7 @@ Khi phân tích một mã cổ phiếu (khi có đầy đủ dữ liệu nến r
             }
 
             const data = await response.json();
+            signal?.throwIfAborted();
             const candidate = data.candidates?.[0];
             if (!candidate || !candidate.content) {
                 throw new Error("Không nhận được phản hồi hợp lệ từ Gemini AI.");
@@ -260,6 +265,7 @@ Khi phân tích một mã cổ phiếu (khi có đầy đủ dữ liệu nến r
             // Execute function calls
             const responseParts = [];
             for (const callPart of functionCalls) {
+                signal?.throwIfAborted();
                 const call = callPart.functionCall;
                 const toolName = call.name;
                 const toolArgs = call.args || {};
@@ -274,7 +280,7 @@ Khi phân tích một mã cổ phiếu (khi có đầy đủ dữ liệu nến r
                         const symbol = (toolArgs.symbol || "").toUpperCase();
                         toolResult = await window.StockAPI.getStockQuote(symbol);
                         toolResultsGathered.push({ type: 'quote', data: toolResult });
-                        if (this.onStockDetected) this.onStockDetected(symbol, toolResult);
+                        if (!signal?.aborted && this.onStockDetected) this.onStockDetected(symbol, toolResult);
                     } else if (toolName === "get_market_indices") {
                         toolResult = await window.StockAPI.getMarketIndices();
                         toolResultsGathered.push({ type: 'indices', data: toolResult });
@@ -302,6 +308,7 @@ Khi phân tích một mã cổ phiếu (khi có đầy đủ dữ liệu nến r
             }
 
             // Push function response to history for next model turn
+            signal?.throwIfAborted();
             this.conversationHistory.push({
                 role: "user",
                 parts: responseParts

@@ -1,9 +1,12 @@
-const CACHE_NAME = 'quangpm-app-v61';
+const CACHE_NAME = 'quangpm-app-v62';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './style.css',
-  './app.js',
+  './style.css?v=2.32',
+  './app.js?v=2.22',
+  './assistant.js',
+  './assistant.css',
+  './gemini-settings.js',
   './habit-scoring.js',
   './markdown.js',
   './marked.min.js',
@@ -13,11 +16,11 @@ const ASSETS_TO_CACHE = [
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',
-  './stock/stock-feature.css?v=1.4',
-  './stock/stock-data.js',
-  './stock/stock-api.js',
-  './stock/stock-agent.js',
-  './stock/stock-feature.js?v=1.1',
+  './stock/stock-feature.css?v=1.5',
+  './stock/stock-data.js?v=1.0',
+  './stock/stock-api.js?v=1.0',
+  './stock/stock-agent.js?v=1.1',
+  './stock/stock-feature.js?v=1.2',
   './sound/liecio-calming-rain.mp3',
   './sound/alex_jauk-calm-zen-river-flowing-228223.mp3',
   './sound/focus.mp3'

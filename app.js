@@ -775,8 +775,16 @@
 
                 // Load data from Firestore
                 loadAllUserData();
+                if (window.__assistantApp) window.__assistantApp.setAccount(user);
             } else {
                 currentUser = null;
+                if (window.__assistantApp) window.__assistantApp.setAccount(null);
+                if (window.__todoApp) window.__todoApp._loadTasks();
+                if (window.__noteApp) {
+                    window.__noteApp._closeModal(true);
+                    window.__noteApp._loadNotes();
+                }
+                if (window.__habitApp) window.__habitApp._stopAccountListeners();
                 setAccountMenuOpen(false);
                 loginPage.classList.remove('hidden');
                 appContainer.style.display = 'none';
@@ -3064,13 +3072,24 @@
         this._syncRemindersToWorker();
     };
     TodoList.prototype._loadTasks = function () {
-        if (!currentUser) { this.tasks = []; this._render(); return; }
         var self = this;
+        var user = currentUser;
+        this.tasks = [];
+        this.closeDateModal();
+        this._closeReminderAlertModal();
+        this._render();
+        this._scheduleNextTimer();
+        this._syncRemindersToWorker();
+        if (!user) return;
         userDocRef('data').doc('todos').get().then(function (doc) {
+            if (currentUser !== user) return;
             self.tasks = (doc.exists && doc.data().items) ? doc.data().items : [];
             self._render();
             self._checkReminders();
             self._syncRemindersToWorker();
+            if (window.__assistantApp) window.__assistantApp.refreshTasks();
+        }).catch(function () {
+            if (currentUser === user) self._render();
         });
     };
 
@@ -5415,14 +5434,14 @@
     //  FIRESTORE PERSISTENCE
     // =========================================================
     NoteApp.prototype._saveNotes = function () {
+        if (!currentUser) return;
         try {
-            localStorage.setItem('flowhub_notes_backup', JSON.stringify({
+            localStorage.setItem('flowhub_notes_backup_' + currentUser.uid, JSON.stringify({
                 items: this.notes,
                 folders: this.folders
             }));
         } catch (e) {}
 
-        if (!currentUser) return;
         userDocRef('data').doc('notes').set({
             items: this.notes,
             folders: this.folders
@@ -5430,8 +5449,11 @@
     };
 
     NoteApp.prototype._loadNotes = function () {
+        var user = currentUser;
+        this.notes = [];
+        this.folders = [];
         try {
-            var cached = localStorage.getItem('flowhub_notes_backup');
+            var cached = user && localStorage.getItem('flowhub_notes_backup_' + user.uid);
             if (cached) {
                 var data = JSON.parse(cached);
                 if (data) {
@@ -5452,11 +5474,12 @@
         }
         var self = this;
         userDocRef('data').doc('notes').get().then(function (doc) {
+            if (currentUser !== user) return;
             if (doc.exists && doc.data()) {
                 self.notes = doc.data().items || [];
                 self.folders = doc.data().folders || [];
                 try {
-                    localStorage.setItem('flowhub_notes_backup', JSON.stringify({
+                    localStorage.setItem('flowhub_notes_backup_' + user.uid, JSON.stringify({
                         items: self.notes,
                         folders: self.folders
                     }));
@@ -5465,6 +5488,7 @@
             self._renderFolders();
             self._render();
         }).catch(function (err) {
+            if (currentUser !== user) return;
             console.error('Error loading notes:', err);
             self._renderFolders();
             self._render();
@@ -5877,8 +5901,19 @@
         }
     };
 
+    HabitApp.prototype._stopAccountListeners = function () {
+        if (this._habitsUnsubscribe) this._habitsUnsubscribe();
+        if (this._profileUnsubscribe) this._profileUnsubscribe();
+        if (this._logsUnsubscribe) this._logsUnsubscribe();
+        this._habitsUnsubscribe = null;
+        this._profileUnsubscribe = null;
+        this._logsUnsubscribe = null;
+    };
+
     HabitApp.prototype._loadData = function () {
         var self = this;
+        var user = currentUser;
+        this._stopAccountListeners();
         if (!currentUser) {
             this._loadLocalData();
             this._render();
@@ -5899,7 +5934,8 @@
         // Firestore Realtime Listeners
         // 1. Habits list
         try {
-            userDocRef('habits').orderBy('order', 'asc').onSnapshot(function (snapshot) {
+            this._habitsUnsubscribe = userDocRef('habits').orderBy('order', 'asc').onSnapshot(function (snapshot) {
+                if (currentUser !== user) return;
                 var items = [];
                 snapshot.forEach(function (doc) {
                     var data = doc.data();
@@ -5922,12 +5958,14 @@
                     } else self._seedDefaultHabits();
                 }
             }, function () {
+                if (currentUser !== user) return;
                 self._loadLocalData();
                 self._render();
             });
 
             // 2. Profile & stats
-            userDocRef('habit_profile').doc('stats').onSnapshot(function (doc) {
+            this._profileUnsubscribe = userDocRef('habit_profile').doc('stats').onSnapshot(function (doc) {
+                if (currentUser !== user) return;
                 self._profileReady = true;
                 if (doc.exists) {
                     var p = doc.data();
@@ -5972,6 +6010,7 @@
 
     HabitApp.prototype._loadMonthLogs = function () {
         var self = this;
+        var user = currentUser;
         if (!currentUser) {
             this._loadLocalData();
             this._calculateStreaks();
@@ -5982,6 +6021,7 @@
         if (this._logsUnsubscribe) this._logsUnsubscribe();
         this._logsUid = currentUser.uid;
         this._logsUnsubscribe = userDocRef('habit_logs').onSnapshot(function (snapshot) {
+            if (currentUser !== user) return;
             self._logsReady = true;
             self.habitLogs = {};
             snapshot.forEach(function (doc) {
@@ -7067,5 +7107,39 @@
         window.__todoApp = new TodoList();
         window.__noteApp = new NoteApp();
         window.__habitApp = new HabitApp();
+        window.__assistantApp = new window.FlowHubAssistant({
+            db: db,
+            getTasks: function () { return window.__todoApp.tasks; },
+            getReminderTime: function (task) { return window.__todoApp._getTaskTargetMs(task); },
+            getNotes: function () { return window.__noteApp.notes; },
+            getNoteText: function (note) {
+                var template = document.createElement('template');
+                template.innerHTML = note.contentHtml
+                    ? sanitizeNoteHtml(note.contentHtml)
+                    : window.__noteApp._renderNoteMarkdown(note.content || '');
+                template.content.querySelectorAll('p, li, h1, h2, h3, pre, blockquote, br, tr').forEach(function (block) {
+                    block.after(document.createTextNode('\n'));
+                });
+                return template.content.textContent.trim();
+            },
+            getHabits: function () { return window.__habitApp.habits; },
+            getHabitLogs: function () { return window.__habitApp.habitLogs; },
+            openReminder: function (id) { window.__todoApp.openDateModal(id); },
+            openNote: function (text) {
+                var notes = window.__noteApp;
+                notes._openModal(null);
+                if (text) {
+                    notes.contentEditor.replaceChildren();
+                    text.split('\n').forEach(function (line) {
+                        var paragraph = document.createElement('p');
+                        if (line) paragraph.textContent = line;
+                        else paragraph.appendChild(document.createElement('br'));
+                        notes.contentEditor.appendChild(paragraph);
+                    });
+                    notes.editorDirty = true;
+                }
+            }
+        });
+        if (currentUser) window.__assistantApp.setAccount(currentUser);
     });
 })();
