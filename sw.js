@@ -1,9 +1,9 @@
-const CACHE_NAME = 'quangpm-app-v88';
+const CACHE_NAME = 'quangpm-app-v89';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './style.css?v=2.33',
-  './app.js?v=2.27',
+  './style.css?v=2.34',
+  './app.js?v=2.28',
   './focus-room.css?v=9',
   './focus-room-art.js?v=19',
   './focus-room.js?v=7',

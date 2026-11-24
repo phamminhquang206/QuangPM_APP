@@ -24,6 +24,7 @@
             todayBadge: 'Hôm nay', overdueBadge: 'Quá hạn',
             subtasksCount: 'mục', addSubtaskPlaceholder: 'Thêm việc con...',
             addSubtaskBtn: '+',
+            editSubtask: 'Sửa việc con',
             editTask: 'Sửa tên',
             doubleClickToEdit: 'Nhấp đúp hoặc bấm ✎ để sửa tên',
             taskTitleLabel: 'Tên công việc:',
@@ -233,6 +234,7 @@
             todayBadge: 'Today', overdueBadge: 'Overdue',
             subtasksCount: 'subtasks', addSubtaskPlaceholder: 'Add subtask...',
             addSubtaskBtn: '+',
+            editSubtask: 'Edit subtask',
             editTask: 'Edit task',
             doubleClickToEdit: 'Double-click or click ✎ to edit',
             taskTitleLabel: 'Task Title:',
@@ -1395,6 +1397,7 @@
         this.expandedTaskIds = new Set();
         this.editingDateTaskId = null;
         this.editingTaskId = null;
+        this.editingSubtask = null;
         this.activeAlertTaskId = null;
         this._exactTimer = null;
         this._cacheElements();
@@ -1566,6 +1569,12 @@
                 }
             } else if (action === 'delete-subtask' && taskId && subtaskId) {
                 self.deleteSubtask(taskId, subtaskId);
+            } else if (action === 'edit-subtask' && taskId && subtaskId) {
+                self.startEditSubtask(taskId, subtaskId);
+            } else if (action === 'save-edit-subtask') {
+                self.finishEditSubtask(true);
+            } else if (action === 'cancel-edit-subtask') {
+                self.finishEditSubtask(false);
             }
         });
 
@@ -1592,9 +1601,21 @@
             }
         });
 
+        this.listEl.addEventListener('input', function (e) {
+            if (e.target.classList.contains('subtask-edit-input') && self.editingSubtask) {
+                self.editingSubtask.text = e.target.value;
+            }
+        });
+
         // Delegate keydown on edit input and subtask inputs
         this.listEl.addEventListener('keydown', function (e) {
-            if (e.target.classList.contains('todo-edit-input')) {
+            if (e.isComposing) return;
+            if (e.target.classList.contains('subtask-edit-input')) {
+                if (e.key === 'Enter' || e.key === 'Escape') {
+                    e.preventDefault();
+                    self.finishEditSubtask(e.key === 'Enter');
+                }
+            } else if (e.target.classList.contains('todo-edit-input')) {
                 var taskId = e.target.getAttribute('data-task-id');
                 if (e.key === 'Enter') {
                     e.preventDefault();
@@ -1614,7 +1635,7 @@
 
         // Delegate focusout on edit input to auto-save
         this.listEl.addEventListener('focusout', function (e) {
-            if (e.target.classList.contains('todo-edit-input')) {
+            if (e.target.classList.contains('todo-edit-input') && !e.target.classList.contains('subtask-edit-input')) {
                 var taskId = e.target.getAttribute('data-task-id');
                 var related = e.relatedTarget;
                 if (related && (related.getAttribute('data-action') === 'cancel-edit-task' || related.getAttribute('data-action') === 'save-edit-task')) {
@@ -1949,6 +1970,37 @@
         this._render();
     };
 
+    TodoList.prototype.startEditSubtask = function (taskId, subtaskId) {
+        var task = this.tasks.find(function (item) { return item.id === taskId; });
+        var subtask = task?.subtasks?.find(function (item) { return item.id === subtaskId; });
+        if (!subtask) return;
+        this.editingSubtask = { taskId: taskId, subtaskId: subtaskId, text: subtask.text };
+        this._render();
+        var input = this.listEl.querySelector('.subtask-edit-input');
+        input?.focus();
+        input?.select();
+    };
+
+    TodoList.prototype.finishEditSubtask = function (save) {
+        var edit = this.editingSubtask;
+        if (!edit) return;
+        var input = this.listEl.querySelector('.subtask-edit-input');
+        if (save && (!input || !input.reportValidity())) return;
+        if (save) {
+            var task = this.tasks.find(function (item) { return item.id === edit.taskId; });
+            var subtask = task?.subtasks?.find(function (item) { return item.id === edit.subtaskId; });
+            var text = input.value.trim();
+            if (subtask && subtask.text !== text) {
+                subtask.text = text;
+                this._saveTasks();
+            }
+        }
+        this.editingSubtask = null;
+        this._render();
+        this.listEl.querySelector('[data-action="edit-subtask"][data-task-id="' + CSS.escape(edit.taskId) +
+            '"][data-subtask-id="' + CSS.escape(edit.subtaskId) + '"]')?.focus();
+    };
+
     TodoList.prototype.addSubtask = function (taskId, text) {
         if (!text) return;
         var task = this.tasks.find(function (t) { return t.id === taskId; });
@@ -1999,6 +2051,7 @@
 
     TodoList.prototype._render = function () {
         var self = this;
+        var activeSubtaskInput = this.listEl.querySelector('.subtask-edit-input:focus');
         var filtered = this._getFilteredTasks();
         var total = this.tasks.length;
         var done = this.tasks.filter(function (t) { return t.completed; }).length;
@@ -2066,12 +2119,28 @@
             // Subtasks container
             var subtasksListHtml = '';
             subtasks.forEach(function (sub) {
+                var edit = self.editingSubtask;
+                var attrs = ' data-task-id="' + task.id + '" data-subtask-id="' + sub.id + '"';
+                var body = '<span class="subtask-text">' + escapeHtml(sub.text) + '</span>' +
+                    '<button type="button" class="subtask-edit" data-action="edit-subtask"' + attrs +
+                    ' title="' + t('editSubtask') + '" aria-label="' + t('editSubtask') + '">✎</button>' +
+                    '<button type="button" class="subtask-delete" data-action="delete-subtask"' + attrs +
+                    ' title="' + t('confirmDelete') + '" aria-label="' + t('confirmDelete') + '">✕</button>';
+                if (isExpanded && edit?.taskId === task.id && edit.subtaskId === sub.id) {
+                    body = '<div class="todo-edit-row">' +
+                        '<input type="text" class="todo-edit-input subtask-edit-input" value="' +
+                        escapeHtml(edit.text).replace(/"/g, '&quot;') + '" aria-label="' + t('editSubtask') +
+                        '" required pattern=".*\\S.*" autocomplete="off" />' +
+                        '<div class="todo-edit-actions">' +
+                        '<button type="button" class="todo-edit-save-btn" data-action="save-edit-subtask" title="' +
+                        t('save') + '" aria-label="' + t('save') + '">✓</button>' +
+                        '<button type="button" class="todo-edit-cancel-btn" data-action="cancel-edit-subtask" title="' +
+                        t('cancel') + '" aria-label="' + t('cancel') + '">✕</button>' +
+                        '</div></div>';
+                }
                 subtasksListHtml += '<div class="subtask-item' + (sub.completed ? ' completed' : '') + '">' +
                     '<input type="checkbox" class="subtask-checkbox"' + (sub.completed ? ' checked' : '') +
-                    ' data-action="toggle-subtask" data-task-id="' + task.id + '" data-subtask-id="' + sub.id + '" />' +
-                    '<span class="subtask-text">' + escapeHtml(sub.text) + '</span>' +
-                    '<button class="subtask-delete" data-action="delete-subtask" data-task-id="' + task.id + '" data-subtask-id="' + sub.id + '" title="' + t('confirmDelete') + '">✕</button>' +
-                    '</div>';
+                    ' data-action="toggle-subtask"' + attrs + ' />' + body + '</div>';
             });
 
             var subtasksContainerHtml = '<div class="todo-subtasks-container' + (isExpanded ? ' open' : '') + '">' +
@@ -2114,7 +2183,11 @@
 
         this.listEl.innerHTML = html;
 
-        if (this.editingTaskId) {
+        var subtaskInput = activeSubtaskInput && this.listEl.querySelector('.subtask-edit-input');
+        if (subtaskInput) {
+            subtaskInput.focus({ preventScroll: true });
+            subtaskInput.setSelectionRange(activeSubtaskInput.selectionStart, activeSubtaskInput.selectionEnd);
+        } else if (this.editingTaskId) {
             var activeInput = document.getElementById('todo-edit-input-' + this.editingTaskId);
             if (activeInput) {
                 activeInput.focus();
@@ -2596,6 +2669,7 @@
         var self = this;
         var user = currentUser;
         this.tasks = [];
+        this.editingSubtask = null;
         this.closeDateModal();
         this._closeReminderAlertModal();
         this._render();
