@@ -779,6 +779,7 @@
             } else {
                 currentUser = null;
                 if (window.__assistantApp) window.__assistantApp.setAccount(null);
+                if (window.__pomodoroApp) window.__pomodoroApp._setAccount(null);
                 if (window.__todoApp) window.__todoApp._loadTasks();
                 if (window.__noteApp) {
                     window.__noteApp._closeModal(true);
@@ -793,7 +794,7 @@
     }
 
     function loadAllUserData() {
-        if (window.__pomodoroApp) window.__pomodoroApp._loadHistory();
+        if (window.__pomodoroApp) window.__pomodoroApp._setAccount(currentUser);
         if (window.__todoApp) window.__todoApp._loadTasks();
         if (window.__noteApp) window.__noteApp._loadNotes();
         if (window.__habitApp) window.__habitApp._loadData();
@@ -1121,21 +1122,6 @@
         return b;
     }
 
-    function minutesFromPoint(x, y, cx, cy) {
-        var angle = (Math.atan2(x - cx, cy - y) * 180 / Math.PI + 360) % 360;
-        var sweep = (angle - 225 + 360) % 360;
-        return Math.round((sweep <= 270 ? sweep : sweep < 315 ? 270 : 0) / 270 * 60);
-    }
-
-    function dialPosition(minutes) {
-        var m = Math.max(0, Math.min(60, minutes));
-        var angle = (225 + m / 60 * 270) * Math.PI / 180;
-        return {
-            x: 50 + Math.sin(angle) * 43.333333,
-            y: 50 - Math.cos(angle) * 43.333333
-        };
-    }
-
     function formatTimeSeconds(totalSec) {
         var s = Math.max(0, totalSec);
         var mins = Math.floor(s / 60);
@@ -1143,650 +1129,155 @@
         return String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
     }
 
-    // Main MyGarden App Controller (named PomodoroTimer for full compatibility)
+    // Focus Room uses the existing Pomodoro and ambient sound controls.
     function PomodoroTimer() {
-        this.KEY = 'flowhub_mygarden_v1';
-        this.state = freshGardenState();
-        this.selectedPlot = 0;
-        this.page = 0;
+        this.state = { duration: 25, sound: 'rain', volume: 35, session: null };
         this.activeView = 'focus';
         this.audio = null;
         this.audioPlaying = false;
         this.soundRequest = 0;
-        this.dialPointer = null;
-        this.toastTimeout = null;
-
-        // Compatibility dummy properties
         this.isRunning = false;
-        this.isPaused = false;
-        this.statusEl = { textContent: '' };
-        this.startBtn = { textContent: '' };
-
-        this._loadLocalState();
         this._cacheElements();
+        this.room = new window.FlowHubFocusRoom.FocusRoom(this, db);
         this._bindEvents();
-        this._bindDialEvents();
-        this._restoreSession();
-        this._loadHistory();
         this._render();
-
-        var self = this;
-        setInterval(function () {
-            self._tick();
-        }, 1000);
+        setInterval(() => this._tick(), 1000);
+        if (currentUser) this._setAccount(currentUser);
     }
 
     PomodoroTimer.prototype._cacheElements = function () {
-        // Sub-nav buttons
-        this.subnavFocus = document.getElementById('garden-subnav-focus');
-        this.subnavGarden = document.getElementById('garden-subnav-garden');
-        this.subnavHistory = document.getElementById('garden-subnav-history');
-
-        // Views
-        this.viewFocus = document.getElementById('garden-focus-view');
-        this.viewGarden = document.getElementById('garden-land-view');
-        this.viewHistory = document.getElementById('garden-history-view');
-
-        // Focus scene
-        this.dialEl = document.getElementById('duration-dial');
-        this.dialProgress = document.getElementById('dial-progress');
-        this.dialHandle = document.getElementById('dial-handle');
-        this.plantArt = document.getElementById('plant-art');
-        this.plantCaption = document.getElementById('plant-caption');
-        this.focusLabel = document.getElementById('garden-focus-label');
-        this.timerEl = document.getElementById('garden-timer');
-        this.messageEl = document.getElementById('garden-message');
-        this.chooseSpeciesBtn = document.getElementById('choose-species');
-        this.speciesIcon = document.getElementById('choose-species-icon');
-        this.speciesName = document.getElementById('choose-species-name');
-        this.dialHint = document.getElementById('dial-hint');
+        this.views = {
+            focus: document.getElementById('garden-focus-view'),
+            room: document.getElementById('garden-land-view'),
+            history: document.getElementById('garden-history-view')
+        };
+        this.nav = {
+            focus: document.getElementById('garden-subnav-focus'),
+            room: document.getElementById('garden-subnav-garden'),
+            history: document.getElementById('garden-subnav-history')
+        };
+        this.timerEl = document.getElementById('room-timer');
         this.actionBtn = document.getElementById('garden-action');
-        this.setupContainer = document.getElementById('garden-setup');
-
-        // Sound bar
+        this.duration = document.getElementById('room-duration');
+        this.reward = document.getElementById('room-session-reward');
         this.soundToggleBtn = document.getElementById('garden-sound-toggle');
         this.soundKindSelect = document.getElementById('garden-sound-kind');
         this.soundVolumeInput = document.getElementById('garden-volume');
-
-        // Garden view
-        this.gardenCountBadge = document.getElementById('garden-count');
-        this.gardenGrid = document.getElementById('garden-grid');
-        this.gardenHint = document.getElementById('garden-hint');
-        this.prevPageBtn = document.getElementById('garden-prev-page');
-        this.nextPageBtn = document.getElementById('garden-next-page');
-        this.pageLabel = document.getElementById('garden-page-label');
-        this.statPlants = document.getElementById('garden-stat-plants');
-        this.statMinutes = document.getElementById('garden-stat-minutes');
-        this.statSessions = document.getElementById('garden-stat-sessions');
-
-        // History
         this.historyListEl = document.getElementById('garden-history-list');
-
-        // Dialogs
-        this.speciesDialog = document.getElementById('species-dialog');
-        this.speciesListEl = document.getElementById('species-list');
-        this.unlockProgressEl = document.getElementById('unlock-progress');
-        this.closeSpeciesBtn = document.getElementById('close-species');
         this.cancelDialog = document.getElementById('cancel-dialog');
-        this.keepFocusBtn = document.getElementById('keep-focus');
-        this.confirmCancelBtn = document.getElementById('confirm-cancel');
     };
 
-    PomodoroTimer.prototype._loadLocalState = function () {
-        try {
-            var raw = localStorage.getItem(this.KEY);
-            if (raw) {
-                this.state = validGardenState(JSON.parse(raw));
-            } else {
-                // Check legacy myForest key if present
-                var legacy = JSON.parse(localStorage.getItem('myForest') || '[]');
-                if (Array.isArray(legacy) && legacy.length > 0) {
-                    var trees = legacy.filter(function (x) { return x === '🌳'; });
-                    this.state.plots = Array(Math.max(16, (Math.floor(trees.length / 16) + 1) * 16)).fill(null);
-                    for (var i = 0; i < trees.length; i++) {
-                        this.state.plots[i] = { id: 'legacy-' + i, species: 'oak', minutes: 25, completedAt: 0 };
-                    }
-                }
-            }
-        } catch (e) {
-            console.warn('MyGarden state load warning:', e);
+    PomodoroTimer.prototype._setAccount = function (account) {
+        const uid = account?.uid;
+        this.historyListEl.innerHTML = '';
+        let legacy = null;
+        if (uid) {
+            try {
+                legacy = validGardenState(JSON.parse(localStorage.getItem('flowhub_mygarden_v1')));
+                const raw = JSON.parse(localStorage.getItem('flowhub_focus_room:' + uid + ':settings'));
+                const settings = raw || legacy;
+                this.state.duration = Number.isInteger(settings.duration) && settings.duration > 0 && settings.duration <= 60 ? settings.duration : 25;
+                this.state.sound = Object.hasOwn(GARDEN_SOUNDS, settings.sound) ? settings.sound : 'rain';
+                this.state.volume = Number.isFinite(settings.volume) ? Math.min(100, Math.max(0, settings.volume)) : 35;
+            } catch {}
         }
-        this.selectedPlot = this.state.session ? this.state.session.plot : this.state.plots.findIndex(function (p) { return !p; });
-        if (this.selectedPlot < 0) this.selectedPlot = 0;
+        const oldSession = legacy?.session;
+        const species = oldSession && GARDEN_SPECIES.find(item => item.id === oldSession.species);
+        this.room.setAccount(account, oldSession && {
+            ...oldSession, legacy: true, speciesName: species?.name.vi, speciesIcon: species?.icon
+        });
+        this._loadHistory();
     };
 
     PomodoroTimer.prototype._save = function () {
+        if (!this.room.uid) return;
+        const { duration, sound, volume } = this.state;
         try {
-            localStorage.setItem(this.KEY, JSON.stringify(this.state));
-            this._saveToCloud();
-            return true;
-        } catch (e) {
-            console.warn('MyGarden save error:', e);
-            return false;
-        }
-    };
-
-    PomodoroTimer.prototype._saveToCloud = function () {
-        if (!currentUser) return;
-        try {
-            var cleanPlots = this.state.plots.map(function (p) {
-                return p ? { species: p.species, minutes: p.minutes, completedAt: p.completedAt, id: p.id } : null;
-            });
-            var payload = {
-                version: 1,
-                plots: cleanPlots,
-                selectedSpecies: this.state.selectedSpecies,
-                duration: this.state.duration,
-                sound: this.state.sound,
-                volume: this.state.volume,
-                updatedAt: Date.now()
-            };
-            userDocRef('data').doc('garden').set(payload, { merge: true }).catch(function () {});
-        } catch (e) {}
-    };
-
-    PomodoroTimer.prototype._loadCloudGarden = function () {
-        if (!currentUser) return;
-        var self = this;
-        userDocRef('data').doc('garden').get().then(function (doc) {
-            if (doc.exists) {
-                var cloudData = doc.data();
-                if (cloudData && Array.isArray(cloudData.plots)) {
-                    var cloudMinutes = totalGardenMinutes(cloudData);
-                    var localMinutes = totalGardenMinutes(self.state);
-                    // If cloud has equal or more progress, adopt cloud state while preserving active session
-                    if (cloudMinutes >= localMinutes) {
-                        var currentSession = self.state.session;
-                        self.state = validGardenState(cloudData);
-                        if (currentSession) self.state.session = currentSession;
-                        self._save();
-                        self._render();
-                    }
-                }
-            }
-        }).catch(function (e) {
-            console.warn('Cloud garden load error:', e);
-        });
+            localStorage.setItem(this.room.prefix + 'settings', JSON.stringify({ duration, sound, volume }));
+        } catch {}
     };
 
     PomodoroTimer.prototype._bindEvents = function () {
-        var self = this;
-
-        // Subnav switching
-        if (this.subnavFocus) this.subnavFocus.addEventListener('click', function () { self._switchView('focus'); });
-        if (this.subnavGarden) this.subnavGarden.addEventListener('click', function () { self._switchView('garden'); });
-        if (this.subnavHistory) this.subnavHistory.addEventListener('click', function () { self._switchView('history'); });
-
-        // Action button (Start / Give up)
-        if (this.actionBtn) {
-            this.actionBtn.addEventListener('click', function () {
-                if (self.state.session) {
-                    if (self.cancelDialog) self.cancelDialog.showModal();
-                } else {
-                    var mins = self.state.duration;
-                    if (!Number.isInteger(mins) || mins < 1 || mins > 60) {
-                        toast(t('gardenDialHint'));
-                        return;
-                    }
-                    if (self.state.plots[self.selectedPlot]) {
-                        self.selectedPlot = self.state.plots.findIndex(function (p) { return !p; });
-                        if (self.selectedPlot === -1) {
-                            self.state.plots.push.apply(self.state.plots, Array(16).fill(null));
-                            self.selectedPlot = self.state.plots.findIndex(function (p) { return !p; });
-                        }
-                    }
-                    var now = Date.now();
-                    self.state.session = {
-                        id: 'ses-' + now,
-                        plot: self.selectedPlot,
-                        species: self.state.selectedSpecies,
-                        minutes: mins,
-                        startedAt: now,
-                        endsAt: now + mins * 60000
-                    };
-                    self.isRunning = true;
-                    self._save();
-                    self._render();
-                }
-            });
+        for (const [view, button] of Object.entries(this.nav)) {
+            button.addEventListener('click', () => this._switchView(view));
         }
-
-        // Cancel modal buttons
-        if (this.keepFocusBtn) {
-            this.keepFocusBtn.addEventListener('click', function () {
-                if (self.cancelDialog) self.cancelDialog.close();
-            });
-        }
-        if (this.confirmCancelBtn) {
-            this.confirmCancelBtn.addEventListener('click', function () {
-                self.state.session = null;
-                self.isRunning = false;
-                self._stopSound();
-                self._save();
-                if (self.cancelDialog) self.cancelDialog.close();
-                self._render();
-                toast(t('cancelSessionToast'));
-            });
-        }
-
-        // Species picker button
-        if (this.chooseSpeciesBtn) {
-            this.chooseSpeciesBtn.addEventListener('click', function () {
-                self._openSpeciesDialog();
-            });
-        }
-        if (this.closeSpeciesBtn) {
-            this.closeSpeciesBtn.addEventListener('click', function () {
-                if (self.speciesDialog) self.speciesDialog.close();
-            });
-        }
-
-        // Sound bar
-        if (this.soundToggleBtn) {
-            this.soundToggleBtn.addEventListener('click', function () {
-                if (self.audio) self._stopSound();
-                else self._startSound();
-            });
-        }
-        if (this.soundKindSelect) {
-            this.soundKindSelect.addEventListener('change', function () {
-                var wasPlaying = !!self.audio;
-                self.state.sound = self.soundKindSelect.value;
-                self._save();
-                if (wasPlaying) self._startSound();
-            });
-        }
-        if (this.soundVolumeInput) {
-            this.soundVolumeInput.addEventListener('input', function () {
-                self.state.volume = Number(self.soundVolumeInput.value);
-                if (self.audio) self.audio.volume = self.state.volume / 100;
-                self._save();
-            });
-        }
-
-        // Garden Pagination
-        if (this.prevPageBtn) {
-            this.prevPageBtn.addEventListener('click', function () {
-                if (self.page > 0) {
-                    self.page--;
-                    self._renderGardenPlots();
-                }
-            });
-        }
-        if (this.nextPageBtn) {
-            this.nextPageBtn.addEventListener('click', function () {
-                if (self.page < (self.state.plots.length / 16 - 1)) {
-                    self.page++;
-                    self._renderGardenPlots();
-                }
-            });
-        }
-
-        // Cross-tab and visibility sync
-        window.addEventListener('storage', function (e) {
-            if (e.key === self.KEY) {
-                self._loadLocalState();
-                if (!self.state.session) self._stopSound();
-                self._render();
-            }
+        this.actionBtn.addEventListener('click', () => {
+            if (this.state.session) this.cancelDialog.showModal();
+            else if (this.duration.reportValidity()) this.room.start(this.state.duration);
         });
-        document.addEventListener('visibilitychange', function () {
-            if (!document.hidden) {
-                self._tick();
-                self._render();
-            }
+        document.getElementById('keep-focus').addEventListener('click', () => this.cancelDialog.close());
+        document.getElementById('confirm-cancel').addEventListener('click', () => {
+            const session = this.state.session;
+            this.cancelDialog.close();
+            if (session && this.room.end(session, true)) playBeep(880, 300, 3);
         });
+        this.duration.addEventListener('input', () => {
+            this.actionBtn.disabled = !!this.room.testState || !this.duration.validity.valid;
+            if (!this.duration.validity.valid) return;
+            this.state.duration = this.duration.valueAsNumber;
+            this._save();
+            this._renderTimer();
+        });
+        document.querySelectorAll('[data-room-minutes]').forEach(button => button.addEventListener('click', () => {
+            if (this.state.session) return;
+            this.state.duration = Number(button.dataset.roomMinutes);
+            this.duration.value = this.state.duration;
+            this.actionBtn.disabled = !!this.room.testState;
+            this._save();
+            this._renderTimer();
+        }));
+        this.soundToggleBtn.addEventListener('click', () => this.audio ? this._stopSound() : this._startSound());
+        this.soundKindSelect.addEventListener('change', () => {
+            this.state.sound = this.soundKindSelect.value;
+            this._save();
+            if (this.audio) this._startSound();
+        });
+        this.soundVolumeInput.addEventListener('input', () => {
+            this.state.volume = Number(this.soundVolumeInput.value);
+            if (this.audio) this.audio.volume = this.state.volume / 100;
+            this._save();
+        });
+        document.addEventListener('visibilitychange', () => { if (!document.hidden) this._tick(); });
     };
 
-    PomodoroTimer.prototype._bindDialEvents = function () {
-        var self = this;
-        var dial = this.dialEl;
-        if (!dial) return;
-
-        function drag(event) {
-            if (self.state.session) return;
-            var r = dial.getBoundingClientRect();
-            var mins = minutesFromPoint(event.clientX, event.clientY, r.left + r.width / 2, r.top + r.height / 2);
-            self.state.duration = mins;
-            self._updateDialUI();
-            self._save();
+    PomodoroTimer.prototype._switchView = function (view) {
+        this.activeView = view;
+        for (const [id, panel] of Object.entries(this.views)) {
+            const active = id === view;
+            panel.hidden = !active;
+            this.nav[id].classList.toggle('active', active);
+            this.nav[id].setAttribute('aria-pressed', String(active));
         }
-
-        dial.addEventListener('pointerdown', function (event) {
-            if (self.state.session || !event.isPrimary || event.button !== 0) return;
-            var r = dial.getBoundingClientRect();
-            var dist = Math.hypot(event.clientX - r.left - r.width / 2, event.clientY - r.top - r.height / 2);
-            if (dist < r.width * 0.3) return; // ignore center clicks
-            event.preventDefault();
-            self.dialPointer = event.pointerId;
-            dial.setPointerCapture(event.pointerId);
-            if (event.pointerType === 'mouse') {
-                dial.focus({ preventScroll: true });
-            } else if (document.activeElement === dial) {
-                dial.blur();
-            }
-            drag(event);
-        });
-
-        dial.addEventListener('pointermove', function (event) {
-            if (event.pointerId === self.dialPointer) drag(event);
-        });
-
-        function endDial(event) {
-            if (event.pointerId === self.dialPointer) {
-                self.dialPointer = null;
-                if (dial.hasPointerCapture(event.pointerId)) {
-                    dial.releasePointerCapture(event.pointerId);
-                }
-            }
-        }
-        dial.addEventListener('pointerup', endDial);
-        dial.addEventListener('pointercancel', endDial);
-        dial.addEventListener('lostpointercapture', function () { self.dialPointer = null; });
-
-        dial.addEventListener('keydown', function (event) {
-            if (self.state.session) return;
-            var steps = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1, PageUp: 5, PageDown: -5 };
-            var mins;
-            if (event.key === 'Home') mins = 0;
-            else if (event.key === 'End') mins = 60;
-            else if (event.key in steps) mins = Math.max(0, Math.min(60, self.state.duration + steps[event.key]));
-            else return;
-            event.preventDefault();
-            self.state.duration = mins;
-            self._updateDialUI();
-            self._save();
-        });
+        if (view === 'history') this._loadHistory();
     };
 
-    PomodoroTimer.prototype._switchView = function (viewName) {
-        this.activeView = viewName;
-        if (this.subnavFocus) this.subnavFocus.classList.toggle('active', viewName === 'focus');
-        if (this.subnavGarden) this.subnavGarden.classList.toggle('active', viewName === 'garden');
-        if (this.subnavHistory) this.subnavHistory.classList.toggle('active', viewName === 'history');
-
-        if (this.viewFocus) this.viewFocus.style.display = viewName === 'focus' ? 'flex' : 'none';
-        if (this.viewGarden) this.viewGarden.style.display = viewName === 'garden' ? 'flex' : 'none';
-        if (this.viewHistory) this.viewHistory.style.display = viewName === 'history' ? 'flex' : 'none';
-
-        if (viewName === 'garden') this._renderGardenPlots();
-        if (viewName === 'history') this._loadHistory();
-    };
-
-    PomodoroTimer.prototype._updateDialUI = function () {
-        var mins = Math.min(60, this.state.session ? this.state.session.minutes : this.state.duration);
-        var pos = dialPosition(mins);
-        if (this.dialEl) {
-            this.dialEl.setAttribute('aria-valuenow', mins);
-            this.dialEl.setAttribute('aria-valuetext', mins + ' phút');
-            this.dialEl.setAttribute('aria-disabled', String(!!this.state.session));
-            this.dialEl.tabIndex = this.state.session ? -1 : 0;
-        }
-        if (this.dialHandle) {
-            this.dialHandle.style.left = pos.x + '%';
-            this.dialHandle.style.top = pos.y + '%';
-        }
-        if (this.dialProgress) {
-            this.dialProgress.style.strokeDasharray = mins + ' 60';
-        }
-        if (this.actionBtn) {
-            this.actionBtn.disabled = !this.state.session && this.state.duration === 0;
-        }
-        if (!this.state.session && this.timerEl) {
-            this.timerEl.textContent = formatTimeSeconds(this.state.duration * 60);
-        }
+    PomodoroTimer.prototype._renderTimer = function () {
+        const session = this.state.session;
+        const seconds = session ? Math.max(0, Math.ceil((session.endsAt - Date.now()) / 1000)) : this.state.duration * 60;
+        this.timerEl.textContent = formatTimeSeconds(seconds);
+        this.reward.textContent = session?.legacy ? 'Phiên MyGarden' : '+' + (session?.minutes || this.state.duration) + ' xu khi hoàn thành';
     };
 
     PomodoroTimer.prototype._render = function () {
-        var session = this.state.session;
-        this.isRunning = !!session;
-        var sp = GARDEN_SPECIES.find(function (s) { return s.id === (session ? session.species : this.state.selectedSpecies); }.bind(this)) || GARDEN_SPECIES[0];
-        var lang = currentLang === 'en' ? 'en' : 'vi';
-        var spName = sp.name[lang] || sp.name.vi;
-        var spVerb = sp.verb[lang] || sp.verb.vi;
-
-        var seconds = session ? Math.max(0, Math.ceil((session.endsAt - Date.now()) / 1000)) : this.state.duration * 60;
-        if (this.timerEl) this.timerEl.textContent = formatTimeSeconds(seconds);
-
-        var progress = session ? Math.max(0, Math.min(1, 1 - seconds / (session.minutes * 60))) : 1;
-        var stageIdx = progress < 0.35 ? 0 : progress < 0.75 ? 1 : 2;
-
-        if (this.plantArt) {
-            this.plantArt.textContent = session ? sp.stages[stageIdx] : sp.icon;
-            this.plantArt.setAttribute('aria-label', spName);
-        }
-
-        if (this.plantCaption) {
-            this.plantCaption.textContent = session
-                ? (spName + (lang === 'vi' ? ' đang lớn lên · ô ' : ' is growing · plot ') + (session.plot + 1))
-                : (lang === 'vi' ? ('Một ' + spName.toLowerCase() + ' đang chờ bạn') : ('A ' + spName.toLowerCase() + ' is waiting for you'));
-        }
-
-        if (this.focusLabel) {
-            this.focusLabel.textContent = session ? t('gardenGrowingEyebrow') : t('gardenFocusEyebrow');
-        }
-
-        if (this.messageEl) {
-            this.messageEl.textContent = session ? t('gardenGrowingMessage') : t('gardenFocusMessage');
-        }
-
-        if (this.actionBtn) {
-            this.actionBtn.textContent = session ? t('gardenGiveUpAction') : t('gardenStartAction').replace('{verb}', spVerb);
-            this.actionBtn.classList.toggle('running', !!session);
-        }
-
-        if (this.setupContainer) {
-            this.setupContainer.style.display = session ? 'none' : 'flex';
-        }
-
-        if (this.speciesIcon) this.speciesIcon.textContent = sp.icon;
-        if (this.speciesName) this.speciesName.textContent = spName;
-
-        if (this.soundKindSelect) this.soundKindSelect.value = this.state.sound;
-        if (this.soundVolumeInput) this.soundVolumeInput.value = this.state.volume;
-
-        this._updateDialUI();
-        this._renderGardenPlots();
-    };
-
-    PomodoroTimer.prototype._renderGardenPlots = function () {
-        var self = this;
-        var session = this.state.session;
-        var lang = currentLang === 'en' ? 'en' : 'vi';
-        var occupied = this.state.plots.filter(Boolean);
-
-        if (this.gardenCountBadge) {
-            this.gardenCountBadge.textContent = occupied.length + ' / ' + this.state.plots.length;
-        }
-        if (this.statPlants) this.statPlants.textContent = occupied.length;
-        if (this.statSessions) this.statSessions.textContent = occupied.length;
-        if (this.statMinutes) this.statMinutes.textContent = totalGardenMinutes(this.state);
-
-        var totalPages = Math.max(1, Math.ceil(this.state.plots.length / 16));
-        this.page = Math.max(0, Math.min(this.page, totalPages - 1));
-        if (this.pageLabel) this.pageLabel.textContent = (lang === 'vi' ? 'Khu ' : 'Area ') + (this.page + 1) + ' / ' + totalPages;
-        if (this.prevPageBtn) this.prevPageBtn.disabled = this.page === 0;
-        if (this.nextPageBtn) this.nextPageBtn.disabled = this.page >= totalPages - 1;
-
-        if (this.gardenHint) {
-            this.gardenHint.textContent = session ? t('gardenLandGrowingHint') : t('gardenLandHint');
-        }
-
-        if (!this.gardenGrid) return;
-        this.gardenGrid.innerHTML = '';
-        var slice = this.state.plots.slice(this.page * 16, this.page * 16 + 16);
-
-        slice.forEach(function (plant, i) {
-            var index = self.page * 16 + i;
-            var isReserved = session && session.plot === index;
-            var btn = document.createElement('button');
-            btn.className = 'plot ' + (plant ? '' : 'empty ') + (isReserved ? 'reserved ' : '') + (!plant && self.selectedPlot === index ? 'selected' : '');
-
-            var plantSp = plant ? (GARDEN_SPECIES.find(function (s) { return s.id === plant.species; }) || GARDEN_SPECIES[0]) : null;
-            btn.textContent = plant ? plantSp.icon : (isReserved ? '🌱' : '+');
-
-            btn.addEventListener('click', function () {
-                if (plant) {
-                    var spName = plantSp.name[lang] || plantSp.name.vi;
-                    toast(spName + ' · ' + plant.minutes + (lang === 'vi' ? ' phút tập trung' : ' focus mins'));
-                } else if (session) {
-                    toast(t('finishCurrentSessionFirst'));
-                } else {
-                    self.selectedPlot = index;
-                    self._switchView('focus');
-                    toast(t('selectPlotToast').replace('{index}', index + 1));
-                }
-            });
-            self.gardenGrid.appendChild(btn);
-        });
-    };
-
-    PomodoroTimer.prototype._openSpeciesDialog = function () {
-        var self = this;
-        var minutes = totalGardenMinutes(this.state);
-        var lang = currentLang === 'en' ? 'en' : 'vi';
-        var next = GARDEN_SPECIES.find(function (s) { return (s.unlockMinutes || 0) > minutes; });
-
-        if (this.unlockProgressEl) {
-            if (next) {
-                var h = Math.floor(minutes / 60);
-                var m = minutes % 60;
-                var rem = next.unlockMinutes - minutes;
-                this.unlockProgressEl.textContent = t('unlockProgressText')
-                    .replace('{h}', h).replace('{m}', m).replace('{rem}', rem);
-            } else {
-                this.unlockProgressEl.textContent = t('allUnlockedText');
-            }
-        }
-
-        if (!this.speciesListEl) return;
-        this.speciesListEl.innerHTML = '';
-
-        GARDEN_SPECIES.forEach(function (sp) {
-            var btn = document.createElement('button');
-            var isCurrent = self.state.selectedSpecies === sp.id;
-            var unlocked = isSpeciesUnlocked(self.state, sp.id);
-            btn.className = 'species' + (isCurrent ? ' chosen' : '') + (!unlocked ? ' locked' : '');
-            if (!unlocked) btn.disabled = true;
-
-            var art = document.createElement('span');
-            art.textContent = sp.icon;
-            var spName = sp.name[lang] || sp.name.vi;
-            btn.append(art, spName);
-
-            if (!unlocked) {
-                var hint = document.createElement('small');
-                hint.textContent = '🔒 ' + (sp.unlockMinutes / 60) + (lang === 'vi' ? ' giờ' : ' hrs');
-                btn.append(hint);
-            }
-
-            btn.addEventListener('click', function () {
-                if (!isSpeciesUnlocked(self.state, sp.id)) return;
-                self.state.selectedSpecies = sp.id;
-                self._save();
-                if (self.speciesDialog) self.speciesDialog.close();
-                self._render();
-            });
-
-            self.speciesListEl.appendChild(btn);
-        });
-
-        if (this.speciesDialog) this.speciesDialog.showModal();
-    };
-
-    PomodoroTimer.prototype._restoreSession = function () {
-        if (!this.state.session) return;
-        var now = Date.now();
-        if (now >= this.state.session.endsAt) {
-            this._settleSession(now);
-        } else {
-            this.isRunning = true;
-        }
+        this.isRunning = !!this.state.session;
+        this._renderTimer();
+        this.duration.value = this.state.duration;
+        document.getElementById('room-setup').hidden = this.isRunning;
+        this.actionBtn.disabled = !this.room.uid || !!this.room.testState;
+        this.actionBtn.textContent = this.isRunning ? 'Kết thúc sớm' : 'Bắt đầu tập trung';
+        this.actionBtn.classList.toggle('running', this.isRunning);
+        this.soundKindSelect.value = this.state.sound;
+        this.soundVolumeInput.value = this.state.volume;
+        if (!this.isRunning && this.cancelDialog.open) this.cancelDialog.close();
+        this.room.render();
     };
 
     PomodoroTimer.prototype._tick = function () {
-        if (!this.state.session) return;
-        var now = Date.now();
-        if (now >= this.state.session.endsAt) {
-            this._settleSession(now);
-        } else {
-            var s = Math.max(0, Math.ceil((this.state.session.endsAt - now) / 1000));
-            if (this.timerEl) this.timerEl.textContent = formatTimeSeconds(s);
-            var progress = 1 - s / (this.state.session.minutes * 60);
-            var sp = GARDEN_SPECIES.find(function (x) { return x.id === this.state.session.species; }.bind(this)) || GARDEN_SPECIES[0];
-            var stageIdx = progress < 0.35 ? 0 : progress < 0.75 ? 1 : 2;
-            if (this.plantArt) this.plantArt.textContent = sp.stages[stageIdx];
-        }
-    };
-
-    PomodoroTimer.prototype._settleSession = function (now) {
-        var s = this.state.session;
-        if (!s) return;
-        var beforeMinutes = totalGardenMinutes(this.state);
-        var completedPlot = s.plot;
-
-        if (!this.state.plots[completedPlot]) {
-            this.state.plots[completedPlot] = {
-                id: s.id,
-                species: s.species,
-                minutes: s.minutes,
-                completedAt: s.endsAt
-            };
-        }
-
-        this.state.session = null;
-        this.isRunning = false;
-
-        // Auto expand if full
-        if (this.state.plots.every(Boolean)) {
-            this.state.plots.push.apply(this.state.plots, Array(16).fill(null));
-        }
-
-        this._stopSound();
-        this._save();
-
-        // Save session entry to Firestore history
-        this._saveHistoryEntry(s.minutes, s.species);
-
-        // Sound chime / beep
-        playBeep(880, 300, 3);
-
-        // Check unlocked new species
-        var afterMinutes = totalGardenMinutes(this.state);
-        var newlyUnlocked = GARDEN_SPECIES.filter(function (sp) {
-            return (sp.unlockMinutes || 0) > beforeMinutes && (sp.unlockMinutes || 0) <= afterMinutes;
-        });
-
-        var lang = currentLang === 'en' ? 'en' : 'vi';
-        if (newlyUnlocked.length > 0) {
-            var names = newlyUnlocked.map(function (sp) { return sp.name[lang] || sp.name.vi; }).join(', ');
-            toast(t('unlockSpeciesToast').replace('{names}', names));
-        } else {
-            toast(t('sessionCompleteToast'));
-        }
-
-        this.selectedPlot = this.state.plots.findIndex(function (p) { return !p; });
-        if (this.selectedPlot < 0) this.selectedPlot = 0;
-        this._render();
-    };
-
-    PomodoroTimer.prototype._saveHistoryEntry = function (minutes, speciesId) {
-        if (!currentUser) return;
-        var sp = GARDEN_SPECIES.find(function (s) { return s.id === speciesId; }) || GARDEN_SPECIES[0];
-        var lang = currentLang === 'en' ? 'en' : 'vi';
-        var entry = {
-            mode: 'garden',
-            duration: minutes,
-            species: speciesId,
-            speciesName: sp.name[lang] || sp.name.vi,
-            speciesIcon: sp.icon,
-            completedAt: getTimeStr(),
-            date: getTodayStr()
-        };
-        var self = this;
-        userDocRef('pomodoro_history').add(entry).then(function () {
-            self._loadHistory();
-        }).catch(function () {});
+        const session = this.state.session;
+        if (!session) return;
+        if (Date.now() >= session.endsAt) {
+            if (this.room.end(session)) playBeep(880, 300, 3);
+        } else this._renderTimer();
     };
 
     PomodoroTimer.prototype._loadHistory = function () {
@@ -1797,10 +1288,10 @@
             return;
         }
         var self = this;
-        // Also check and load cloud garden state
-        this._loadCloudGarden();
+        var uid = currentUser.uid;
 
         userDocRef('pomodoro_history').orderBy('date', 'desc').get().then(function (snap) {
+            if (currentUser?.uid !== uid) return;
             var history = {};
             snap.forEach(function (doc) {
                 var d = doc.data();
@@ -1823,17 +1314,17 @@
         var html = '';
         var locale = currentLang === 'vi' ? 'vi-VN' : 'en-US';
         days.forEach(function (day) {
-            var items = history[day];
+            var items = history[day].sort(function (a, b) { return String(b.completedAt || '').localeCompare(String(a.completedAt || '')); });
             var dateObj = new Date(day + 'T00:00:00');
             var dateStr = dateObj.toLocaleDateString(locale, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
             html += '<div class="history-day" style="margin-bottom:14px;"><div class="history-date" style="font-size:12px; font-weight:600; color:var(--garden-mint); margin-bottom:6px;">' + dateStr + '</div>';
             items.forEach(function (item) {
-                var icon = item.speciesIcon || '🌱';
-                var name = item.speciesName || (item.species ? item.species : 'Cây trồng');
+                var icon = item.mode === 'room' ? '◷' : (item.speciesIcon || '🌱');
+                var name = item.mode === 'room' ? 'Tập trung' : (item.speciesName || item.species || 'MyGarden');
                 var mins = item.duration || item.minutes || (item.mode === '50' ? 40 : 25);
                 html += '<div class="history-item" style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:rgba(36,95,84,0.3); border:1px solid rgba(213,233,167,0.15); border-radius:10px; margin-bottom:6px; font-size:13px;">' +
-                    '<span>' + icon + ' ' + name + ' · ' + mins + 'm</span>' +
-                    '<span style="color:var(--garden-muted); font-size:12px;">' + (item.completedAt || '') + '</span></div>';
+                    '<span>' + escapeHtml(icon + ' ' + name + ' · ' + mins + ' phút' + (item.mode === 'room' ? ' · +' + item.coins + ' xu' : '')) + '</span>' +
+                    '<span style="color:var(--garden-muted); font-size:12px;">' + escapeHtml(item.completedAt || '') + '</span></div>';
             });
             html += '</div>';
         });
@@ -1849,7 +1340,7 @@
         var player = new Audio(trackUrl);
         this.audio = player;
         player.loop = true;
-        player.volume = (this.state.volume || 35) / 100;
+        player.volume = this.state.volume / 100;
         player.preload = 'auto';
 
         player.addEventListener('error', function () {
@@ -7070,60 +6561,9 @@
     // =========================================================
     //  INITIALIZATION
     // =========================================================
-    function initGardenViewport() {
-        var section = document.getElementById('pomodoro-section');
-        var header = document.querySelector('.app-header');
-        var subnav = section.querySelector('.garden-subnav');
-        var pending = false;
-
-        function update() {
-            pending = false;
-            if (window.innerWidth >= 768 || !section.classList.contains('active') || !section.offsetHeight) return;
-            var viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-            var bottomPadding = parseFloat(getComputedStyle(section.parentElement).paddingBottom) || 10;
-            var top = section.getBoundingClientRect().top + window.scrollY;
-            var available = viewportHeight - top - subnav.offsetHeight - 10 - bottomPadding;
-
-            [['.garden-focus-card', '.garden-scene', '--garden-phone-scene', 220],
-             ['.garden-land-card', '.garden-land', '--garden-phone-land', 420]].forEach(function (config) {
-                var card = section.querySelector(config[0]);
-                if (!card.offsetHeight) return;
-                var style = getComputedStyle(card);
-                var overhead = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom)
-                    + parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth);
-                var count = 0;
-                Array.from(card.children).forEach(function (child) {
-                    var childStyle = getComputedStyle(child);
-                    if (childStyle.display === 'none') return;
-                    count++;
-                    overhead += (parseFloat(childStyle.marginTop) || 0) + (parseFloat(childStyle.marginBottom) || 0);
-                    if (!child.matches(config[1])) overhead += child.getBoundingClientRect().height;
-                });
-                overhead += Math.max(0, count - 1) * (parseFloat(style.rowGap) || 0);
-                var size = Math.floor(Math.max(120, Math.min(config[3], available - overhead - 4))) + 'px';
-                if (section.style.getPropertyValue(config[2]) !== size) section.style.setProperty(config[2], size);
-            });
-        }
-
-        function schedule() {
-            if (!pending) { pending = true; requestAnimationFrame(update); }
-        }
-        if ('ResizeObserver' in window) {
-            var observer = new ResizeObserver(schedule);
-            [header, subnav].concat(Array.from(section.querySelectorAll('.garden-card'))).forEach(function (element) {
-                observer.observe(element);
-            });
-        }
-        new MutationObserver(schedule).observe(section, { attributes: true, attributeFilter: ['class'] });
-        window.addEventListener('resize', schedule);
-        if (window.visualViewport) window.visualViewport.addEventListener('resize', schedule);
-        schedule();
-    }
-
     document.addEventListener('DOMContentLoaded', function () {
         initTabs();
         initAccessibleModals();
-        initGardenViewport();
         setLanguage();
         initThemeToggle();
         initAuth();

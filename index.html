@@ -19,6 +19,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=2.33">
+    <link rel="stylesheet" href="focus-room.css?v=9">
     <link rel="stylesheet" href="stock/stock-feature.css?v=1.5">
     <link rel="stylesheet" href="assistant.css?v=3">
 
@@ -158,12 +159,10 @@
                 <button class="tab-btn active" data-tab="pomodoro" role="tab" id="tab-pomodoro" aria-selected="true" aria-controls="pomodoro-section" tabindex="0">
                     <span class="tab-icon" aria-hidden="true">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 21v-9" />
-                            <path d="M12 14c-4.5 0-7-2.5-7-7 4.5 0 7 2.5 7 7Z" />
-                            <path d="M12 11c0-4.5 2.5-7 7-7 0 4.5-2.5 7-7 7Z" />
+                            <path d="m3 11 9-7 9 7M5 10v10h14V10M9 20v-6h6v6" />
                         </svg>
                     </span>
-                    <span class="tab-label">MyGarden</span>
+                    <span class="tab-label">Focus Room</span>
                 </button>
                 <button class="tab-btn" data-tab="todo" role="tab" id="tab-todo" aria-selected="false" aria-controls="todo-section" tabindex="-1">
                     <span class="tab-icon" aria-hidden="true">
@@ -205,157 +204,150 @@
             </nav>
         </header>
 
-        <!-- ===== MYGARDEN (POMODORO) SECTION ===== -->
-        <section id="pomodoro-section" class="section active" role="tabpanel" aria-labelledby="tab-pomodoro" tabindex="0">
-            <!-- Garden Sub-navigation -->
-            <div class="garden-subnav">
-                <button class="garden-subnav-btn active" id="garden-subnav-focus" data-view="focus">
-                    <svg class="app-shell-icon garden-subnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <circle cx="12" cy="13" r="8" />
-                        <path d="M12 9v4l2.5 1.5M9 2h6M12 2v3" />
-                    </svg>
-                    <span data-i18n="gardenFocusTab">Tập trung</span>
-                </button>
-                <button class="garden-subnav-btn" id="garden-subnav-garden" data-view="garden">
-                    <svg class="app-shell-icon garden-subnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="m3 11 9-7 9 7" />
-                        <path d="M5 10v10h14V10M9 20v-6h6v6" />
-                    </svg>
-                    <span data-i18n="gardenLandTab">Khu vườn</span>
-                </button>
-                <button class="garden-subnav-btn" id="garden-subnav-history" data-view="history">
-                    <svg class="app-shell-icon garden-subnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M5 19v-7h4v7M10 19V5h4v14M15 19v-9h4v9M3 19h18" />
-                    </svg>
-                    <span data-i18n="gardenHistoryTab">Lịch sử</span>
-                </button>
-            </div>
+        <!-- Focus Room -->
+        <section id="pomodoro-section" class="section active focus-room" role="tabpanel" aria-labelledby="tab-pomodoro" tabindex="0">
+            <nav class="room-nav" aria-label="Focus Room">
+                <button type="button" class="room-btn active" id="garden-subnav-focus" aria-controls="garden-focus-view" aria-pressed="true">Tập trung</button>
+                <button type="button" class="room-btn" id="garden-subnav-garden" aria-controls="garden-land-view" aria-pressed="false">Phòng của tôi</button>
+                <button type="button" class="room-btn" id="garden-subnav-history" aria-controls="garden-history-view" aria-pressed="false">Lịch sử</button>
+            </nav>
 
-            <!-- VIEW 1: FOCUS VIEW -->
-            <div id="garden-focus-view" class="garden-view-pane active">
-                <div class="garden-card garden-focus-card">
-                    <div class="garden-eyebrow" id="garden-focus-label" data-i18n="gardenFocusEyebrow">DÀNH MỘT CHÚT THỜI GIAN CHO BẠN</div>
-
-                    <div class="garden-scene">
-                        <div class="garden-orbit"></div>
-                        <div id="duration-dial" role="slider" tabindex="0" aria-label="Thời lượng tập trung" aria-valuemin="0" aria-valuemax="60" aria-valuenow="25" aria-valuetext="25 phút">
-                            <svg viewBox="0 0 240 240" aria-hidden="true">
-                                <path class="dial-track" d="M46.46 193.54 A104 104 0 1 1 193.54 193.54"/>
-                                <path id="dial-progress" class="dial-progress" pathLength="60" d="M46.46 193.54 A104 104 0 1 1 193.54 193.54"/>
-                            </svg>
-                            <span id="dial-handle" aria-hidden="true"></span>
-                            <span class="dial-min" aria-hidden="true">0</span>
-                            <span class="dial-max" aria-hidden="true">60</span>
+            <div id="garden-focus-view" class="room-layout">
+                <div class="room-visual">
+                    <div id="room-focus-scene" class="room-scene" role="img" aria-label="Căn phòng tập trung nhìn từ góc chéo">
+                        <canvas aria-hidden="true"></canvas>
+                    </div>
+                    <button type="button" class="room-btn room-zoom-trigger" data-room-zoom="room-focus-scene" aria-haspopup="dialog">Xem phòng lớn</button>
+                </div>
+                <div class="room-focus-panel">
+                    <div class="room-panel-heading">
+                        <h2>Tập trung</h2>
+                        <span class="room-coins" data-room-coins>0 xu</span>
+                    </div>
+                    <div id="room-timer" class="room-timer" role="timer" aria-label="Thời gian còn lại">25:00</div>
+                    <p id="room-session-reward" class="room-muted">+25 xu khi hoàn thành</p>
+                    <div id="room-setup" class="room-setup">
+                        <label for="room-duration">Thời lượng <span>(phút)</span></label>
+                        <input id="room-duration" type="number" min="1" max="60" step="1" value="25" inputmode="numeric" required>
+                        <div class="room-presets" aria-label="Thời lượng có sẵn">
+                            <button type="button" class="room-btn" data-room-minutes="15">15 phút</button>
+                            <button type="button" class="room-btn" data-room-minutes="25">25 phút</button>
+                            <button type="button" class="room-btn" data-room-minutes="50">50 phút</button>
                         </div>
-                        <span class="garden-spark">✦</span>
-                        <div class="garden-island"></div>
-                        <span id="plant-art" role="img" aria-label="Cây thông">🌲</span>
-                        <span id="plant-caption">Một cây thông đang chờ bạn</span>
                     </div>
-
-                    <div id="garden-timer" role="timer" aria-label="Thời gian còn lại">25:00</div>
-                    <p id="garden-message" data-i18n="gardenFocusMessage">Đặt điện thoại xuống. Để khu vườn lớn lên.</p>
-
-                    <div id="garden-setup">
-                        <button id="choose-species" class="garden-species-btn">
-                            <span id="choose-species-icon">🌲</span>
-                            <span id="choose-species-name">Cây thông</span>
-                            <span class="garden-chevron">⌄</span>
-                        </button>
-                        <span id="dial-hint" data-i18n="gardenDialHint">Xoay vòng quanh cây để chọn số phút</span>
-                    </div>
-
-                    <button id="garden-action" class="garden-primary-btn" data-i18n="gardenStartAction">Bắt đầu trồng ↗</button>
-
-                    <!-- Nature Ambient Sound Controls -->
-                    <div class="garden-sound-bar">
-                        <button id="garden-sound-toggle" aria-label="Phát âm thanh" aria-pressed="false" title="Bật/Tắt âm thanh">♫</button>
+                    <button type="button" id="garden-action" class="room-btn room-accent room-start">Bắt đầu tập trung</button>
+                    <p id="room-test-focus-hint" class="room-muted" hidden>Thoát Test Mode trong Phòng của tôi để bắt đầu phiên thật.</p>
+                    <p id="room-focus-feedback" class="room-status" role="status"></p>
+                    <div class="room-sound">
+                        <button type="button" id="garden-sound-toggle" class="room-btn" aria-label="Bật hoặc tắt âm thanh" aria-pressed="false">♫</button>
                         <select id="garden-sound-kind" aria-label="Âm thanh tập trung">
-                            <option value="rain">🌧️ Mưa dịu nhẹ</option>
-                            <option value="stream">🌊 Suối trong rừng</option>
-                            <option value="ambient">✨ Giai điệu thư giãn</option>
+                            <option value="rain">Mưa dịu nhẹ</option>
+                            <option value="stream">Suối trong rừng</option>
+                            <option value="ambient">Giai điệu thư giãn</option>
                         </select>
-                        <div class="garden-volume-wrap">
-                            <input id="garden-volume" type="range" min="0" max="100" value="35" aria-label="Âm lượng" title="Âm lượng">
-                        </div>
+                        <input id="garden-volume" type="range" min="0" max="100" value="35" aria-label="Âm lượng">
                     </div>
                 </div>
             </div>
 
-            <!-- VIEW 2: GARDEN LAND VIEW -->
-            <div id="garden-land-view" class="garden-view-pane" style="display: none;">
-                <div class="garden-card garden-land-card">
-                    <div class="garden-heading">
-                        <div>
-                            <div class="garden-eyebrow" data-i18n="gardenLandEyebrow">TỪ NHỮNG PHÚT BẠN TẬP TRUNG</div>
-                            <h2 class="garden-title" data-i18n="gardenLandTitle">Khu vườn của bạn</h2>
+            <div id="garden-land-view" class="room-layout" hidden>
+                <div class="room-visual">
+                    <div id="room-scene" class="room-scene" aria-label="Cảnh phòng của tôi">
+                        <canvas aria-hidden="true"></canvas>
+                        <div class="room-hotspots"></div>
+                    </div>
+                    <button type="button" class="room-btn room-zoom-trigger" data-room-zoom="room-scene" aria-haspopup="dialog">Xem phòng lớn</button>
+                    <p id="room-action-label" class="room-action-label" role="status"></p>
+                </div>
+                <div class="room-focus-panel">
+                    <div class="room-panel-heading">
+                        <h2>Phòng của tôi</h2>
+                        <span class="room-coins" data-room-coins>0 xu</span>
+                    </div>
+                    <button type="button" id="room-open-shop" class="room-btn room-accent">Mở cửa hàng</button>
+                    <button type="button" id="room-test-toggle" class="room-btn" aria-pressed="false" aria-controls="room-test-controls" hidden>Bật Test Mode</button>
+                    <div id="room-test-controls" class="room-test-controls" hidden>
+                        <p class="room-muted">Bố trí thử sẽ được xóa khi thoát. Đặt đồ miễn phí và chọn động tác để xem ngay.</p>
+                        <div class="room-test-buttons" role="group" aria-label="Bố trí phòng thử">
+                            <button type="button" id="room-test-sample" class="room-btn">Nạp phòng mẫu</button>
+                            <button type="button" id="room-test-empty" class="room-btn">Dọn phòng thử</button>
                         </div>
-                        <div class="garden-tools">
-                            <span id="garden-count" class="garden-badge">0 / 16</span>
+                        <div class="room-test-buttons" role="group" aria-label="Chuyển động nhân vật">
+                            <button type="button" id="room-test-idle" class="room-btn" aria-pressed="true">Nghỉ</button>
+                            <button type="button" id="room-test-focus" class="room-btn" aria-pressed="false">Giả lập tập trung</button>
+                            <button type="button" id="room-test-finish" class="room-btn">Giả lập hết phiên</button>
                         </div>
                     </div>
-                    <p id="garden-hint" class="garden-hint" data-i18n="gardenLandHint">Chọn một ô đất trống để gieo mầm.</p>
-
-                    <div class="garden-land">
-                        <div id="garden-grid" aria-label="Các ô trong khu vườn"></div>
-                    </div>
-
-                    <div class="garden-pages">
-                        <button id="garden-prev-page" aria-label="Khu trước">◀</button>
-                        <span id="garden-page-label">Khu 1 / 1</span>
-                        <button id="garden-next-page" aria-label="Khu tiếp theo">▶</button>
-                    </div>
-
-                    <div class="garden-stats-grid">
-                        <div class="garden-stat-box">
-                            <strong id="garden-stat-plants">0</strong>
-                            <span data-i18n="gardenStatPlants">Sinh vật</span>
-                        </div>
-                        <div class="garden-stat-box">
-                            <strong id="garden-stat-minutes">0</strong>
-                            <span data-i18n="gardenStatMinutes">Phút tập trung</span>
-                        </div>
-                        <div class="garden-stat-box">
-                            <strong id="garden-stat-sessions">0</strong>
-                            <span data-i18n="gardenStatSessions">Phiên hoàn thành</span>
-                        </div>
-                    </div>
+                    <p id="room-pending" class="room-muted" role="status"></p>
+                    <p id="room-status" class="room-status" role="status"></p>
+                    <h3>Đồ trong phòng</h3>
+                    <ul id="room-placed" class="room-placed"></ul>
                 </div>
             </div>
 
-            <!-- VIEW 3: HISTORY VIEW -->
-            <div id="garden-history-view" class="garden-view-pane" style="display: none;">
-                <div class="garden-card garden-history-card">
-                    <div class="garden-heading">
-                        <div>
-                            <div class="garden-eyebrow" data-i18n="gardenHistoryEyebrow">DỮ LIỆU ĐÁM MÂY</div>
-                            <h2 class="garden-title" data-i18n="gardenHistoryTitle">📊 Lịch sử tập trung</h2>
-                        </div>
-                    </div>
-                    <div id="garden-history-list" class="garden-history-list"></div>
-                </div>
+            <div id="garden-history-view" class="room-focus-panel" hidden>
+                <div class="room-panel-heading"><h2>Lịch sử tập trung</h2></div>
+                <div id="garden-history-list"></div>
             </div>
 
-            <!-- MODAL: CHOOSE SPECIES -->
-            <dialog id="species-dialog" class="garden-dialog">
-                <div class="dialog-top">
-                    <h2 data-i18n="chooseSpeciesTitle">Chọn một mầm sống</h2>
-                    <button id="close-species" aria-label="Đóng">✕</button>
+            <dialog id="room-shop" class="room-dialog" aria-labelledby="room-shop-title">
+                <div class="room-shop-content">
+                    <div class="room-shop-header">
+                        <div class="room-panel-heading">
+                            <h2 id="room-shop-title">Cửa hàng</h2>
+                            <span class="room-coins" data-room-coins>0 xu</span>
+                            <button type="button" id="room-shop-close" class="room-btn" aria-label="Đóng cửa hàng">Đóng</button>
+                        </div>
+                        <div class="room-filters">
+                            <label>Loại vật phẩm
+                                <select id="room-category"><option value="all">Tất cả loại</option></select>
+                            </label>
+                            <label id="room-shop-filter-label">Hiển thị
+                                <select id="room-filter">
+                                    <option value="all">Tất cả</option>
+                                    <option value="affordable">Đủ xu mua hoặc đổi</option>
+                                    <option value="owned">Đã sở hữu</option>
+                                </select>
+                            </label>
+                        </div>
+                        <p id="room-shop-connection" class="room-muted" role="status"></p>
+                        <p id="room-shop-status-mode" class="room-muted" hidden>Mọi mẫu đều có thể đặt thử miễn phí.</p>
+                        <p id="room-shop-status" class="room-status" role="status"></p>
+                    </div>
+                    <div id="room-preview" class="room-preview" hidden>
+                        <div class="room-panel-heading">
+                            <h3 id="room-preview-title">Xem thử</h3>
+                            <div class="room-preview-controls">
+                                <button type="button" id="room-preview-play" class="room-btn">Xem lại động tác</button>
+                                <button type="button" id="room-preview-close" class="room-btn">Đóng xem thử</button>
+                            </div>
+                        </div>
+                        <div id="room-preview-scene" class="room-scene" role="img" aria-label="Căn phòng với vật phẩm đang xem thử">
+                            <canvas aria-hidden="true"></canvas>
+                        </div>
+                        <canvas id="room-preview-item" class="room-thumbnail room-preview-item" width="480" height="300" aria-hidden="true" hidden></canvas>
+                        <p id="room-preview-note" class="room-muted"></p>
+                    </div>
+                    <p id="room-item-count" class="room-muted" role="status"></p>
+                    <div id="room-shop-items" class="room-shop-items"></div>
                 </div>
-                <p data-i18n="chooseSpeciesSub">Mỗi phiên hoàn thành là một thành viên mới trong khu vườn.</p>
-                <p id="unlock-progress" class="unlock-progress"></p>
-                <div id="species-list" class="species-list"></div>
             </dialog>
 
-            <!-- MODAL: CANCEL CONFIRMATION -->
-            <dialog id="cancel-dialog" class="garden-dialog">
-                <div class="dialog-top">
-                    <h2 data-i18n="cancelFocusTitle">Dừng phiên tập trung?</h2>
+            <dialog id="room-zoom" class="room-dialog room-zoom" aria-labelledby="room-zoom-title">
+                <div class="room-panel-heading room-zoom-heading">
+                    <h2 id="room-zoom-title">Cảnh phòng</h2>
+                    <button type="button" id="room-zoom-close" class="room-btn" autofocus>Đóng</button>
                 </div>
-                <p data-i18n="cancelFocusDesc">Sinh vật của phiên này sẽ không được thêm vào vườn. Bạn có thể bắt đầu lại bất cứ lúc nào.</p>
+                <div id="room-zoom-viewport" class="room-zoom-viewport" tabindex="0" aria-label="Cuộn ngang để xem phòng"></div>
+                <p class="room-muted room-zoom-hint">Vuốt ngang để xem toàn bộ căn phòng.</p>
+            </dialog>
+
+            <dialog id="cancel-dialog" class="garden-dialog" aria-labelledby="room-cancel-title">
+                <div class="dialog-top"><h2 id="room-cancel-title">Dừng phiên tập trung?</h2></div>
+                <p>Phiên kết thúc sớm sẽ không nhận xu.</p>
                 <div class="dialog-actions">
-                    <button id="keep-focus" class="garden-dialog-btn primary" data-i18n="keepFocusBtn">Tiếp tục tập trung</button>
-                    <button id="confirm-cancel" class="garden-dialog-btn secondary" data-i18n="giveUpBtn">Kết thúc sớm</button>
+                    <button type="button" id="keep-focus" class="garden-dialog-btn primary" autofocus>Tiếp tục tập trung</button>
+                    <button type="button" id="confirm-cancel" class="garden-dialog-btn secondary">Kết thúc sớm</button>
                 </div>
             </dialog>
         </section>
@@ -1503,7 +1495,9 @@
     <script src="stock/stock-feature.js?v=1.2"></script>
     <script src="habit-scoring.js?v=2"></script>
     <script src="assistant.js?v=3"></script>
-    <script src="app.js?v=2.25"></script>
+    <script src="focus-room-art.js?v=19"></script>
+    <script src="focus-room.js?v=7"></script>
+    <script src="app.js?v=2.27"></script>
 
     <!-- Register Service Worker for PWA -->
     <script>
