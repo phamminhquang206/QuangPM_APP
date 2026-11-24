@@ -444,6 +444,9 @@ button,
 }
 
 .header-top {
+    /* Lift the entire blur stacking context above tabs and page content. */
+    position: relative;
+    z-index: 150;
     display: flex;
     align-items: center;
     justify-content: space-between;

@@ -1,9 +1,9 @@
-const CACHE_NAME = 'quangpm-app-v64';
+const CACHE_NAME = 'quangpm-app-v65';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './style.css?v=2.32',
-  './app.js?v=2.24',
+  './style.css?v=2.33',
+  './app.js?v=2.25',
   './assistant.js?v=3',
   './assistant.css?v=3',
   './gemini-settings.js',

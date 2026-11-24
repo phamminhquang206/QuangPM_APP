@@ -3142,7 +3142,7 @@
             for (var j = el.attributes.length - 1; j >= 0; j--) {
                 var attr = el.attributes[j];
                 var unsafeUrl = /^(?:javascript:|data:text\/html)/i.test(attr.value.trim());
-                if (attr.name.startsWith('on') || attr.name === 'formaction' ||
+                if (attr.name.startsWith('on') || attr.name === 'formaction' || attr.name === 'contenteditable' ||
                     ((attr.name === 'href' || attr.name === 'src' || attr.name === 'xlink:href') && unsafeUrl)) {
                     el.removeAttribute(attr.name);
                 }
@@ -4903,6 +4903,11 @@
 
     NoteApp.prototype._protectEditorChrome = function () {
         if (!this.contentEditor) return;
+        // Saved/imported child blocks must inherit the editor's current mode.
+        // A stale contenteditable="false" otherwise locks sub-items in edit mode.
+        this.contentEditor.querySelectorAll('[contenteditable]').forEach(function (el) {
+            el.removeAttribute('contenteditable');
+        });
         this.contentEditor.querySelectorAll('.notion-code-header, .callout-header').forEach(function (el) {
             el.contentEditable = 'false';
         });
@@ -4934,6 +4939,7 @@
         if (this.contentEditor) {
             this.contentEditor.contentEditable = isEditing ? 'true' : 'false';
             this.contentEditor.setAttribute('aria-readonly', isEditing ? 'false' : 'true');
+            this._protectEditorChrome();
         }
         if (this.modalTip) {
             this.modalTip.textContent = isEditing ? t('notionShortcutsTip') : t('tapToEditTip');
@@ -5111,7 +5117,10 @@
             this.editingNoteId = newNote.id;
         }
 
-        if (this.contentEditor) this.contentEditor.innerHTML = htmlContent;
+        if (this.contentEditor) {
+            this.contentEditor.innerHTML = htmlContent;
+            this._protectEditorChrome();
+        }
         this.editorDirty = false;
         this.activeTable = null;
         this.activeTableCell = null;
